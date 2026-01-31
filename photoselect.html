@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PhotoSelect - 智能图片选择</title>
+    <meta name="description" content="PhotoSelect - 高效、智能的安卓图片选择工具">
+    <link rel="icon" href="../assets/images/logo.png">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        /* Specific styles for app landing page */
+        .app-hero {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        /* Mobile Menu Styles */
+        @media (max-width: 900px) {
+            .nav.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="../index.html">
+            <img src="../assets/images/logo.png" alt="Logo" class="logo">
+            <span class="brand-name">重定向传媒(科技)</span>
+        </a>
+        <nav class="nav" id="mainNav">
+            <a href="../index.html">首页</a>
+            <a href="#features">功能</a>
+            <a href="use.html">使用协议</a>
+            <a href="#download">下载</a>
+            <a href="../index.html#contact">联系我们</a>
+        </nav>
+        <button id="menuBtn" class="menu-btn" aria-label="菜单">☰</button>
+    </div>
+</header>
+
+<main>
+    <!-- HERO -->
+    <section class="hero app-hero">
+        <div class="container">
+            <img src="../assets/images/applogo.png" alt="PhotoSelect" class="app-icon">
+            <h1>PhotoSelect</h1>
+            <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px; color: var(--muted);">
+                您的智能图片管理助手。快速筛选、整理和分享您的精彩时刻。
+            </p>
+            <div class="hero-cta" style="justify-content: center;">
+                <a class="btn primary" href="#download">立即下载</a>
+                <a class="btn ghost" href="#features">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="container section">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 40px;">核心功能</h2>
+        <div class="services-grid">
+            <div class="service-card" style="text-align: center;">
+                <span class="feature-icon">🚀</span>
+                <h4>极速加载</h4>
+                <p>采用先进的图片加载引擎，即使数千张图片也能瞬间预览，告别卡顿。</p>
+            </div>
+            <div class="service-card" style="text-align: center;">
+                <span class="feature-icon">✨</span>
+                <h4>智能筛选</h4>
+                <p>自动识别模糊、重复照片，帮您轻松腾出存储空间，保留最美瞬间。</p>
+                <p>即将上线</p>
+            </div>
+            <div class="service-card" style="text-align: center;">
+                <span class="feature-icon">🔒</span>
+                <h4>隐私安全</h4>
+                <p>所有处理均在本地完成，无需上传云端，时刻守护您的隐私安全。</p>
+            </div>
+            <div class="service-card" style="text-align: center;">
+                <span class="feature-icon">🎨</span>
+                <h4>便捷编辑</h4>
+                <p>内置常用编辑工具，裁剪、滤镜一键搞定，让照片更出彩。</p>
+                <p>即将上线</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- DOWNLOAD -->
+    <section id="download" class="container section" style="text-align: center;">
+        <div class="card glass" style="max-width: 800px; margin: 0 auto;">
+            <h2>下载 PhotoSelect</h2>
+            <p style="margin: 20px 0; color: var(--muted);">当前版本：v1.0.0 | 平台：Android</p>
+            
+            <div style="padding: 30px; background: rgba(11, 132, 255, 0.04); border-radius: 16px; margin-bottom: 20px;">
+                <p style="margin-bottom: 16px; font-weight: bold;">📱 Android 安装包</p>
+                <!-- 注意：实际部署时请替换 href 为真实的 APK 文件路径 -->
+                <!-- 用户提供的参考路径: D:\mujoco\v1.0\android\app -->
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a class="btn primary" href="release/photoselect.apk" download>
+                        ⬇️ 本地下载
+                    </a>
+                    <a class="btn ghost" href="#" onclick="alert('请填入 GitHub Release 链接。\n提示：大陆访问速度不稳定，建议配合加速器使用。')">
+                        🐱 GitHub 下载
+                    </a>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.85rem; color: var(--muted);">
+                * 适用于 Android 8.0 及以上版本<br>
+                * 若安装时提示未知来源，请在设置中允许安装
+            </p>
+        </div>
+    </section>
+
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <p>© <span id="year"></span> PhotoSelect / 臺北重定向集團有限公司</p>
+        <div style="display: flex; gap: 10px;">
+             <a href="../index.html" style="color: var(--muted); text-decoration: none;">返回主站</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // 菜单切换逻辑
+    const menuBtn = document.getElementById('menuBtn');
+    const nav = document.getElementById('mainNav');
+
+    menuBtn.addEventListener('click', () => {
+        nav.classList.toggle('active');
+    });
+
+    // 点击导航链接后自动收起菜单
+    nav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            nav.classList.remove('active');
+        });
+    });
+
+    // 更新年份
+    document.getElementById('year').innerText = new Date().getFullYear();
+</script>
+</body>
+</html>
