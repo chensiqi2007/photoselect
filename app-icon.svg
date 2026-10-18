@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- 背景渐变暗房圆角矩形 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1F242C"/>
+      <stop offset="50%" stop-color="#14171D"/>
+      <stop offset="100%" stop-color="#0A0B0E"/>
+    </linearGradient>
+
+    <!-- 镜头外圈倒角渐变 -->
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+
+    <!-- 镜头光泽渐变 -->
+    <linearGradient id="glassGrad" x1="20%" y1="20%" x2="80%" y2="80%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#0F172A" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- 叶片高光渐变 -->
+    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+
+    <!-- 光晕滤镜 -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- 1. 主圆角图标底座 (Squircle) -->
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#bgGrad)"/>
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="none" stroke="#334155" stroke-width="8" stroke-opacity="0.5"/>
+
+  <!-- 2. 镜头外金属环刻度圈 -->
+  <circle cx="512" cy="512" r="380" fill="#11151C" stroke="url(#rimGrad)" stroke-width="12" filter="url(#glow)"/>
+  <circle cx="512" cy="512" r="340" fill="none" stroke="#334155" stroke-width="4" stroke-dasharray="8 16"/>
+
+  <!-- 3. 镜头深邃光学玻璃 -->
+  <circle cx="512" cy="512" r="310" fill="url(#glassGrad)"/>
+
+  <!-- 4. 光圈叶片 (Aperture Blades - 6片对称交叠) -->
+  <g transform="translate(512, 512)">
+    <!-- 叶片 1 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+    <!-- 叶片 2 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" transform="rotate(60)" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+    <!-- 叶片 3 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" transform="rotate(120)" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+    <!-- 叶片 4 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" transform="rotate(180)" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+    <!-- 叶片 5 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" transform="rotate(240)" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+    <!-- 叶片 6 -->
+    <path d="M 0,-250 L 140,-120 L 70,30 L -90,-80 Z" transform="rotate(300)" fill="url(#bladeGrad)" stroke="#475569" stroke-width="2"/>
+
+    <!-- 5. 瞳孔内景 (中心光圈孔径) -->
+    <polygon points="0,-85 74,-42 74,42 0,85 -74,42 -74,-42" fill="#020617"/>
+
+    <!-- 6. 核心璀璨合焦点 (RAW+JPG 闪耀星芒，体现毫秒合焦) -->
+    <circle cx="0" cy="0" r="28" fill="#10B981" filter="url(#glow)"/>
+    <circle cx="0" cy="0" r="14" fill="#FFFFFF"/>
+
+    <!-- 7. 对焦十字测距线 -->
+    <line x1="-120" y1="0" x2="-45" y2="0" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+    <line x1="45" y1="0" x2="120" y2="0" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="-120" x2="0" y2="-45" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="45" x2="0" y2="120" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- 8. 弧形反光高光弧 -->
+  <path d="M 280,310 A 300 300 0 0 1 680,240" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" opacity="0.25"/>
+  <path d="M 330,360 A 240 240 0 0 1 590,300" fill="none" stroke="#38BDF8" stroke-width="8" stroke-linecap="round" opacity="0.35"/>
+</svg>

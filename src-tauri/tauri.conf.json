@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
+  "productName": "PhotoSelect Desktop",
+  "version": "1.0.0",
+  "identifier": "com.photoselect.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "PhotoSelect Desktop - 极速摄影选片与管理平台",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false,
+        "backgroundColor": "#121212",
+        "decorations": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost ipc: http://localhost:1420;"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

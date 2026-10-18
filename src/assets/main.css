@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #121212;
+    color: #E5E5E5;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    transition: background-color 0.18s linear, color 0.18s linear;
+  }
+}
+
+/* 工业级暗房微细滚动条 */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #181818;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2E2E2E;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4A4A4A;
+}
+
+/* 等宽参数排版 */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   统一线性动效设计规范 (Linear Animation & Smooth Transitions)
+   ============================================================ */
+.linear-transition {
+  transition: all 0.16s linear !important;
+}
+
+.linear-fade-enter-active,
+.linear-fade-leave-active {
+  transition: opacity 0.16s linear, transform 0.16s linear;
+}
+
+.linear-fade-enter-from,
+.linear-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* ============================================================
+   白昼模式 (Light Studio Theme) 全局覆盖
+   ============================================================ */
+html.theme-light {
+  color-scheme: light;
+}
+
+html.theme-light body {
+  background-color: #F2F2F7 !important;
+  color: #1C1C1E !important;
+}
+
+/* 基础背景色映射 */
+html.theme-light .bg-\[\#111111\] {
+  background-color: #EFEFF4 !important;
+}
+
+html.theme-light .bg-\[\#121212\] {
+  background-color: #F2F2F7 !important;
+}
+
+html.theme-light .bg-\[\#141414\] {
+  background-color: #F8F8FA !important;
+}
+
+html.theme-light .bg-\[\#161616\] {
+  background-color: #FFFFFF !important;
+}
+
+html.theme-light .bg-\[\#181818\] {
+  background-color: #FFFFFF !important;
+}
+
+html.theme-light .bg-\[\#1C1C1C\] {
+  background-color: #F2F2F7 !important;
+}
+
+html.theme-light .bg-\[\#1E1E1E\] {
+  background-color: #EFEFF4 !important;
+}
+
+html.theme-light .bg-\[\#202020\] {
+  background-color: #E5E5EA !important;
+}
+
+html.theme-light .bg-\[\#222222\] {
+  background-color: #E5E5EA !important;
+}
+
+html.theme-light .bg-\[\#262626\] {
+  background-color: #E5E5EA !important;
+}
+
+html.theme-light .bg-\[\#2A2A2A\] {
+  background-color: #D1D1D6 !important;
+}
+
+/* 边框色映射 */
+html.theme-light .border-\[\#2A2A2A\] {
+  border-color: #E5E5EA !important;
+}
+
+html.theme-light .border-\[\#333333\] {
+  border-color: #D1D1D6 !important;
+}
+
+html.theme-light .border-\[\#3E3E3E\],
+html.theme-light .hover\:border-\[\#3E3E3E\]:hover {
+  border-color: #D1D1D6 !important;
+}
+
+html.theme-light .border-\[\#444444\] {
+  border-color: #D1D1D6 !important;
+}
+
+html.theme-light .border-\[\#555555\] {
+  border-color: #C7C7CC !important;
+}
+
+html.theme-light .border-\[\#262626\] {
+  border-color: #E5E5EA !important;
+}
+
+html.theme-light .border-\[\#222222\] {
+  border-color: #E5E5EA !important;
+}
+
+html.theme-light .border-\[\#1F1F1F\] {
+  border-color: #E5E5EA !important;
+}
+
+/* 文字颜色映射 */
+html.theme-light .text-\[\#E5E5E5\] {
+  color: #1C1C1E !important;
+}
+
+html.theme-light .text-\[\#A0A0A0\] {
+  color: #48484A !important;
+}
+
+html.theme-light .text-\[\#8C8C8C\] {
+  color: #636366 !important;
+}
+
+html.theme-light .text-\[\#777777\] {
+  color: #636366 !important;
+}
+
+html.theme-light .text-\[\#666666\] {
+  color: #8E8E93 !important;
+}
+
+html.theme-light .text-\[\#555555\] {
+  color: #8E8E93 !important;
+}
+
+html.theme-light .text-\[\#4D4D4D\] {
+  color: #AEAEB2 !important;
+}
+
+html.theme-light .text-\[\#444444\] {
+  color: #AEAEB2 !important;
+}
+
+/* 交互 Hover 色映射 */
+html.theme-light .hover\:bg-\[\#333333\]:hover {
+  background-color: #D1D1D6 !important;
+}
+
+html.theme-light .hover\:bg-\[\#2A2A2A\]:hover {
+  background-color: #E5E5EA !important;
+}
+
+html.theme-light .hover\:bg-\[\#202020\]:hover {
+  background-color: #E5E5EA !important;
+}
+
+html.theme-light .hover\:text-\[\#E5E5E5\]:hover {
+  color: #000000 !important;
+}
+
+/* ============================================================
+   浮动暗色 HUD / 悬浮控制条 / 弹出遮罩等在白昼模式下保护高对比度白字
+   ============================================================ */
+html.theme-light [class*="bg-black/"],
+html.theme-light .bg-black {
+  color: #FFFFFF !important;
+}
+
+html.theme-light [class*="bg-black/"] .text-\[\#E5E5E5\],
+html.theme-light .bg-black .text-\[\#E5E5E5\] {
+  color: #FFFFFF !important;
+}
+
+html.theme-light [class*="bg-black/"] .text-\[\#8C8C8C\],
+html.theme-light .bg-black .text-\[\#8C8C8C\] {
+  color: #D1D1D6 !important;
+}
+
+html.theme-light [class*="bg-black/"] .text-\[\#666666\],
+html.theme-light .bg-black .text-\[\#666666\] {
+  color: #AEAEB2 !important;
+}
+
+html.theme-light [class*="bg-black/"] kbd.bg-\[\#222222\] {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+}
+
+/* 白昼模式下的微滚动条 */
+html.theme-light ::-webkit-scrollbar-track {
+  background: #F2F2F7;
+}
+
+html.theme-light ::-webkit-scrollbar-thumb {
+  background: #C7C7CC;
+}
+
+html.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #8E8E93;
+}

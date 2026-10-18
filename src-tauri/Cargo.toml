@@ -1,0 +1,48 @@
+[package]
+name = "photoselect-desktop"
+version = "1.0.0"
+description = "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond RAW+JPG Culling Platform"
+authors = ["PhotoSelect Team"]
+edition = "2021"
+
+[lib]
+name = "photoselect_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.38", features = ["full"] }
+walkdir = "2.5"
+natord = "1.0.9"
+uuid = { version = "1.8", features = ["v4", "fast-rng"] }
+dashmap = "5.5"
+byteorder = "1.5"
+rusqlite = { version = "0.31", features = ["bundled"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+anyhow = "1.0"
+urlencoding = "2.1"
+rayon = "1.10"
+log = "0.4"
+env_logger = "0.11"
+http = "1.1"
+rawler = "0.8.0"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
+keyring = "3.6"
+base64 = "0.23"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
