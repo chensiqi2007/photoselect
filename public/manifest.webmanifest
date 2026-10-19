@@ -1,0 +1,47 @@
+{
+  "name": "PhotoSelect Desktop - 极速摄影选片与管理平台",
+  "short_name": "PhotoSelect",
+  "description": "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond-level RAW+JPG Culling Platform",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0ea5e9",
+  "background_color": "#121212",
+  "categories": ["photo", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/Square44x44Logo.png",
+      "sizes": "44x44",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/Square150x150Logo.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/Square310x310Logo.png",
+      "sizes": "310x310",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "摄影选片台",
+      "url": "/",
+      "icons": [{ "src": "/icons/Square44x44Logo.png", "sizes": "44x44" }]
+    }
+  ]
+}

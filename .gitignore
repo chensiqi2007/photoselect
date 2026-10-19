@@ -1,51 +1,173 @@
-# Dependencies
-node_modules/
-package-lock.json.bak
+# ==============================================================================
+# PhotoSelect Desktop - Git Ignore Configuration
+# ==============================================================================
 
-# Production Build Output
+# ------------------------------------------------------------------------------
+# 1. 依赖目录与包管理 (Dependencies & Package Managers)
+# ------------------------------------------------------------------------------
+node_modules/
+.pnp/
+.pnp.js
+package-lock.json.bak
+yarn.lock.bak
+pnpm-lock.yaml.bak
+
+# ------------------------------------------------------------------------------
+# 2. 前端构建产物与缓存 (Frontend Build & Cache)
+# ------------------------------------------------------------------------------
 dist/
 dist-ssr/
+.vite/
+.cache/
+.temp/
+.tmp/
 *.local
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+.eslintcache
+.stylelintcache
 
-# Tauri & Rust Build Output
+# ------------------------------------------------------------------------------
+# 3. Tauri & Rust 编译产物 (Tauri & Rust Build Outputs)
+# ------------------------------------------------------------------------------
 src-tauri/target/
 target/
 **/*.rs.bk
+Cargo.lock.bak
 
-# Compiled Executables & Installers
-*.exe
-*.msi
-*.deb
-*.AppImage
-*.apk
+# C/C++ & Native 调试符号与中间产物
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dmp
+
+# ------------------------------------------------------------------------------
+# 4. 安装包、分发产物与压缩包 (Installers & Distribution Bundles)
+# ------------------------------------------------------------------------------
 release/
 
-# SQLite & Local DBs
+# Windows
+*.exe
+*.msi
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.msm
+
+# Linux
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.flatpak
+
+# macOS
+*.dmg
+*.pkg
+*.app/
+
+# Mobile (Tauri Mobile)
+*.apk
+*.aab
+
+# MSIX 打包临时暂存目录
+msix/staging/
+
+# ------------------------------------------------------------------------------
+# 5. 证书、私钥与敏感配置 (Certificates, Keys & Security)
+# ------------------------------------------------------------------------------
+*.pfx
+*.p12
+*.cer
+*.key
+*.pem
+*.keystore
+*.jks
+PhotoSelect_Dev.pfx
+
+# ------------------------------------------------------------------------------
+# 6. 本地数据库与缓存数据 (Databases & Runtime Cache)
+# ------------------------------------------------------------------------------
 *.db
 *.db-shm
 *.db-wal
+*.db-journal
 *.sqlite
 *.sqlite3
 
-# Logs & Diagnostics
+# ------------------------------------------------------------------------------
+# 7. 日志与崩溃转储 (Logs & Crash Dumps)
+# ------------------------------------------------------------------------------
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Environment & Editor
+# ------------------------------------------------------------------------------
+# 8. 环境变量与私有配置 (Environment & Secrets)
+# ------------------------------------------------------------------------------
 .env
 .env.*
+.env.local
+.env.*.local
 !.env.example
+!.env.template
+
+# ------------------------------------------------------------------------------
+# 9. 编辑器与 IDE 配置 (IDEs & Editors)
+# ------------------------------------------------------------------------------
+# Visual Studio Code
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# JetBrains (WebStorm, RustRover, etc.)
 .idea/
+*.iml
+*.iws
+*.ipr
+
+# Visual Studio (MSVC)
+.vs/
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# Sublime Text
 *.sublime-project
 *.sublime-workspace
 
-# Operating System Files
+# AI & Modern Editors
+.cursor/
+.claude/
+.zed/
+
+# ------------------------------------------------------------------------------
+# 10. 操作系统生成文件 (OS Generated Files)
+# ------------------------------------------------------------------------------
+# macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
 desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory

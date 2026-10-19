@@ -47,18 +47,20 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [3/3] 正在调用 Tauri 2.0 编译 Rust 后端并封装为 Windows .EXE 安装包...
-call npx tauri build --no-bundle
+echo [3/3] 正在调用 Tauri 2.0 编译 Rust 后端并封装为 Windows .EXE 安装包 (NSIS Setup)...
+call npx tauri build --bundles nsis
 
 if %errorlevel% equ 0 (
     copy /y "src-tauri\target\release\photoselect-desktop.exe" "PhotoSelect-Desktop-v1.0.0.exe" >nul
+    copy /y "src-tauri\target\release\bundle\nsis\PhotoSelect Desktop_1.0.0_x64-setup.exe" "PhotoSelect-Desktop-v1.0.0-Setup.exe" >nul
     echo.
     echo ========================================================================
     echo  [√] 打包成功！
-    echo  独立免安装运行文件: PhotoSelect-Desktop-v1.0.0.exe (已复制到工程根目录)
-    echo  构建输出源目录: src-tauri\target\release\photoselect-desktop.exe
+    echo  1. Windows 安装包 (向导): PhotoSelect-Desktop-v1.0.0-Setup.exe
+    echo  2. 独立免安装运行文件:     PhotoSelect-Desktop-v1.0.0.exe
+    echo  3. NSIS 构建目录:         src-tauri\target\release\bundle\nsis\
     echo ========================================================================
-    explorer.exe /select,"PhotoSelect-Desktop-v1.0.0.exe"
+    explorer.exe /select,"PhotoSelect-Desktop-v1.0.0-Setup.exe"
 ) else (
     echo.
     echo [X] 打包过程出现异常，请查看上方详细日志。

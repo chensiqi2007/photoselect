@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build": "tauri build",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "build:msix": "powershell -ExecutionPolicy Bypass -File ./build-msix.ps1",
+    "build:msix:quick": "powershell -ExecutionPolicy Bypass -File ./build-msix.ps1 -SkipBuild",
+    "build:msix:store": "powershell -ExecutionPolicy Bypass -File ./build-msix.ps1 -StoreReady",
+    "build:linux": "wsl -d Ubuntu bash ./build-linux.sh"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.1.1",

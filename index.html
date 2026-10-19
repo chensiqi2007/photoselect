@@ -3,10 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/icons/Square150x150Logo.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/icons/Square44x44Logo.png" />
     <title>PhotoSelect Desktop - 极速摄影选片与管理平台</title>
   </head>
   <body class="bg-[#121212] text-[#E5E5E5] overflow-hidden select-none">
     <div id="app" class="w-screen h-screen overflow-hidden"></div>
+    <script>
+      if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

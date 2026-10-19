@@ -1,4 +1,4 @@
-name: Release Multiplatform (Windows & Linux)
+name: Release Multiplatform (Windows & Linux .deb / .rpm)
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
           - platform: 'windows-latest'
             args: ''
           - platform: 'ubuntu-22.04'
-            args: ''
+            args: '--bundles deb,appimage'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -28,7 +28,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev rpm alien
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -53,13 +53,39 @@ jobs:
         run: npm run build
 
       - name: Build Tauri App & Publish Release
+        id: tauri_build
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__
           releaseName: 'PhotoSelect Desktop v__VERSION__'
-          releaseBody: 'PhotoSelect Desktop 极速摄影选片与管理平台 v__VERSION__ 正式版发布（包含 Windows 安装包、Linux .deb 和 .AppImage 双版本）'
+          releaseBody: 'PhotoSelect Desktop 极速摄影选片与管理平台 v__VERSION__ 发布（包含 Windows 安装包、Linux .deb、.rpm 以及 .AppImage 多格式支持）'
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
+
+      # 为 Linux 平台自动生成并上传 .rpm 包
+      - name: Generate and Upload RPM Package
+        if: matrix.platform == 'ubuntu-22.04'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DEB_PATH=$(find src-tauri/target/release/bundle/deb -name "*.deb" | head -n 1)
+          if [ -f "$DEB_PATH" ]; then
+            echo "Found deb package: $DEB_PATH"
+            # 使用 alien 生成标准 rpm
+            sudo alien -r -c --target=x86_64 "$DEB_PATH"
+            RPM_FILE=$(find . -maxdepth 1 -name "*.rpm" | head -n 1)
+            if [ -f "$RPM_FILE" ]; then
+              echo "Generated rpm package: $RPM_FILE"
+              # 获取 tag 名并上传到本次 release
+              TAG_NAME=${GITHUB_REF#refs/tags/}
+              if [[ "$GITHUB_REF" != refs/tags/* ]]; then
+                # 若为手动触发，查找最新发布的 tag
+                TAG_NAME=$(gh release list --limit 1 | awk '{print $1}')
+              fi
+              echo "Uploading $RPM_FILE to release $TAG_NAME..."
+              gh release upload "$TAG_NAME" "$RPM_FILE" --clobber || true
+            fi
+          fi
