@@ -30,6 +30,25 @@ export function useHotkeys() {
       return;
     }
 
+    // 1.1 页面及字体缩放快捷键: Ctrl/Cmd + = / +, Ctrl/Cmd + -, Ctrl/Cmd + 0
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        store.zoomInUiScale();
+        return;
+      }
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        store.zoomOutUiScale();
+        return;
+      }
+      if (e.key === "0") {
+        e.preventDefault();
+        store.resetUiScale();
+        return;
+      }
+    }
+
     // 2. 翻页导航: 方向键 ← / → 或 A / D (在对比模式下切换候选图 B)
     if (e.key === "ArrowRight" || key === "d") {
       e.preventDefault();
@@ -74,21 +93,21 @@ export function useHotkeys() {
       return;
     }
 
-    // 4. 星级评定: 数字键 0 - 5
-    if (["0", "1", "2", "3", "4", "5"].includes(e.key)) {
+    // 4. 星级评定: 数字键 0 - 5 (无 Ctrl/Cmd 修饰键)
+    if (!e.ctrlKey && !e.metaKey && ["0", "1", "2", "3", "4", "5"].includes(e.key)) {
       e.preventDefault();
       store.setRating(parseInt(e.key, 10));
       return;
     }
 
-    // 5. 色彩标签: 数字键 6 (红) / 7 (黄) / 8 (绿) / 9 (蓝)
+    // 5. 色彩标签: 数字键 6 (红) / 7 (黄) / 8 (绿) / 9 (蓝) (无 Ctrl/Cmd 修饰键)
     const colorMap: Record<string, ColorLabel> = {
       "6": "red",
       "7": "yellow",
       "8": "green",
       "9": "blue",
     };
-    if (colorMap[e.key]) {
+    if (!e.ctrlKey && !e.metaKey && colorMap[e.key]) {
       e.preventDefault();
       store.setColorLabel(colorMap[e.key]);
       return;

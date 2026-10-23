@@ -414,8 +414,8 @@ watch(
   }
 );
 
-// 监听渲染开关
-watch([() => store.focusPeaking, showClippingWarning, scale, panX, panY], () => {
+// 监听渲染开关及界面缩放
+watch([() => store.focusPeaking, () => store.uiScale, showClippingWarning, scale, panX, panY], () => {
   requestRender();
 });
 
@@ -699,14 +699,14 @@ onUnmounted(() => {
     <!-- 左上角悬浮 HUD: 文件名 + RAW+JPG 徽章 + 缩放百分比 -->
     <div
       v-if="store.currentPhoto"
-      class="absolute top-4 left-4 z-20 flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-[#333333] shadow-lg"
+      class="absolute top-4 left-4 z-20 flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 shadow-2xl"
     >
-      <span class="font-mono font-bold text-xs text-[#E5E5E5]">
+      <span class="font-mono font-bold text-xs text-[#F4F4F5]">
         {{ store.currentPhoto.base_name }}
       </span>
       <span
         :class="[
-          'text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow',
+          'text-[10px] font-mono font-bold px-1.5 py-0.2 rounded shadow-sm',
           store.currentPhoto.std_image && store.currentPhoto.raw_image
             ? 'bg-blue-600 text-white'
             : store.currentPhoto.raw_image
@@ -716,23 +716,23 @@ onUnmounted(() => {
       >
         {{ getBadgeLabel(store.currentPhoto) }}
       </span>
-      <span class="text-[10px] font-mono text-[#8C8C8C] tabular-nums">
+      <span class="text-[10px] font-mono text-[#A1A1AA] tabular-nums">
         {{ Math.round(scale * 100) }}%
       </span>
     </div>
 
     <!-- 右上角悬浮辅助工具条 (人眼对焦 / 峰值对焦 / 过曝警示 / 100% 切换) -->
     <div
-      class="absolute top-4 right-4 z-20 flex items-center space-x-1.5 p-1 rounded-lg bg-black/60 backdrop-blur-md border border-[#333333] shadow-lg text-xs"
+      class="absolute top-4 right-4 z-20 flex items-center space-x-1 p-1 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 shadow-2xl text-xs"
     >
       <!-- AI 人眼识别对焦追踪开关 -->
       <button
         @click="store.toggleEyeAf"
         :class="[
-          'flex items-center space-x-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer',
+          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
           store.eyeAfEnabled
-            ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-            : 'text-[#8C8C8C] hover:text-[#E5E5E5]',
+            ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 shadow-sm'
+            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
         ]"
         :title="t.eyeAf.toggleOverlay"
       >
@@ -744,10 +744,10 @@ onUnmounted(() => {
       <button
         @click="store.focusPeaking = !store.focusPeaking"
         :class="[
-          'flex items-center space-x-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer',
+          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
           store.focusPeaking
-            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-            : 'text-[#8C8C8C] hover:text-[#E5E5E5]',
+            ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-sm'
+            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
         ]"
         :title="t.loupe.peaking"
       >
@@ -759,10 +759,10 @@ onUnmounted(() => {
       <button
         @click="showClippingWarning = !showClippingWarning"
         :class="[
-          'flex items-center space-x-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer',
+          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
           showClippingWarning
-            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-            : 'text-[#8C8C8C] hover:text-[#E5E5E5]',
+            ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm'
+            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
         ]"
         :title="t.loupe.clipping"
       >
@@ -774,10 +774,10 @@ onUnmounted(() => {
       <button
         @click="toggle100Percent"
         :class="[
-          'flex items-center space-x-1 px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer',
+          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
           is100Percent
-            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-            : 'text-[#8C8C8C] hover:text-[#E5E5E5]',
+            ? 'bg-blue-500/25 text-blue-300 border border-blue-500/40 shadow-sm'
+            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
         ]"
         :title="is100Percent ? t.loupe.fitScreen : t.loupe.sharpness100"
       >
@@ -792,16 +792,16 @@ onUnmounted(() => {
     <!-- 底部中央悬浮打标条 -->
     <div
       v-if="store.currentPhoto"
-      class="absolute bottom-4 z-20 flex items-center space-x-3 px-4 py-2 rounded-xl bg-black/70 backdrop-blur-md border border-[#333333] shadow-2xl"
+      class="absolute bottom-4 z-20 flex items-center space-x-3 px-4 py-2 rounded-2xl bg-black/80 backdrop-blur-md border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6)]"
     >
-      <div class="flex items-center space-x-1">
+      <div class="flex items-center space-x-1.5">
         <button
           @click="store.setFlag(1 as FlagStatus)"
           :class="[
-            'flex items-center space-x-1 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer',
+            'flex items-center space-x-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
             store.currentPhoto.flag === 1
-              ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-              : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+              ? 'bg-emerald-500 text-white shadow-emerald-500/40'
+              : 'bg-[#222228] text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-[#2C2C34]',
           ]"
           :title="t.loupe.pickKey"
         >
@@ -811,10 +811,10 @@ onUnmounted(() => {
         <button
           @click="store.setFlag(-1 as FlagStatus)"
           :class="[
-            'flex items-center space-x-1 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer',
+            'flex items-center space-x-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
             store.currentPhoto.flag === -1
-              ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-              : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+              ? 'bg-rose-500 text-white shadow-rose-500/40'
+              : 'bg-[#222228] text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-[#2C2C34]',
           ]"
           :title="t.loupe.rejectKey"
         >
@@ -823,7 +823,7 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <div class="h-4 w-[1px] bg-[#333333]"></div>
+      <div class="h-4 w-[1px] bg-white/10"></div>
 
       <!-- 星级打分点阵 -->
       <div class="flex items-center space-x-1">
@@ -839,13 +839,13 @@ onUnmounted(() => {
               'w-4 h-4 transition-colors',
               (store.currentPhoto?.rating || 0) >= star
                 ? 'text-amber-400 fill-amber-400'
-                : 'text-[#444444] hover:text-[#8C8C8C]',
+                : 'text-[#44444C] hover:text-[#8E8E98]',
             ]"
           />
         </button>
       </div>
 
-      <div class="h-4 w-[1px] bg-[#333333]"></div>
+      <div class="h-4 w-[1px] bg-white/10"></div>
 
       <!-- 快捷色标 -->
       <div class="flex items-center space-x-1.5">
@@ -854,10 +854,10 @@ onUnmounted(() => {
           :key="color"
           @click="store.setColorLabel(color)"
           :class="[
-            'w-4 h-4 rounded-full transition-transform',
+            'w-4 h-4 rounded-full transition-all cursor-pointer',
             store.currentPhoto?.color_label === color
-              ? 'ring-2 ring-white scale-125'
-              : 'opacity-70 hover:opacity-100',
+              ? 'ring-2 ring-white scale-125 shadow-md'
+              : 'opacity-70 hover:opacity-100 hover:scale-110',
             color === 'red' ? 'bg-[#EF4444]' : '',
             color === 'yellow' ? 'bg-[#F59E0B]' : '',
             color === 'green' ? 'bg-[#10B981]' : '',

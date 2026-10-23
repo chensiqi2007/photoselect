@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoSelect Desktop - 新一代极速摄影选片与数字资产管理平台 | 官方网站</title>
+  <meta name="description" content="专为商业摄影师、独立摄影师、婚礼跟拍与生态鸟类摄影师打造的高性能桌面暗房快速初筛与管理工具。零导入即开即看、SubSecTime 连拍聚合选优、Narrative 风格人眼 100% 特写、WebGL 2.0 峰值对焦、兼容 Adobe Lightroom Classic XMP 侧车生态。">
+  <meta name="keywords" content="PhotoSelect, 摄影选片软件, RAW选片, 连拍筛选, 峰值对焦, 人眼焦点检测, 商业摄影, 鸟类摄影, Lightroom替代, 选片神器">
+  <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- ==================== Header ==================== -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="brand">
+        <img src="assets/images/app-icon.svg" alt="PhotoSelect Logo" class="brand-icon">
+        <div class="brand-title">
+          <span>PhotoSelect</span>
+          <span class="version-tag">v1.1.0</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features" class="nav-link">核心特性</a></li>
+        <li><a href="#darkroom" class="nav-link">暗房工作流</a></li>
+        <li><a href="#compare" class="nav-link">软件横评</a></li>
+        <li><a href="#cameras" class="nav-link">相机兼容</a></li>
+        <li><a href="#simulator" class="nav-link">快捷键模拟</a></li>
+        <li><a href="#download" class="nav-link">软件下载</a></li>
+        <li><a href="#faq" class="nav-link">常见问题</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="#download" class="btn-header-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>免费下载</span>
+        </a>
+
+        <button class="mobile-toggle" aria-label="打开菜单">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== Hero Section ==================== -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-pill">
+        <span class="hero-pill-badge">NEW</span>
+        <span>PhotoSelect v1.1.0 重磅发布 · 支持索尼 A9 III / 佳能 R5 II / 尼康 Z8 / 离线人眼检视</span>
+      </div>
+
+      <h1 class="hero-title">
+        新一代极速摄影选片与<br>
+        <span class="text-gradient">数字资产暗房管理平台</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        专为商业跟拍、人像写真、体育连拍与生态鸟类摄影师打造的高性能桌面初筛利器。<br>
+        <strong>零导入即开即看 · 毫秒级 RAW+JPG 联动 · 100% 本地离线隐私保护</strong>
+      </p>
+
+      <div class="hero-actions">
+        <a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" class="btn-primary" download>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>下载 Windows 安装包 (64位)</span>
+        </a>
+
+        <a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h11v11H0zM13 0h11v11H13zM0 13h11v11H0zM13 13h11v11H13z"/></svg>
+          <span>Microsoft Store 商店安装</span>
+        </a>
+
+        <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="btn-ghost">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub 开源 (AGPL v3)</span>
+        </a>
+      </div>
+
+      <div class="trust-bar">
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>零导入直连存储卡</span>
+        </div>
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>100% 本地离线不传云端</span>
+        </div>
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Rust + Tauri 2.0 毫秒响应</span>
+        </div>
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>完全免费无隐藏收费</span>
+        </div>
+      </div>
+
+      <!-- Hero Interactive Showcase Mockup -->
+      <div class="hero-mockup-wrapper">
+        <div class="mockup-header-switcher">
+          <button class="mockup-tab-btn active" data-view="darkroom">🖥️ 暗房全景工作台</button>
+          <button class="mockup-tab-btn" data-view="burst">⚡ 连拍聚合 & Best Shot</button>
+          <button class="mockup-tab-btn" data-view="peaking">🎯 WebGL 2.0 峰值对焦</button>
+          <button class="mockup-tab-btn" data-view="eye">👁️ 人眼 100% 特写检视</button>
+          <button class="mockup-tab-btn" data-view="compare">⚖️ 双图联动比对 [A/B]</button>
+        </div>
+
+        <div class="hero-mockup-viewport">
+          <img id="heroMockupImage" src="assets/images/hero-darkroom.svg" alt="PhotoSelect 极速暗房全景工作台">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Core Features Bento Grid ==================== -->
+  <section class="section-padding" id="features">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">CORE HIGHLIGHTS</span>
+        <h2 class="section-title">重构选片体验的 6 大核心支柱</h2>
+        <p class="section-desc">告别传统选片软件“先导入 20 分钟、再卡顿 1 小时”的痛苦流程。PhotoSelect 从底层架构为大容量高码率商业影像彻底优化。</p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- 1. Zero-Import (Col 8) -->
+        <div class="bento-card bento-col-8">
+          <div>
+            <span class="bento-badge">⚡ 零等待架构</span>
+            <h3 class="bento-title">零导入 · 即开即看 (Zero-Import Architecture)</h3>
+            <p class="bento-desc">彻底抛弃传统软件漫长的“拷贝文件入库”、“建立目录”与生成巨型数据库的等待。直接插上相机 SD / CFexpress 读卡器或选定硬盘目录，毫秒级流式读取，万张 8K 巨幅底片瞬间平铺。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>直接点选目录</strong>：无需等待目录同步，0 秒启动，随拍随插随看</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>虚拟化视口与双级 LRU</strong>：十万张照片仅占用恒定极低内存（&lt;80MB 空载）</span>
+              </li>
+            </ul>
+          </div>
+          <div class="bento-graphic">
+            <img src="assets/images/feature-burst.svg" alt="SubSecTime 连拍聚合">
+          </div>
+        </div>
+
+        <!-- 2. RAW+JPG Pairing (Col 4) -->
+        <div class="bento-card bento-col-4">
+          <div>
+            <span class="bento-badge">🔗 智能双星合一</span>
+            <h3 class="bento-title">RAW + JPG 智能同名绑定</h3>
+            <p class="bento-desc">原厂 RAW 与机内出图的伴随 JPG 自动汇聚为一张卡片。前台以极致流畅的 JPG 毫秒级翻阅，后台实时联动 RAW，标记与导出同生共死。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>杜绝二次重复筛选，效率翻倍</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>流式导出仅需拷走精选 RAW，省时省盘</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3. WebGL Focus Peaking (Col 6) -->
+        <div class="bento-card bento-col-6">
+          <div>
+            <span class="bento-badge">🎯 GPU 硬件着色器</span>
+            <h3 class="bento-title">WebGL 2.0 原生 Shader 级峰值对焦</h3>
+            <p class="bento-desc">摄影师无需逐张按下放大镜。基于 WebGL 2.0 着色器实现实时边缘反差轮廓提取，高饱和荧光轮廓精准勾勒焦点所在，睫毛合焦还是鼻尖合焦瞬间裁决。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>按下 <kbd>F</kbd> 键瞬间开关，高亮轮廓零延迟呈现</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>双击或按空格，瞬时 1:1 原生像素无级放大检查</span>
+              </li>
+            </ul>
+          </div>
+          <div class="bento-graphic">
+            <img src="assets/images/feature-peaking.svg" alt="WebGL 2.0 峰值对焦轮廓">
+          </div>
+        </div>
+
+        <!-- 4. Narrative 100% Eye Inspection (Col 6) -->
+        <div class="bento-card bento-col-6">
+          <div>
+            <span class="bento-badge">👁️ 离线 AI 468 关键点</span>
+            <h3 class="bento-title">Narrative Select 风格人眼 100% 特写</h3>
+            <p class="bento-desc">内置离线 MediaPipe Face Landmarker 模型，自动定位画面中每个人物面部。同时呈现左眼与右眼 100% 真实对焦点裁切小卡，计算合焦锐度评分与闭眼预警。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>100% 离线计算，面部与眼神生物数据绝不上云</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>点击眼睛小卡，主画布瞬间平移吸附居中放大</span>
+              </li>
+            </ul>
+          </div>
+          <div class="bento-graphic">
+            <img src="assets/images/feature-eye.svg" alt="人眼 100% 特写焦点检视">
+          </div>
+        </div>
+
+        <!-- 5. Burst Fold & Best Shot (Col 6) -->
+        <div class="bento-card bento-col-6">
+          <div>
+            <span class="bento-badge">⚡ 3D 错位层叠</span>
+            <h3 class="bento-title">SubSecTime 连拍聚合与「留优汰次」</h3>
+            <p class="bento-desc">提取 EXIF 亚秒与微秒级时间戳，精准聚合 20–120 fps 高频连拍序列。开启折叠视图后，整组照片以 3D 错位层叠呈现为唯一样卡，结合毛发高频纹理自动标记 Best Shot。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>一键「留优汰次」：代表帧标为 Pick，组内过渡帧全数淘汰</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>64-bit dHash 0.5ms 感知哈希指纹，秒杀机械连击冗余帧</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 6. Compare View & XMP Sync (Col 6) -->
+        <div class="bento-card bento-col-6">
+          <div>
+            <span class="bento-badge">⚖️ 双图分屏比对</span>
+            <h3 class="bento-title">双图并排联动对比 & Adobe LrC 侧车同步</h3>
+            <p class="bento-desc">基准图 [A] 与候选图 [B] 左右分屏联动比对，同频缩放平移。按 <kbd>S</kbd> 键瞬间左右互换。完全兼容 Adobe Lightroom Classic 标准 <kbd>.xmp</kbd> 附属文件与层级分类树。</p>
+            <ul class="feature-bullets">
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>免导出直接回写源目录同名侧车，无缝流转后期修图</span>
+              </li>
+              <li class="feature-bullet">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>支持层级物种分类树（如 <code>动物|鸟类|红嘴相思鸟</code>）</span>
+              </li>
+            </ul>
+          </div>
+          <div class="bento-graphic">
+            <img src="assets/images/feature-compare.svg" alt="双图联动比对模式">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Interactive Keyboard Darkroom Blind-Operation Simulator ==================== -->
+  <section class="section-padding" id="simulator" style="background: rgba(14, 18, 26, 0.6);">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">BLIND OPERATION SIMULATOR</span>
+        <h2 class="section-title">全键盘暗房盲操指南</h2>
+        <p class="section-desc">专业暗房的核心精髓在于：<strong>目光始终停留在相片主体上，手指盲打完成所有评级与淘汰</strong>。请直接在下方点击虚拟键盘，或敲击您手中的实体物理键盘体验！</p>
+      </div>
+
+      <div class="simulator-wrapper">
+        <div class="sim-grid">
+          <!-- Left: Keyboard Keys -->
+          <div class="keyboard-board">
+            <div style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 700; margin-bottom: 6px;">
+              ⌨️ 点击下方键位或直接按下键盘（支持 0-5, P, X, U, F, Space, S）:
+            </div>
+
+            <!-- Number Row: Ratings -->
+            <div class="keyboard-row">
+              <button class="key-btn" data-key="1" data-action="star-1">
+                <span>1</span>
+                <span class="key-label">★1</span>
+              </button>
+              <button class="key-btn" data-key="2" data-action="star-2">
+                <span>2</span>
+                <span class="key-label">★2</span>
+              </button>
+              <button class="key-btn" data-key="3" data-action="star-3">
+                <span>3</span>
+                <span class="key-label">★3</span>
+              </button>
+              <button class="key-btn" data-key="4" data-action="star-4">
+                <span>4</span>
+                <span class="key-label">★4</span>
+              </button>
+              <button class="key-btn" data-key="5" data-action="star-5">
+                <span>5</span>
+                <span class="key-label">★5</span>
+              </button>
+              <button class="key-btn" data-key="0" data-action="star-0">
+                <span>0</span>
+                <span class="key-label">清空</span>
+              </button>
+            </div>
+
+            <!-- Action Row 1: Pick / Reject / Unflag / Peaking -->
+            <div class="keyboard-row">
+              <button class="key-btn" data-key="P" data-action="pick" style="border-color: rgba(16, 185, 129, 0.4);">
+                <span style="color: #34d399;">P</span>
+                <span class="key-label">留用</span>
+              </button>
+              <button class="key-btn" data-key="X" data-action="reject" style="border-color: rgba(239, 68, 68, 0.4);">
+                <span style="color: #f87171;">X</span>
+                <span class="key-label">淘汰</span>
+              </button>
+              <button class="key-btn" data-key="U" data-action="unflag">
+                <span>U</span>
+                <span class="key-label">取消标</span>
+              </button>
+              <button class="key-btn" data-key="F" data-action="peaking">
+                <span style="color: #38bdf8;">F</span>
+                <span class="key-label">峰值对焦</span>
+              </button>
+              <button class="key-btn" data-key="S" data-action="swap">
+                <span>S</span>
+                <span class="key-label">AB互换</span>
+              </button>
+            </div>
+
+            <!-- Action Row 2: Space 100% Zoom -->
+            <div class="keyboard-row">
+              <button class="key-btn key-wide" data-key="SPACE" data-action="zoom">
+                <span>SPACE 空格键</span>
+                <span class="key-label">瞬间 1:1 锐度放大 / 还原</span>
+              </button>
+            </div>
+
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">
+              💡 实际客户端还支持 <code>Ctrl + = / -</code> 四档无损高分屏缩放 (100%/125%/150%/200%) 与 <code>Z</code> 键人眼焦点呼出。
+            </p>
+          </div>
+
+          <!-- Right: Interactive Simulated Photo Card -->
+          <div class="sim-card" id="simCard">
+            <div class="sim-viewport" id="simViewport">
+              <img src="assets/images/hero-darkroom.svg" alt="Sample Bird Photo" class="sim-photo-sample">
+              <div class="sim-peaking-overlay"></div>
+            </div>
+
+            <div class="sim-status-row">
+              <div>
+                <span class="sim-tag-pick" id="simTagPick">PICK (留用候选)</span>
+                <span class="sim-tag-reject" id="simTagReject" style="display: none;">REJECT (淘汰废片)</span>
+              </div>
+              <div class="sim-stars" id="simStars">★★★★★</div>
+            </div>
+
+            <div style="font-size: 0.84rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+              <span>DSC08492.ARW + JPG</span>
+              <span style="color: var(--accent-cyan); font-family: var(--font-mono);">1/4000s · ƒ/2.8 · ISO 320</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Horizontal Comparison Table ==================== -->
+  <section class="section-padding" id="compare">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">COMPETITIVE MATRIX</span>
+        <h2 class="section-title">主流摄影选片工具横向对比</h2>
+        <p class="section-desc">为什么成千上万专业摄影师放弃传统庞杂工具，转向 PhotoSelect？</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>功能特性 / 评价维度</th>
+              <th class="highlight-col">📸 PhotoSelect Desktop</th>
+              <th>Adobe Lightroom Classic</th>
+              <th>Photo Mechanic</th>
+              <th>Narrative Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>导入等待时间</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">⚡ 0 秒 (零导入即开即看)</span></td>
+              <td>较长 (需建立目录与转码)</td>
+              <td>0 秒 (直接读取文件)</td>
+              <td>较长 (需同步并构建项目)</td>
+            </tr>
+            <tr>
+              <td><strong>RAW+JPG 智能同名绑定</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 原生自动化双星合一</span></td>
+              <td>需手动设置/易产生混乱</td>
+              <td>需配置过滤显示选项</td>
+              <td>支持部分格式</td>
+            </tr>
+            <tr>
+              <td><strong>GPU 硬件着色器峰值对焦</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ WebGL 2.0 原生 Shader</span></td>
+              <td>无原生峰值对焦显示</td>
+              <td>无峰值对焦</td>
+              <td>无</td>
+            </tr>
+            <tr>
+              <td><strong>人脸/人眼 100% 特写检视</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 离线 468 关键点 + 锐度评分</span></td>
+              <td>无 (需手动逐张放大看)</td>
+              <td>无</td>
+              <td>有 (主要核心收费卖点)</td>
+            </tr>
+            <tr>
+              <td><strong>高频连拍聚合与 Best Shot</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ EXIF 亚秒补偿 + 智能推荐</span></td>
+              <td>需手动叠放或连拍分组</td>
+              <td>仅粗略时间间隔分组</td>
+              <td>支持</td>
+            </tr>
+            <tr>
+              <td><strong>64-bit dHash 严格去重</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 0.5ms 感知哈希淘汰机械连打</span></td>
+              <td>无</td>
+              <td>无</td>
+              <td>部分支持</td>
+            </tr>
+            <tr>
+              <td><strong>「分组折叠选片」视图</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 3D 叠放卡片 + 一键留优汰次</span></td>
+              <td>常规堆叠</td>
+              <td>接触式展开</td>
+              <td>有</td>
+            </tr>
+            <tr>
+              <td><strong>High-DPI 等比缩放</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 100%/125%/150%/200% 四档</span></td>
+              <td>依赖系统缩放 (偶发模糊)</td>
+              <td>传统固定排版界面</td>
+              <td>依赖系统缩放</td>
+            </tr>
+            <tr>
+              <td><strong>XMP 侧车与层级分类树</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">✓ 100% 兼容 Adobe 标准</span></td>
+              <td>原生支持</td>
+              <td>原生支持</td>
+              <td>导出同步</td>
+            </tr>
+            <tr>
+              <td><strong>商业安全与数据隐私</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">🔒 100% 本地离线优先</span></td>
+              <td>本地</td>
+              <td>本地</td>
+              <td>依赖部分云端订阅与上传</td>
+            </tr>
+            <tr>
+              <td><strong>定价策略</strong></td>
+              <td class="highlight-col"><span class="compare-badge-winner">🎉 完全免费 / 终身开源承诺</span></td>
+              <td>¥888+/年 (昂贵订阅制)</td>
+              <td>$249+ (高昂买断制)</td>
+              <td>$180+/年 (昂贵订阅制)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Supported Cameras & RAW Formats ==================== -->
+  <section class="section-padding" id="cameras">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">HARDWARE ECOSYSTEM</span>
+        <h2 class="section-title">全主流相机与原生 RAW 兼容</h2>
+        <p class="section-desc">依托 Rust 底层强大的解码矩阵（包括 rawler 与原厂全保真流提取），毫秒级极速解析主流品牌原厂文件。</p>
+        
+        <div style="max-width: 420px; margin: 24px auto 0;">
+          <input type="text" id="cameraSearchInput" placeholder="🔍 快速搜索相机型号 (如 A1, R5, Z8, X-T5, GFX)..." 
+                 style="width: 100%; padding: 12px 18px; border-radius: var(--radius-full); background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.95rem; outline: none;">
+        </div>
+      </div>
+
+      <div class="camera-brand-grid">
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Sony (索尼)</span>
+            <span class="camera-ext">.ARW · .srf</span>
+          </div>
+          <p class="camera-models">A1, A9 III, A7R V, A7 IV, A7C II, FX3, A6700 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Canon (佳能)</span>
+            <span class="camera-ext">.CR3 · .CR2</span>
+          </div>
+          <p class="camera-models">EOS R1, R5 Mark II, R6 Mark II, R3, R8, 5D Mark IV 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Nikon (尼康)</span>
+            <span class="camera-ext">.NEF · .NRW</span>
+          </div>
+          <p class="camera-models">Z9, Z8, Z6 III, Zf, D850, D500 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Fujifilm (富士)</span>
+            <span class="camera-ext">.RAF</span>
+          </div>
+          <p class="camera-models">GFX100 II, X-T5, X-H2S, X100VI, X-S20 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Adobe 通用 DNG</span>
+            <span class="camera-ext">.DNG</span>
+          </div>
+          <p class="camera-models">Leica (徕卡全系列), DJI 大疆无人机, 哈苏 (Hasselblad), 转换 DNG</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Panasonic (松下)</span>
+            <span class="camera-ext">.RW2</span>
+          </div>
+          <p class="camera-models">S5 II, S1H, GH6, G9 II, S9 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>Olympus / OM</span>
+            <span class="camera-ext">.ORF</span>
+          </div>
+          <p class="camera-models">OM-1 Mark II, OM-5, E-M1X, TG-7 等全系列</p>
+        </div>
+
+        <div class="camera-card">
+          <div class="camera-brand-title">
+            <span>标准数码位图</span>
+            <span class="camera-ext">.JPG · .PNG · .WebP</span>
+          </div>
+          <p class="camera-models">所有主流数码相机直出 JPEG、手机成片与高解析导图</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Download Matrix & System Requirements ==================== -->
+  <section class="section-padding download-section" id="download">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">DOWNLOAD NOW</span>
+        <h2 class="section-title">下载 PhotoSelect Desktop</h2>
+        <p class="section-desc">为专业摄影师量身定制。纯净、无任何捆绑、零数据收集，终身开源免费。</p>
+      </div>
+
+      <div class="download-cards-grid">
+        <!-- Windows Setup (Featured) -->
+        <div class="download-card featured">
+          <span class="featured-ribbon">推荐首选</span>
+          <div class="download-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h11v11H0zM13 0h11v11H13zM0 13h11v11H0zM13 13h11v11H13z"/></svg>
+          </div>
+          <h3 class="download-title">Windows 安装版</h3>
+          <p class="download-desc">标准安装向导，自动关联快捷方式与系统右键上下文菜单。适合长期主力选片设备。</p>
+          <ul class="download-specs-list">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>版本：v1.1.0 · 约 15.4 MB</span>
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>支持 Windows 10 / 11 (64位)</span>
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>包含完整 WebGL 2.0 着色器</span>
+            </li>
+          </ul>
+          <a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" class="btn-primary" style="width: 100%; justify-content: center;" download>
+            <span>直接下载安装包 (.exe)</span>
+          </a>
+        </div>
+
+        <!-- Microsoft Store -->
+        <div class="download-card">
+          <div class="download-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3 class="download-title">Microsoft Store</h3>
+          <p class="download-desc">经过微软官方安全审核认证，支持商店后台无感自动静默更新与沙箱安全隔离。</p>
+          <ul class="download-specs-list">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>微软官方签名认证 MSIX 包</span>
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>商店一键安装，自动版本迭代</span>
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>无残留干净卸载</span>
+            </li>
+          </ul>
+          <a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener" class="btn-secondary" style="width: 100%; justify-content: center;">
+            <span>在微软应用商店获取</span>
+          </a>
+        </div>
+
+        <!-- Portable & Linux -->
+        <div class="download-card">
+          <div class="download-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+          </div>
+          <h3 class="download-title">Linux</h3>
+          <p class="download-desc">提供 Linux 原生安装包。</p>
+          <ul class="download-specs-list">
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Linux Debian/Ubuntu: .deb (18MB)</span>
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Linux Fedora/RHEL: .rpm (16MB)</span>
+            </li>
+          </ul>
+          <div style="display: flex; gap: 8px;">
+            <a href="https://github.com/chensiqi2007/photoselect/releases" target="_blank" rel="noopener" class="btn-ghost" style="flex: 1; justify-content: center; font-size: 0.85rem;">全部发行包</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Requirements Card -->
+      <div class="sys-req-box">
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: var(--text-main);">💻 系统软硬件推荐规格</h3>
+        <div class="sys-req-grid">
+          <div class="sys-req-col">
+            <h4>最低运行要求 (基础选片)</h4>
+            <ul>
+              <li><strong>操作系统</strong>：Windows 10 (64 位，1809 版以上) 或 Windows 11 / Linux (x64)</li>
+              <li><strong>处理器 (CPU)</strong>：Intel Core i3 / AMD Ryzen 3 或同等 64 位芯片</li>
+              <li><strong>运行内存 (RAM)</strong>：4 GB</li>
+              <li><strong>显卡 (GPU)</strong>：支持 DirectX 11 与 WebGL 2.0（Intel HD 500 系列集成显卡以上）</li>
+              <li><strong>磁盘空间</strong>：150 MB 应用空间，建议 2 GB 临时快取</li>
+            </ul>
+          </div>
+          <div class="sys-req-col">
+            <h4>推荐配置规格 (5000万像素高频连拍)</h4>
+            <ul>
+              <li><strong>操作系统</strong>：Windows 11 (64 位最新版)</li>
+              <li><strong>处理器 (CPU)</strong>：Intel Core i7 (10代+) / AMD Ryzen 7 (3000系+) 6 核心以上</li>
+              <li><strong>运行内存 (RAM)</strong>：16 GB 或更高</li>
+              <li><strong>显卡 (GPU)</strong>：NVIDIA GTX 1060 / RTX 系列、AMD RX 系列独显 (4GB+ 显存)</li>
+              <li><strong>存储设备</strong>：高速 NVMe M.2 固态硬盘 + USB 3.2 / UHS-II 高速读卡器</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FAQ Accordion ==================== -->
+  <section class="section-padding" id="faq">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">FREQUENTLY ASKED QUESTIONS</span>
+        <h2 class="section-title">常见问题答疑</h2>
+        <p class="section-desc">为您解答关于零导入、数据隐私、XMP 兼容与商业使用的关键疑问。</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item active">
+          <button class="faq-question">
+            <span>为什么叫“零导入”？它与 Lightroom 的“导入”有何本质不同？</span>
+            <span class="faq-toggle-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            传统软件（如 Lightroom Classic）在选片前必须经过“拷贝入库”、“建立 SQLite 庞大数据库”与“逐张建立智能预览”等漫长步骤，拍了 3000 张往往要干等 20 分钟以上才能看到第一张照片。PhotoSelect 采用类似 Photo Mechanic 的直读文件系统设计，插上存储卡即可瞬间打开，后台异步按需流式提取，真正做到 0 秒开启选片。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>RAW+JPG 同名文件是如何处理的？会占用双份精力吗？</span>
+            <span class="faq-toggle-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            完全不会！PhotoSelect 具备智能同名绑定引擎。拍摄时如果开启了 RAW+JPG 双格式存储（如 <code>DSC08492.ARW</code> 与 <code>DSC08492.JPG</code>），软件会自动汇聚为单一卡片。前台利用轻量高速的 JPG 毫秒级翻阅判断曝光，而后台评星、标旗与流式导出均同时作用于 RAW 核心底片。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>人脸与人眼焦点检测是在本地运行还是联网上传照片？</span>
+            <span class="faq-toggle-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <strong>100% 本地纯离线运行，绝不上云！</strong> PhotoSelect 内置 Google MediaPipe Face Landmarker WebAssembly 本地推理模型。所有面部关键点、双眼 100% 裁切与锐度评分全部在您电脑本地 CPU/GPU 内存中完成，无需联网，商业客户的肖像与隐私资产享有绝对安全保障。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>打标结果如何与 Adobe Lightroom Classic 或 Capture One 无缝衔接？</span>
+            <span class="faq-toggle-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            PhotoSelect 严格遵循国际影像行业标准的 <code>.xmp</code> 侧车规范。在选片时评定的星级（0-5星）、旗标（留用/淘汰）、色标以及层级关键字，会实时或导出时写入同名 <code>.xmp</code> 附属文件。后续只需将对应文件夹导入 Lightroom Classic，所有评星与标记立刻 100% 完美重现，实现真正零工作流割裂。
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>软件完全免费吗？未来会像某些竞品一样转为收费订阅制吗？</span>
+            <span class="faq-toggle-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            PhotoSelect 基于 GNU AGPL v3 自由开源协议发布。核心桌面端完全免费，不限功能、不限照片数量，且永久向全球摄影师社群承诺开源，绝无月费与隐藏订阅陷阱。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand">
+            <img src="assets/images/app-icon.svg" alt="PhotoSelect Logo" class="brand-icon">
+            <span style="font-weight: 700; color: #fff;">PhotoSelect Desktop</span>
+          </div>
+          <p>
+            新一代极速摄影选片与数字资产暗房管理平台。<br>
+            以纯粹的桌面性能与暗房美学，解放每一位影像创作者。
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>核心特性</h5>
+          <ul>
+            <li><a href="#features">零导入架构</a></li>
+            <li><a href="#features">RAW+JPG 双星合一</a></li>
+            <li><a href="#features">WebGL 峰值对焦</a></li>
+            <li><a href="#features">人眼 100% 特写检视</a></li>
+            <li><a href="#features">连拍聚合与 Best Shot</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>软件下载</h5>
+          <ul>
+            <li><a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" download>Windows 安装版 (.exe)</a></li>
+            <li><a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener">Microsoft Store 商店版</a></li>
+            <li><a href="https://github.com/chensiqi2007/photoselect/releases" target="_blank" rel="noopener">Linux 发行版 (.deb/.rpm)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>社区与致谢</h5>
+          <ul>
+            <li><a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener">GitHub 仓库</a></li>
+            <li><a href="privacy.html">隐私权保护政策</a></li>
+            <li><a href="https://github.com/jamesphotography/SuperPicky" target="_blank" rel="noopener">致敬 SuperPicky 慧眼选鸟</a></li>
+            <li><a href="https://github.com/sun-jiao/osea" target="_blank" rel="noopener">致敬 OSEA 鸟类识别</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 URL Time LLC. 基于 GNU AGPL v3 协议开源发布.
+        </div>
+        <div class="social-links">
+          <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="social-link" title="GitHub">GitHub</a>
+          <a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener" class="social-link" title="Microsoft Store">Microsoft Store</a>
+          <a href="privacy.html" class="social-link">隐私政策</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

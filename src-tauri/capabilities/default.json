@@ -3,8 +3,10 @@
   "identifier": "default",
   "description": "Default permissions for PhotoSelect Desktop",
   "windows": ["main"],
+  "webviews": ["main"],
   "permissions": [
     "core:default",
+    "core:webview:allow-set-webview-zoom",
     "shell:default",
     "dialog:default",
     "fs:default"

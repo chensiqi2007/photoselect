@@ -1,10 +1,12 @@
 pub mod db;
 pub mod ai_selection;
+pub mod burst;
 pub mod decoder;
 pub mod exporter;
 pub mod models;
 pub mod protocol;
 pub mod scanner;
+pub mod similarity;
 
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, State};
@@ -89,6 +91,7 @@ async fn scan_directory(
                     group.rating = record.rating;
                     group.flag = record.flag;
                     group.color_label = record.color_label.clone();
+                    group.tags = record.tags.clone();
                 }
             }
         }
@@ -249,6 +252,65 @@ async fn execute_export(
     .map_err(|e| format!("导出工作线程异常: {}", e))?
 }
 
+/// 原子单独更新照片关键字与生态标签 (持久化至 SQLite)
+#[tauri::command]
+async fn update_photo_tags(
+    signature: String,
+    base_name: String,
+    folder_path: String,
+    tags: Vec<String>,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let db = state.db.clone();
+    tokio::task::spawn_blocking(move || {
+        db.update_tags(&signature, &base_name, &folder_path, &tags)
+            .map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// 执行毫秒级高速连拍聚合算法 (根据时间戳与文件名序列精准分组并标定 Best Shot)
+#[tauri::command]
+fn cluster_burst_photos(
+    mut photos: Vec<crate::models::PhotoGroup>,
+    config: Option<crate::models::BurstConfig>,
+) -> Result<(Vec<crate::models::PhotoGroup>, Vec<crate::models::BurstCluster>), String> {
+    let cfg = config.unwrap_or_default();
+    let clusters = crate::burst::BurstDetector::cluster_photos(&mut photos, &cfg);
+    Ok((photos, clusters))
+}
+
+/// 为指定单张照片在其同目录下写入/更新行业标准 XMP 侧车文件 (支持生态层级与平铺关键字)
+#[tauri::command]
+async fn write_photo_xmp(
+    photo: crate::models::PhotoGroup,
+    extra_keywords: Option<Vec<String>>,
+) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        let xmp_path = Exporter::write_xmp_sidecar_for_photo(&photo, extra_keywords.as_deref())
+            .map_err(|e| format!("写入 XMP 侧车文件失败: {:#}", e))?;
+        Ok(xmp_path.to_string_lossy().to_string())
+    })
+    .await
+    .map_err(|e| format!("XMP 写入任务异常: {}", e))?
+}
+
+/// 执行严格去重与同主体视觉聚类分析 (基于 64-bit dHash 与时序滑动窗口)
+#[tauri::command]
+async fn detect_similarity_and_duplicates(
+    mut photos: Vec<crate::models::PhotoGroup>,
+    config: Option<crate::models::SimilarityConfig>,
+) -> Result<(Vec<crate::models::PhotoGroup>, Vec<crate::models::SubjectCluster>), String> {
+    tokio::task::spawn_blocking(move || {
+        let cfg = config.unwrap_or_default();
+        let clusters = crate::similarity::SimilarityDetector::detect_duplicates_and_subjects(&mut photos, &cfg);
+        Ok((photos, clusters))
+    })
+    .await
+    .map_err(|e| format!("去重与相似度分析任务异常: {}", e))?
+}
+
 // =========================================================================
 // Tauri 2.0 入口与生命周期构建器
 // =========================================================================
@@ -279,9 +341,13 @@ pub fn run() {
             update_photo_rating,
             update_photo_flag,
             update_photo_color_label,
+            update_photo_tags,
             batch_update_photo_status,
             get_recent_workspaces,
             execute_export,
+            cluster_burst_photos,
+            detect_similarity_and_duplicates,
+            write_photo_xmp,
             get_ai_selection_settings,
             save_ai_selection_settings,
             test_ai_connection,

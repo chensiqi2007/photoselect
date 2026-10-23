@@ -10,7 +10,7 @@
     Name="URLTime.PhotoSelect"
     ProcessorArchitecture="x64"
     Publisher="CN=8BABBFD4-2819-444B-9628-8A6896C1313E"
-    Version="1.0.0.0" />
+    Version="1.1.0.0" />
 
   <Properties>
     <DisplayName>PhotoSelect Desktop</DisplayName>

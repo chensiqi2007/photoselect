@@ -79,25 +79,13 @@ if (-not $makeappxPath) {
 # 3. Build application if not skipped
 if (-not $SkipBuild) {
     Write-Host ""
-    Write-Host "[3/5] Compiling PhotoSelect Desktop release binary..." -ForegroundColor Green
+    Write-Host "[3/5] Compiling PhotoSelect Desktop standalone release binary..." -ForegroundColor Green
+    Write-Host "  -> Invoking Tauri CLI (npx tauri build --no-bundle) with embedded assets..." -ForegroundColor Gray
     
-    Write-Host "  -> Building Vue 3 frontend (npm run build)..." -ForegroundColor Gray
-    npm run build
+    npx tauri build --no-bundle
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "[X] Frontend compilation failed!" -ForegroundColor Red
+        Write-Host "[X] Tauri release build failed!" -ForegroundColor Red
         exit 1
-    }
-
-    Write-Host "  -> Building Rust backend (cargo build --release)..." -ForegroundColor Gray
-    Push-Location (Join-Path $projectRoot "src-tauri")
-    try {
-        cargo build --release
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[X] Rust backend compilation failed!" -ForegroundColor Red
-            exit 1
-        }
-    } finally {
-        Pop-Location
     }
 } else {
     Write-Host ""

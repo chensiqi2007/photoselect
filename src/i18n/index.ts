@@ -114,6 +114,8 @@ export interface Translations {
     langZhCn: string;
     langZhTw: string;
     langEnUs: string;
+    uiScale: string;
+    uiScaleDesc: string;
     about: string;
     version: string;
     engineDesc: string;
@@ -316,9 +318,11 @@ const zhCN: Translations = {
     langZhCn: "简体中文",
     langZhTw: "繁體中文",
     langEnUs: "English",
+    uiScale: "页面与字体缩放",
+    uiScaleDesc: "自适应 High-DPI 高分屏，支持 100%、125%、150%、200% 页面与字体比例缩放",
     about: "关于 PhotoSelect Desktop",
     version: "版本",
-    engineDesc: "Zero-Import 零导入纯原生相机 RAW+JPG 极速选片平台。基于 Tauri 2.0、WebGL 2.0 着色器与 Rayon 多核并行加速。",
+    engineDesc: "Zero-Import 零导入纯原生相机 RAW+JPG 极速选片平台 v1.1.0。全新搭载高速连拍聚合、感知哈希严格去重与同主体分组折叠视图，支持 XMP 生态级双向同步、100%~200% High-DPI 缩放与 AI 智能选片。",
     close: "完成",
     aiTitle: "AI 选图服务",
     aiEnabled: "启用视觉 AI 选图",
@@ -497,9 +501,11 @@ const zhTW: Translations = {
     langZhCn: "簡體中文",
     langZhTw: "繁體中文",
     langEnUs: "English",
+    uiScale: "頁面與字型縮放",
+    uiScaleDesc: "自適應 High-DPI 高解析度螢幕，支援 100%、125%、150%、200% 介面與字型比例縮放",
     about: "關於 PhotoSelect Desktop",
     version: "版本",
-    engineDesc: "Zero-Import 零導入純原生相機 RAW+JPG 極速選片平台。基於 Tauri 2.0、WebGL 2.0 著色器與 Rayon 多核並行加速。",
+    engineDesc: "Zero-Import 零導入純原生相機 RAW+JPG 極速選片平台 v1.1.0。全新搭載高速連拍聚合、感知雜湊嚴格去重與同主體分組折疊檢視，支援 XMP 生態級雙向同步、100%~200% High-DPI 縮放與 AI 智慧選片。",
     close: "完成",
     aiTitle: "AI 選圖服務",
     aiEnabled: "啟用視覺 AI 選圖",
@@ -678,9 +684,11 @@ const enUS: Translations = {
     langZhCn: "简体中文 (Simplified Chinese)",
     langZhTw: "繁體中文 (Traditional Chinese)",
     langEnUs: "English (US)",
+    uiScale: "UI & Font Scaling",
+    uiScaleDesc: "Adaptive High-DPI display scaling, supporting 100%, 125%, 150%, and 200%",
     about: "About PhotoSelect Desktop",
     version: "Version",
-    engineDesc: "Zero-Import native RAW+JPG ultra-fast culling platform. Built with Tauri 2.0, WebGL 2.0 shaders, and Rayon parallel CPU pipeline.",
+    engineDesc: "Zero-Import native RAW+JPG ultra-fast culling platform v1.1.0. Featuring burst clustering, dHash duplicate detection & subject-group folded views, bidirectional XMP keyword sync, 100%-200% High-DPI scaling, and AI-assisted culling.",
     close: "Done",
     aiTitle: "AI Photo Selection",
     aiEnabled: "Enable vision AI selection",

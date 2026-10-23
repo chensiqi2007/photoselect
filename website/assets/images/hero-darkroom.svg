@@ -1,0 +1,408 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="windowBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141822"/>
+      <stop offset="100%" stop-color="#0c0e14"/>
+    </linearGradient>
+    <linearGradient id="neutralGray" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2d3340"/>
+      <stop offset="100%" stop-color="#232733"/>
+    </linearGradient>
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="accentGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e2433" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#121620" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="photoSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="60%" stop-color="#2d527c"/>
+      <stop offset="100%" stop-color="#1a2d42"/>
+    </linearGradient>
+
+    <!-- Glow & Shadow Filters -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Clip Path for Canvas Photo -->
+    <clipPath id="viewportClip">
+      <rect x="250" y="80" width="700" height="520" rx="4"/>
+    </clipPath>
+  </defs>
+
+  <g filter="url(#boxShadow)">
+    <!-- App Window Frame -->
+    <rect x="10" y="10" width="1180" height="730" rx="14" fill="url(#windowBg)" stroke="#2b3245" stroke-width="1.5"/>
+
+    <!-- Window Titlebar -->
+    <rect x="10" y="10" width="1180" height="42" rx="14" fill="#0f121a"/>
+    <path d="M 10 42 L 1190 42" stroke="#1f2433" stroke-width="1"/>
+    
+    <!-- Window Control Buttons (macOS / Windows style hybrid) -->
+    <circle cx="34" cy="26" r="6" fill="#ef4444" fill-opacity="0.8"/>
+    <circle cx="52" cy="26" r="6" fill="#f59e0b" fill-opacity="0.8"/>
+    <circle cx="70" cy="26" r="6" fill="#10b981" fill-opacity="0.8"/>
+
+    <!-- App Title & Breadcrumbs -->
+    <g transform="translate(100, 29)">
+      <circle cx="6" cy="-2" r="5" fill="#38bdf8"/>
+      <text x="20" y="2" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto" font-size="12" font-weight="600">PhotoSelect Desktop</text>
+      <text x="156" y="2" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto" font-size="12">/ Volumes / SONY_SD / DCIM / 100MSDCF / DSC08492.ARW + JPG</text>
+    </g>
+
+    <!-- Window Quick Status (Right) -->
+    <g transform="translate(980, 29)">
+      <rect x="0" y="-12" width="72" height="22" rx="4" fill="#1e2433" stroke="#334155" stroke-width="0.8"/>
+      <text x="36" y="3" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="600" text-anchor="middle">125% DPI</text>
+      <rect x="80" y="-12" width="80" height="22" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8"/>
+      <text x="120" y="3" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="600" text-anchor="middle">XMP SYNC</text>
+    </g>
+
+    <!-- Action Toolbar Under Header -->
+    <rect x="10" y="42" width="1180" height="38" fill="#131722"/>
+    <path d="M 10 80 L 1190 80" stroke="#1f2433" stroke-width="1"/>
+
+    <g transform="translate(30, 60)">
+      <rect x="0" y="-12" width="90" height="24" rx="4" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8" stroke-width="1"/>
+      <text x="45" y="4" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="600" text-anchor="middle">⚡ 零导入模式</text>
+      
+      <rect x="102" y="-12" width="105" height="24" rx="4" fill="#1e2433" stroke="#334155" stroke-width="0.8"/>
+      <text x="154" y="4" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="middle">⧉ 分组折叠 (开)</text>
+
+      <rect x="219" y="-12" width="105" height="24" rx="4" fill="#1e2433" stroke="#334155" stroke-width="0.8"/>
+      <text x="271" y="4" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="middle">🎯 峰值对焦 [F]</text>
+
+      <rect x="336" y="-12" width="115" height="24" rx="4" fill="#1e2433" stroke="#334155" stroke-width="0.8"/>
+      <text x="393" y="4" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="middle">👁️ 人眼检视 [Z]</text>
+    </g>
+
+    <g transform="translate(1010, 60)">
+      <rect x="0" y="-12" width="140" height="24" rx="4" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+      <text x="70" y="4" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="600" text-anchor="middle">📦 流式导出 [Ctrl+E]</text>
+    </g>
+
+    <!-- LEFT SIDEBAR: Filters & Catalogs -->
+    <rect x="10" y="80" width="240" height="520" fill="#10131c"/>
+    <path d="M 250 80 L 250 600" stroke="#1f2433" stroke-width="1"/>
+    
+    <g transform="translate(25, 105)">
+      <text x="0" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">FILTER & RATINGS</text>
+      
+      <!-- Rating Stars Filter -->
+      <g transform="translate(0, 18)">
+        <text x="0" y="14" fill="#facc15" font-size="13">★★★★★</text>
+        <text x="80" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">142 张</text>
+        <rect x="195" y="4" width="14" height="14" rx="3" fill="#38bdf8" fill-opacity="0.2" stroke="#38bdf8"/>
+      </g>
+      <g transform="translate(0, 42)">
+        <text x="0" y="14" fill="#facc15" font-size="13">★★★★☆</text>
+        <text x="80" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">428 张</text>
+      </g>
+      <g transform="translate(0, 66)">
+        <text x="0" y="14" fill="#facc15" font-size="13">★★★☆☆</text>
+        <text x="80" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">961 张</text>
+      </g>
+
+      <!-- Flags -->
+      <text x="0" y="115" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">FLAGS 旗标</text>
+      <g transform="translate(0, 130)">
+        <rect x="0" y="0" width="18" height="18" rx="4" fill="#10b981" fill-opacity="0.2"/>
+        <text x="9" y="13" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">P</text>
+        <text x="26" y="14" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">留用 (Pick)</text>
+        <text x="180" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">312</text>
+      </g>
+      <g transform="translate(0, 158)">
+        <rect x="0" y="0" width="18" height="18" rx="4" fill="#ef4444" fill-opacity="0.2"/>
+        <text x="9" y="13" fill="#f87171" font-size="11" font-weight="bold" text-anchor="middle">X</text>
+        <text x="26" y="14" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">淘汰 (Reject)</text>
+        <text x="180" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">1,845</text>
+      </g>
+
+      <!-- Camera Model -->
+      <text x="0" y="210" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">CAMERA 机型</text>
+      <g transform="translate(0, 225)">
+        <text x="0" y="14" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">Sony Alpha 1 (ILCE-1)</text>
+        <text x="180" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">2,410</text>
+      </g>
+      <g transform="translate(0, 248)">
+        <text x="0" y="14" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">Nikon Z8</text>
+        <text x="180" y="14" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">892</text>
+      </g>
+
+      <!-- Species / Taxonomy -->
+      <text x="0" y="295" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">AI SPECIES 智能物种</text>
+      <g transform="translate(0, 312)">
+        <rect x="0" y="0" width="195" height="48" rx="6" fill="#182030" stroke="#2563eb" stroke-width="0.8"/>
+        <text x="10" y="18" fill="#60a5fa" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="bold">红嘴相思鸟</text>
+        <text x="10" y="34" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">Leiothrix lutea (置信度 99.1%)</text>
+        <circle cx="178" cy="24" r="6" fill="#10b981"/>
+      </g>
+    </g>
+
+    <!-- CENTER VIEWPORT: 18% Neutral Gray Darkroom Canvas -->
+    <rect x="250" y="80" width="700" height="520" fill="#262a33"/>
+    
+    <!-- Rendered Photo in Darkroom (Wildlife Bird Action in Focus) -->
+    <g clip-path="url(#viewportClip)">
+      <rect x="270" y="95" width="660" height="490" fill="url(#photoSky)" rx="8"/>
+      
+      <!-- Forest / Mountain Bokeh Background -->
+      <path d="M 270 420 Q 420 300 580 390 T 930 360 L 930 585 L 270 585 Z" fill="#0d1b1e" opacity="0.85"/>
+      <path d="M 270 480 Q 480 370 720 450 T 930 430 L 930 585 L 270 585 Z" fill="#081014"/>
+
+      <!-- Perched Branch -->
+      <path d="M 270 470 C 400 450, 520 480, 680 430 C 760 405, 850 420, 930 390" stroke="#3e2723" stroke-width="22" stroke-linecap="round"/>
+      <path d="M 540 460 C 600 490, 680 520, 740 540" stroke="#2e1a14" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- Bird Silhouette with Vivid Feathers (Kingfisher / Red-billed Leiothrix) -->
+      <g transform="translate(560, 310)">
+        <!-- Tail -->
+        <path d="M -20 90 L -60 170 L -40 175 L 0 100 Z" fill="#1e3a8a"/>
+        <path d="M -10 95 L -35 180 L -15 185 L 10 105 Z" fill="#0284c7"/>
+        
+        <!-- Body -->
+        <ellipse cx="20" cy="50" rx="42" ry="55" fill="#0284c7" transform="rotate(-15 20 50)"/>
+        <!-- Golden Chest -->
+        <path d="M 25 20 C 50 40, 60 75, 40 105 C 10 80, 10 40, 25 20 Z" fill="#f59e0b"/>
+        
+        <!-- Wing -->
+        <path d="M 5 25 C -25 50, -40 110, -10 120 C 15 90, 25 50, 5 25 Z" fill="#0f172a"/>
+        
+        <!-- Head -->
+        <circle cx="50" cy="5" r="30" fill="#0369a1"/>
+        
+        <!-- Red Beak -->
+        <path d="M 75 0 L 125 12 L 75 18 Z" fill="#ef4444"/>
+        
+        <!-- Eye Contour -->
+        <circle cx="62" cy="2" r="7" fill="#f8fafc"/>
+        <circle cx="63" cy="2" r="4.5" fill="#0f172a"/>
+        <circle cx="64" cy="1" r="1.5" fill="#ffffff"/>
+
+        <!-- Real-time WebGL 2.0 Focus Peaking Contour (Electric Cyan / Neon Green) -->
+        <circle cx="62" cy="2" r="12" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="4 2" filter="url(#softGlow)"/>
+        <path d="M 40 -12 C 55 -25, 75 -20, 85 -5 C 95 10, 80 25, 65 25" fill="none" stroke="#34d399" stroke-width="2" filter="url(#softGlow)"/>
+        <path d="M 75 -1 L 115 10 L 80 16" fill="none" stroke="#22d3ee" stroke-width="2" filter="url(#softGlow)"/>
+        <path d="M 15 25 C 35 45, 45 75, 30 100" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3"/>
+      </g>
+    </g>
+
+    <!-- Center HUD: Floating 2x2 EXIF Parameters Overlay -->
+    <g transform="translate(270, 105)" filter="url(#cardShadow)">
+      <rect x="0" y="0" width="220" height="64" rx="8" fill="#0b0f17" fill-opacity="0.88" stroke="#334155" stroke-width="0.8"/>
+      <g transform="translate(15, 20)">
+        <text x="0" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="9" font-weight="700">SHUTTER</text>
+        <text x="0" y="16" fill="#f8fafc" font-family="JetBrains Mono,monospace,Segoe UI" font-size="14" font-weight="700">1/4000s</text>
+
+        <text x="70" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="9" font-weight="700">APERTURE</text>
+        <text x="70" y="16" fill="#38bdf8" font-family="JetBrains Mono,monospace,Segoe UI" font-size="14" font-weight="700">ƒ/2.8</text>
+
+        <text x="145" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="9" font-weight="700">ISO</text>
+        <text x="145" y="16" fill="#f8fafc" font-family="JetBrains Mono,monospace,Segoe UI" font-size="14" font-weight="700">320</text>
+      </g>
+      <text x="15" y="54" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">600mm · FE 600mm F4 GM OSS + 1.4x</text>
+    </g>
+
+    <!-- Narrative Select Style 100% EYE FOCUS CARD (Floating Widget) -->
+    <g transform="translate(685, 105)" filter="url(#cardShadow)">
+      <rect x="0" y="0" width="245" height="155" rx="10" fill="#0b0f19" fill-opacity="0.94" stroke="#38bdf8" stroke-width="1.2"/>
+      
+      <!-- Header -->
+      <path d="M 0 0 L 245 0 L 245 28 L 0 28 Z" fill="#131b2c" rx="10"/>
+      <circle cx="16" cy="14" r="4" fill="#38bdf8"/>
+      <text x="28" y="18" fill="#e2e8f0" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="600">Narrative 100% 焦点检视</text>
+      
+      <rect x="175" y="6" width="60" height="17" rx="3" fill="#10b981" fill-opacity="0.2"/>
+      <text x="205" y="18" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10" font-weight="700" text-anchor="middle">SHARP 99%</text>
+
+      <!-- Eye Zoom Inset Box -->
+      <g transform="translate(14, 38)">
+        <rect x="0" y="0" width="105" height="80" rx="6" fill="#182334" stroke="#38bdf8" stroke-width="1.5"/>
+        <!-- Zoomed Eye Graphic -->
+        <circle cx="52" cy="40" r="28" fill="#0369a1"/>
+        <circle cx="52" cy="40" r="16" fill="#f8fafc"/>
+        <circle cx="53" cy="40" r="11" fill="#0f172a"/>
+        <circle cx="56" cy="37" r="4" fill="#ffffff"/>
+        <!-- Focus Crosshair -->
+        <circle cx="52" cy="40" r="20" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <line x1="52" y1="16" x2="52" y2="22" stroke="#22d3ee" stroke-width="1.5"/>
+        <line x1="52" y1="58" x2="52" y2="64" stroke="#22d3ee" stroke-width="1.5"/>
+        <line x1="28" y1="40" x2="34" y2="40" stroke="#22d3ee" stroke-width="1.5"/>
+        <line x1="70" y1="40" x2="76" y2="40" stroke="#22d3ee" stroke-width="1.5"/>
+      </g>
+
+      <!-- Eye Metrics Column -->
+      <g transform="translate(130, 42)">
+        <text x="0" y="14" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">目标: 鸟类/右眼</text>
+        <text x="0" y="32" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="12" font-weight="bold">极致合焦 (In Focus)</text>
+        <text x="0" y="48" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">眨眼状态: 睁开</text>
+        <text x="0" y="64" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="9">MediaPipe 468pts</text>
+        <rect x="0" y="70" width="70" height="4" rx="2" fill="#1e293b"/>
+        <rect x="0" y="70" width="69" height="4" rx="2" fill="#34d399"/>
+      </g>
+
+      <text x="14" y="142" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">💡 点击直接平移居中 100% 原始像素查看</text>
+    </g>
+
+    <!-- RIGHT INSPECTOR: EXIF, Histogram & XMP Tree -->
+    <rect x="950" y="80" width="240" height="520" fill="#10131c"/>
+    <path d="M 950 80 L 950 600" stroke="#1f2433" stroke-width="1"/>
+
+    <g transform="translate(965, 105)">
+      <text x="0" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">HISTOGRAM 直方图</text>
+      
+      <!-- Histogram Box -->
+      <rect x="0" y="12" width="210" height="85" rx="6" fill="#090c13" stroke="#1e2433"/>
+      <!-- Channels curves -->
+      <path d="M 5 90 Q 30 75 55 50 T 110 30 T 160 65 T 205 92" fill="#ef4444" fill-opacity="0.25" stroke="#ef4444" stroke-width="1"/>
+      <path d="M 5 92 Q 40 80 80 40 T 140 25 T 180 70 T 205 94" fill="#10b981" fill-opacity="0.25" stroke="#10b981" stroke-width="1"/>
+      <path d="M 5 91 Q 50 70 95 35 T 150 20 T 190 60 T 205 93" fill="#3b82f6" fill-opacity="0.3" stroke="#38bdf8" stroke-width="1.2"/>
+      
+      <!-- Metadata details -->
+      <text x="0" y="125" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="700" letter-spacing="1">METADATA 元数据</text>
+
+      <g transform="translate(0, 140)">
+        <text x="0" y="12" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">原片文件名</text>
+        <text x="210" y="12" fill="#f8fafc" font-family="JetBrains Mono,monospace,Segoe UI" font-size="11" text-anchor="end">DSC08492.ARW</text>
+
+        <text x="0" y="34" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">同名伴侣</text>
+        <text x="210" y="34" fill="#34d399" font-family="JetBrains Mono,monospace,Segoe UI" font-size="11" text-anchor="end">DSC08492.JPG 🔗</text>
+
+        <text x="0" y="56" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">原始分辨率</text>
+        <text x="210" y="56" fill="#f8fafc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">8640 × 5760 (50.1 MP)</text>
+
+        <text x="0" y="78" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">色彩空间</text>
+        <text x="210" y="78" fill="#f8fafc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">Adobe RGB (1998)</text>
+
+        <text x="0" y="100" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">拍摄精确时间</text>
+        <text x="210" y="100" fill="#f8fafc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" text-anchor="end">14:26:08.824</text>
+      </g>
+
+      <!-- Lightroom Sidecar Status -->
+      <g transform="translate(0, 275)">
+        <rect x="0" y="0" width="210" height="75" rx="6" fill="#141a29" stroke="#1d4ed8" stroke-width="0.8"/>
+        <text x="12" y="20" fill="#60a5fa" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="bold">Adobe LrC .xmp 侧车就绪</text>
+        <text x="12" y="38" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10">标记、评星与层级关键字即刻双向回写，导入 Lightroom 完美重现。</text>
+      </g>
+
+      <!-- Quick Action Buttons -->
+      <g transform="translate(0, 375)">
+        <rect x="0" y="0" width="100" height="32" rx="6" fill="#10b981" fill-opacity="0.18" stroke="#10b981" stroke-width="1"/>
+        <text x="50" y="20" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="12" font-weight="bold" text-anchor="middle">留用 [P]</text>
+
+        <rect x="110" y="0" width="100" height="32" rx="6" fill="#ef4444" fill-opacity="0.18" stroke="#ef4444" stroke-width="1"/>
+        <text x="160" y="20" fill="#f87171" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="12" font-weight="bold" text-anchor="middle">淘汰 [X]</text>
+      </g>
+    </g>
+
+    <!-- BOTTOM FILMSTRIP (Virtual Scrolling + 3D Burst Grouped Cards) -->
+    <rect x="10" y="600" width="1180" height="140" rx="0 0 14 14" fill="#0b0d13"/>
+    <path d="M 10 600 L 1190 600" stroke="#1f2433" stroke-width="1"/>
+
+    <!-- Filmstrip Controls -->
+    <g transform="translate(25, 622)">
+      <text x="0" y="0" fill="#64748b" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">胶卷胶带栏 · 共 2,842 张 (已筛选 410 张 · 14.4%)</text>
+    </g>
+
+    <!-- Thumbnail Cards Carousel -->
+    <!-- Card 1 (Single) -->
+    <g transform="translate(25, 635)">
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1c2230" stroke="#334155" stroke-width="0.8"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#243447"/>
+      <text x="8" y="82" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">_DSC8490</text>
+      <text x="127" y="82" fill="#facc15" font-size="10" text-anchor="end">★★★</text>
+    </g>
+
+    <!-- Card 2: 3D Stacked Burst Group (Collapsed View with Best Shot) -->
+    <g transform="translate(175, 635)">
+      <!-- 3D Layer 3 (Back) -->
+      <rect x="12" y="-8" width="125" height="85" rx="6" fill="#141a24" stroke="#2a3547" stroke-width="0.8" opacity="0.6"/>
+      <!-- 3D Layer 2 (Middle) -->
+      <rect x="6" y="-4" width="130" height="88" rx="6" fill="#18202d" stroke="#334155" stroke-width="0.8" opacity="0.8"/>
+      <!-- Front Card (Best Shot Active) -->
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1c2436" stroke="#38bdf8" stroke-width="2"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#1e3a5f"/>
+      
+      <!-- Group Count Badge (Top-Right) -->
+      <rect x="90" y="7" width="37" height="16" rx="3" fill="#0f172a" fill-opacity="0.9" stroke="#38bdf8" stroke-width="0.8"/>
+      <text x="108" y="19" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10" font-weight="700" text-anchor="middle">⧉ 18张</text>
+      
+      <!-- Best Shot Badge (Top-Left) -->
+      <rect x="8" y="7" width="55" height="16" rx="3" fill="#059669" fill-opacity="0.9"/>
+      <text x="35" y="19" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="9" font-weight="bold" text-anchor="middle">BEST SHOT</text>
+
+      <text x="8" y="82" fill="#38bdf8" font-family="JetBrains Mono,monospace" font-size="10" font-weight="bold">_DSC8492</text>
+      <text x="127" y="82" fill="#facc15" font-size="10" text-anchor="end">★★★★★</text>
+    </g>
+
+    <!-- Card 3 (Pick Selected Active in Viewport) -->
+    <g transform="translate(330, 635)">
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1a2538" stroke="#10b981" stroke-width="2"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#2d527c"/>
+      <rect x="8" y="7" width="22" height="16" rx="3" fill="#10b981"/>
+      <text x="19" y="19" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10" font-weight="bold" text-anchor="middle">P</text>
+      <text x="8" y="82" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10" font-weight="bold">_DSC8493</text>
+      <text x="127" y="82" fill="#facc15" font-size="10" text-anchor="end">★★★★☆</text>
+    </g>
+
+    <!-- Card 4 (Rejected) -->
+    <g transform="translate(480, 635)" opacity="0.65">
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#181920" stroke="#ef4444" stroke-width="1"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#181a20"/>
+      <!-- Semi-transparent red reject overlay -->
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#7f1d1d" fill-opacity="0.4"/>
+      <rect x="8" y="7" width="22" height="16" rx="3" fill="#ef4444"/>
+      <text x="19" y="19" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10" font-weight="bold" text-anchor="middle">X</text>
+      <text x="8" y="82" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">_DSC8494</text>
+      <text x="127" y="82" fill="#64748b" font-size="10" text-anchor="end">REJECT</text>
+    </g>
+
+    <!-- Card 5 (Grouped Burst 2) -->
+    <g transform="translate(630, 635)">
+      <rect x="8" y="-5" width="125" height="85" rx="6" fill="#141a24" stroke="#2a3547" stroke-width="0.8" opacity="0.7"/>
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1c2230" stroke="#334155" stroke-width="0.8"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#203348"/>
+      <rect x="90" y="7" width="37" height="16" rx="3" fill="#0f172a" fill-opacity="0.9" stroke="#94a3b8" stroke-width="0.8"/>
+      <text x="108" y="19" fill="#cbd5e1" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="10" font-weight="700" text-anchor="middle">⧉ 12张</text>
+      <text x="8" y="82" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">_DSC8495</text>
+      <text x="127" y="82" fill="#facc15" font-size="10" text-anchor="end">★★★★</text>
+    </g>
+
+    <!-- Card 6 -->
+    <g transform="translate(780, 635)">
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1c2230" stroke="#334155" stroke-width="0.8"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#283a50"/>
+      <text x="8" y="82" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">_DSC8496</text>
+      <text x="127" y="82" fill="#facc15" font-size="10" text-anchor="end">★★★</text>
+    </g>
+
+    <!-- Card 7 -->
+    <g transform="translate(930, 635)">
+      <rect x="0" y="0" width="135" height="90" rx="6" fill="#1c2230" stroke="#334155" stroke-width="0.8"/>
+      <rect x="4" y="4" width="127" height="66" rx="4" fill="#1f2c3d"/>
+      <text x="8" y="82" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">_DSC8497</text>
+      <text x="127" y="82" fill="#64748b" font-size="10" text-anchor="end">☆☆☆☆☆</text>
+    </g>
+
+    <!-- Card 8 -->
+    <g transform="translate(1080, 635)">
+      <rect x="0" y="0" width="90" height="90" rx="6" fill="#1c2230" stroke="#334155" stroke-width="0.8"/>
+      <rect x="4" y="4" width="82" height="66" rx="4" fill="#1a2533"/>
+    </g>
+  </g>
+</svg>

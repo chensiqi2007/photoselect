@@ -1,9 +1,10 @@
 [package]
 name = "photoselect-desktop"
-version = "1.0.0"
+version = "1.1.0"
 description = "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond RAW+JPG Culling Platform"
-authors = ["PhotoSelect Team"]
+authors = ["URL Time"]
 edition = "2021"
+license = "AGPL-3.0-only"
 
 [lib]
 name = "photoselect_desktop_lib"

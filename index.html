@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN" class="dark w-full h-full overflow-hidden">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -9,10 +9,13 @@
     <link rel="apple-touch-icon" href="/icons/Square150x150Logo.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" type="image/png" href="/icons/Square44x44Logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>PhotoSelect Desktop - 极速摄影选片与管理平台</title>
   </head>
-  <body class="bg-[#121212] text-[#E5E5E5] overflow-hidden select-none">
-    <div id="app" class="w-screen h-screen overflow-hidden"></div>
+  <body class="bg-[#121212] text-[#E5E5E5] w-full h-full overflow-hidden select-none m-0 p-0">
+    <div id="app" class="w-full h-full overflow-hidden"></div>
     <script>
       if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
         window.addEventListener('load', () => {

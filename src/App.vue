@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   UploadCloud,
   Layers,
+  Camera,
 } from "lucide-vue-next";
 import { usePhotoStore } from "./stores/photoStore";
 import { useHotkeys } from "./composables/useHotkeys";
@@ -50,6 +51,8 @@ const handleSelectFolder = async () => {
 onMounted(async () => {
   // 初始化系统外观模式 (黑暗/白昼)
   store.initTheme();
+  // 初始化系统 UI 页面与字体缩放 (100% / 125% / 150% / 200%)
+  store.initUiScale();
   try {
     await store.loadAiSettings();
     unlistenAiProgress = await listen("ai-selection-progress", (event) => {
@@ -89,7 +92,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-screen h-screen flex flex-col bg-[#121212] text-[#E5E5E5] overflow-hidden select-none font-sans">
+  <div class="w-full h-full flex flex-col bg-[#121212] text-[#E5E5E5] overflow-hidden select-none font-sans">
     <!-- 1. 顶部极简暗房工具栏 (36px) -->
     <TopBar />
 
@@ -107,78 +110,161 @@ onUnmounted(() => {
         <template v-if="store.viewMode === 'loupe'">
           <ViewportWebGL v-if="store.currentPhoto" />
 
-          <!-- 空状态：极速挂载与目录直达 -->
-          <div
-            v-else
-            class="text-center p-8 max-w-lg flex flex-col items-center justify-center border-2 border-dashed rounded-2xl transition-all"
-            :class="[
-              isDragOver
-                ? 'border-sky-400 bg-sky-500/10 scale-102'
-                : store.theme === 'light'
-                ? 'border-[#D1D1D6] bg-white/90 shadow-xl'
-                : 'border-[#2A2A2A] bg-[#161616]/70 shadow-xl backdrop-blur-sm'
-            ]"
-          >
-            <div class="w-16 h-16 rounded-2xl bg-[#1C1C1C] border border-[#333333] flex items-center justify-center mb-4 text-sky-400 shadow-xl">
-              <UploadCloud class="w-8 h-8 stroke-[1.8]" />
-            </div>
-
-            <h2 class="text-lg font-bold text-[#E5E5E5] mb-2 tracking-wide">
-              挂载相机卡或选择照片目录
-            </h2>
-            <p class="text-xs text-[#8C8C8C] mb-6 leading-relaxed max-w-md">
-              直接拖拽 SD 卡、CFexpress 卷或包含 JPG 与 RAW 的物理文件夹至窗口；或点击下方按钮选择本地相册
-            </p>
-
-            <button
-              @click="handleSelectFolder"
-              class="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-xl hover:shadow-2xl active:scale-95 flex items-center space-x-2 cursor-pointer mb-6"
+          <!-- 空状态：专业级暗房工作台直达 (Pro Darkroom Studio Viewfinder) -->
+          <div v-else class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
+            <!-- 核心取景框容器 (Camera Viewfinder Frame) -->
+            <div
+              class="relative z-10 w-full max-w-xl p-8 md:p-10 rounded-2xl transition-all duration-200 border"
+              :class="[
+                isDragOver
+                  ? 'border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.2)] scale-[1.01]'
+                  : store.theme === 'light'
+                  ? 'border-[#E4E4E7] bg-white shadow-xl'
+                  : 'border-[#26262C] bg-[#151518] shadow-[0_20px_50px_rgba(0,0,0,0.5)]'
+              ]"
             >
-              <FolderOpen class="w-4 h-4 text-white" />
-              <span>{{ t.topbar.openFolder }}</span>
-            </button>
+              <!-- 取景框四角准星刻度 (Viewfinder Reticle Marks) -->
+              <div class="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t border-l border-white/20 pointer-events-none"></div>
+              <div class="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t border-r border-white/20 pointer-events-none"></div>
+              <div class="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b border-l border-white/20 pointer-events-none"></div>
+              <div class="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b border-r border-white/20 pointer-events-none"></div>
 
-            <!-- 扫描错误提示 -->
-            <div v-if="store.scanError" class="mb-4 text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20 max-w-md break-all">
-              {{ store.scanError }}
-            </div>
-
-            <!-- 快速直达检测到的系统驱动器与移动存储卡 -->
-            <div v-if="store.mountPoints.length > 0" class="w-full pt-4 border-t border-[#262626] text-left">
-              <div class="text-[11px] font-mono text-[#666666] mb-2 flex items-center space-x-1">
-                <HardDrive class="w-3 h-3 text-[#8C8C8C]" />
-                <span>已检测到的系统驱动器 / 移动存储卡:</span>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="mount in store.mountPoints"
-                  :key="mount"
-                  @click="store.loadFolder(mount)"
-                  class="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#202020] hover:bg-[#2A2A2A] border border-[#333333] text-xs font-mono text-[#E5E5E5] transition-colors cursor-pointer"
+              <!-- 顶部精工镜头刻度图形 -->
+              <div class="flex flex-col items-center mb-6">
+                <div
+                  class="w-14 h-14 rounded-2xl flex items-center justify-center border mb-3.5 transition-transform duration-200"
+                  :class="[
+                    store.theme === 'light'
+                      ? 'bg-zinc-100 border-zinc-200 text-zinc-700 shadow-sm'
+                      : 'bg-[#1C1C22] border-[#2E2E36] text-[#A1A1AA]'
+                  ]"
                 >
-                  <HardDrive class="w-3.5 h-3.5 text-blue-400" />
-                  <span>{{ mount }}</span>
-                  <ArrowUpRight class="w-3 h-3 text-[#8C8C8C]" />
+                  <Camera class="w-6 h-6 stroke-[1.75]" />
+                </div>
+
+                <div class="flex items-center space-x-2">
+                  <h2
+                    class="text-lg font-semibold tracking-tight"
+                    :class="store.theme === 'light' ? 'text-zinc-900' : 'text-zinc-100'"
+                  >
+                    PhotoSelect
+                  </h2>
+                  <span
+                    class="px-1.5 py-0.5 rounded font-mono text-[10px] font-medium border"
+                    :class="[
+                      store.theme === 'light'
+                        ? 'bg-zinc-100 border-zinc-200 text-zinc-600'
+                        : 'bg-[#222228] border-white/10 text-zinc-400'
+                    ]"
+                  >
+                    v1.1.0
+                  </span>
+                </div>
+
+                <p
+                  class="text-xs mt-1.5 leading-relaxed text-center font-normal"
+                  :class="store.theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'"
+                >
+                  秒级零导入直读原生 RAW+JPG • 毫秒级连拍聚合与峰值对焦
+                </p>
+              </div>
+
+              <!-- 主操作按钮：精工物理质感按键 -->
+              <div class="flex justify-center mb-5">
+                <button
+                  @click="handleSelectFolder"
+                  class="group px-6 py-2.5 rounded-xl font-medium text-xs tracking-wide transition-all duration-150 flex items-center space-x-2.5 cursor-pointer border shadow-sm active:scale-95"
+                  :class="[
+                    store.theme === 'light'
+                      ? 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-zinc-200'
+                      : 'bg-[#222228] hover:bg-[#2C2C34] text-zinc-100 border-[#32323A] hover:border-zinc-500/50'
+                  ]"
+                >
+                  <FolderOpen class="w-4 h-4 text-amber-400 group-hover:scale-105 transition-transform" />
+                  <span>{{ t.topbar.openFolder }}</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded text-[10px] font-mono border"
+                    :class="[
+                      store.theme === 'light'
+                        ? 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                        : 'bg-black/40 border-white/10 text-zinc-400'
+                    ]"
+                  >
+                    Ctrl+O
+                  </kbd>
                 </button>
               </div>
-            </div>
 
-            <!-- 最近工作区快捷入口 -->
-            <div v-else-if="store.recentWorkspaces.length > 0" class="w-full pt-4 border-t border-[#262626] text-left">
-              <div class="text-[11px] font-mono text-[#666666] mb-2 flex items-center space-x-1">
-                <Layers class="w-3 h-3 text-[#8C8C8C]" />
-                <span>最近打开的历史工作区:</span>
+              <!-- 拖拽提示 -->
+              <div
+                class="text-[11px] flex items-center justify-center space-x-1.5 mb-5 font-normal"
+                :class="store.theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'"
+              >
+                <UploadCloud class="w-3.5 h-3.5" />
+                <span>或将 SD 卡、CFexpress 卷或照片文件夹拖放至此</span>
               </div>
-              <div class="space-y-1">
-                <button
-                  v-for="ws in store.recentWorkspaces.slice(0, 3)"
-                  :key="ws.id"
-                  @click="store.loadFolder(ws.folder_path)"
-                  class="w-full flex items-center justify-between px-3 py-1.5 rounded bg-[#202020] hover:bg-[#2A2A2A] border border-[#333333] text-xs font-mono text-[#8C8C8C] hover:text-[#E5E5E5] transition-colors text-left cursor-pointer"
+
+              <!-- 扫描错误提示 -->
+              <div v-if="store.scanError" class="mb-4 text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 max-w-md mx-auto break-all">
+                {{ store.scanError }}
+              </div>
+
+              <!-- 快速检测到的系统卷与存储卡 -->
+              <div v-if="store.mountPoints.length > 0" class="w-full pt-4 border-t border-white/5 text-left">
+                <div
+                  class="text-[11px] font-mono mb-2 flex items-center justify-between"
+                  :class="store.theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'"
                 >
-                  <span class="truncate max-w-[340px]">{{ ws.folder_path }}</span>
-                  <ArrowUpRight class="w-3 h-3 flex-shrink-0" />
-                </button>
+                  <div class="flex items-center space-x-1.5">
+                    <HardDrive class="w-3 h-3 text-zinc-400" />
+                    <span>存储驱动器 / SD 卡:</span>
+                  </div>
+                  <span class="text-[10px] text-zinc-500">点击直达</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button
+                    v-for="mount in store.mountPoints"
+                    :key="mount"
+                    @click="store.loadFolder(mount)"
+                    class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer"
+                    :class="[
+                      store.theme === 'light'
+                        ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                        : 'bg-[#1C1C22] hover:bg-[#25252D] border-[#2A2A32] text-zinc-300'
+                    ]"
+                  >
+                    <HardDrive class="w-3 h-3 text-zinc-400" />
+                    <span class="font-medium">{{ mount }}</span>
+                    <ArrowUpRight class="w-2.5 h-2.5 text-zinc-500" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- 最近工作区快捷入口 -->
+              <div v-else-if="store.recentWorkspaces.length > 0" class="w-full pt-4 border-t border-white/5 text-left">
+                <div
+                  class="text-[11px] font-mono mb-2 flex items-center space-x-1.5"
+                  :class="store.theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'"
+                >
+                  <Layers class="w-3 h-3 text-zinc-400" />
+                  <span>历史工作区:</span>
+                </div>
+                <div class="space-y-1">
+                  <button
+                    v-for="ws in store.recentWorkspaces.slice(0, 3)"
+                    :key="ws.id"
+                    @click="store.loadFolder(ws.folder_path)"
+                    class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all text-left cursor-pointer"
+                    :class="[
+                      store.theme === 'light'
+                        ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                        : 'bg-[#1C1C22] hover:bg-[#25252D] border-[#2A2A32] text-zinc-300'
+                    ]"
+                  >
+                    <span class="truncate max-w-[380px]">{{ ws.folder_path }}</span>
+                    <ArrowUpRight class="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

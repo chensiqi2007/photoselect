@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoSelect Desktop - 隐私权政策 (Privacy Policy)</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .privacy-content {
+      max-width: 860px;
+      margin: 40px auto 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      line-height: 1.8;
+    }
+
+    .privacy-content h1 {
+      font-size: 2rem;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+
+    .privacy-meta {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .privacy-content h2 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-top: 36px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .privacy-content h3 {
+      font-size: 1.1rem;
+      color: var(--accent-cyan);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    .privacy-content ul {
+      padding-left: 24px;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .privacy-content li {
+      margin-bottom: 8px;
+    }
+
+    .privacy-content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .privacy-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      color: var(--text-secondary);
+    }
+
+    .privacy-card strong {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="https://www.urltime.cn/app/photoselectdesktop/index.html#download" class="brand">
+        <img src="assets/images/app-icon.svg" alt="PhotoSelect Logo" class="brand-icon">
+        <div class="brand-title">
+          <span>PhotoSelect</span>
+          <span class="version-tag">v1.1.0</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <a href="https://index.html" class="lang-switcher">
+          <span>🇨🇳 中国版首页</span>
+        </a>
+        <a href="https://www.urltime.org/app/index.html" class="lang-switcher">
+          <span>🌐 Global Edition</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="privacy-content">
+      <h1>PhotoSelect 隐私权保护政策 (Privacy Policy)</h1>
+      <div class="privacy-meta">
+        发行组织 (Publisher): <strong>PhotoSelect Desktop Open Source Project / URL Time</strong> | 生效日期 (Effective Date):
+        2026-10-18
+      </div>
+
+      <section>
+        <h2>中文版说明 (Chinese)</h2>
+        <h3>1. 核心隐私保护承诺</h3>
+        <p>PhotoSelect 坚守「本机构建、纯离线运行、零数据收集 (Local-First, Offline &amp; Zero Data
+          Collection)」的根本原则。我们深知摄影师作品与客户肖像资产的高度私密性，本软件在系统架构设计上确保您的所有照片、元数据和生物特征绝对留在本地设备。</p>
+
+        <h3>2. 数据收集与离线处理规范</h3>
+        <ul>
+          <li><strong>零个人可识别信息 (PII) 收集：</strong>我们不收集、不记录、不上报任何用户的个人身份信息、设备指纹、位置数据或使用偏好。</li>
+          <li><strong>本机端 RAW 与图片解码：</strong>所有图像与视频文件（Sony ARW, Canon CR3, Nikon NEF, Fujifilm RAF
+            等）的解析、全保真预览流提取、缩略图计算与 SQLite 本地缓存，均在您本地设备的内存与存储介质内完成，绝不上载至外部云端服务器。</li>
+          <li><strong>纯离线端侧 AI 推理：</strong>MediaPipe Face Landmarker 人脸与人眼焦点计算依托 WebAssembly
+            在本地硬件上独立推论，绝不向网络传输任何面部或眼部生物识别数据。</li>
+        </ul>
+
+        <h3>3. 系统权限声明与合规</h3>
+        <p>本应用程序向操作系统（Windows / Linux）申请的完全受信任文件系统存取权限（Full Trust），仅严格用于让用户选择目录浏览、高速缓存读取与 XMP 侧车写入，绝无任何隐蔽越权操作。</p>
+
+        <div class="privacy-card">
+          <strong>官方开发者支持与反馈渠道：</strong><br>
+          GitHub Issues: <a href="https://github.com/chensiqi2007/photoselect/issues"
+            style="color: var(--accent-cyan);">https://github.com/chensiqi2007/photoselect/issues</a><br>
+          电子邮箱: support@urltime.com
+        </div>
+      </section>
+
+      <section style="margin-top: 50px;">
+        <h2>English Version (International)</h2>
+        <h3>1. Core Privacy Commitment</h3>
+        <p>PhotoSelect Desktop strictly adheres to the principle of "Local-First, Offline &amp; Zero Data Collection".
+          We recognize the confidential nature of client photographic assets and artistic masterworks. Our software is
+          architected to guarantee that your photos, metadata, and biometric landmarks remain 100% on your local
+          machine.</p>
+
+        <h3>2. Data Collection and Local Processing</h3>
+        <ul>
+          <li><strong>Zero Personally Identifiable Information (PII):</strong> We do not collect, transmit, store, or
+            profile any personally identifiable information, device IDs, or usage habits.</li>
+          <li><strong>Local RAW Processing:</strong> All RAW decoding (Sony ARW, Canon CR3, Nikon NEF, Fujifilm RAF,
+            Adobe DNG) and thumbnail generation take place strictly within your local CPU/GPU and SSD cache.</li>
+          <li><strong>Offline On-Device AI:</strong> MediaPipe 468-point facial mesh and eye sharpness evaluation run
+            entirely via offline WebAssembly models without network connections.</li>
+        </ul>
+
+        <h3>3. System Permissions</h3>
+        <p>The file system access requested by PhotoSelect on Windows and Linux is used solely to read user-selected
+          photography folders and write back standard <code>.xmp</code> sidecar metadata.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container" style="text-align: center;">
+      <p>© 2026 PhotoSelect Desktop Open Source Project. All rights reserved.</p>
+      <p style="margin-top: 8px;">
+        <a href="https://www.urltime.cn/app/photoselectdesktop/index.html#download"
+          style="color: var(--accent-cyan); margin: 0 10px;">中国版首页</a> |
+        <a href="https://www.urltime.org/app/index.html"
+          style="color: var(--accent-cyan); margin: 0 10px;">International Edition</a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+
+</html>

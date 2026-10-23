@@ -17,6 +17,7 @@ export interface ExifSummary {
   iso?: number;
   exposure_compensation?: string;
   capture_time?: string;
+  sub_sec_time?: string;
   width?: number;
   height?: number;
   orientation?: number;
@@ -32,6 +33,14 @@ export interface PhotoGroup {
   rating: number;                  // 0 - 5 星
   flag: FlagStatus;                // 1(留用), 0(未标记), -1(淘汰)
   color_label: ColorLabel;         // 色彩标签
+  tags?: string[];                 // 关键字与生态/分类标签 (如 ["红嘴相思鸟", "动物|鸟类|红嘴相思鸟"])
+  burst_group_id?: string | null;  // 连拍动作组 ID (如 "burst_001")
+  is_burst_best?: boolean;         // 是否为连拍组推荐最佳帧 (Best Shot)
+  phash?: string | null;           // 64-bit dHash 图像感知指纹
+  subject_group_id?: string | null;// 同主体/场景聚类组 ID (如 "subj_001")
+  is_subject_best?: boolean;       // 是否为同主体推荐最佳帧
+  is_duplicate?: boolean;          // 是否为严格重复帧
+  duplicate_of?: string | null;    // 重复所指向的主参考照片 ID
   file_size_bytes: number;         // 照片主文件大小
   capture_time: string | null;     // 拍摄时间戳 ISO 8601
   exif: ExifSummary | null;        // EXIF 核心元数据
@@ -93,5 +102,44 @@ export interface PhotoMetadataRecord {
   rating: number;
   flag: FlagStatus;
   color_label: ColorLabel;
+  tags?: string[];
   updated_at: string;
 }
+
+export interface BurstConfig {
+  threshold_ms?: number;
+  min_burst_count?: number;
+  auto_flag_best?: boolean;
+}
+
+export interface BurstCluster {
+  group_id: string;
+  photo_ids: string[];
+  count: number;
+  best_photo_id: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  time_span_ms: number;
+}
+
+export interface SimilarityConfig {
+  dedup_threshold?: number;
+  subject_threshold?: number;
+  time_window_secs?: number;
+  min_group_count?: number;
+  auto_reject_duplicates?: boolean;
+  auto_flag_best?: boolean;
+}
+
+export interface SubjectCluster {
+  group_id: string;
+  cluster_type: "subject" | "duplicate";
+  photo_ids: string[];
+  count: number;
+  best_photo_id: string | null;
+  duplicate_ids: string[];
+  start_time: string | null;
+  end_time: string | null;
+  time_span_secs: number;
+}
+

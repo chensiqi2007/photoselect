@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 216 64" width="216" height="64">
+  <defs>
+    <linearGradient id="badgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181e2b"/>
+      <stop offset="100%" stop-color="#0e131d"/>
+    </linearGradient>
+  </defs>
+  <rect width="216" height="64" rx="8" fill="url(#badgeBg)" stroke="#334155" stroke-width="1.2"/>
+  
+  <!-- Microsoft 4-Color Tiles -->
+  <g transform="translate(18, 18)">
+    <rect x="0" y="0" width="13" height="13" fill="#f25022"/>
+    <rect x="15" y="0" width="13" height="13" fill="#7fba00"/>
+    <rect x="0" y="15" width="13" height="13" fill="#00a4ef"/>
+    <rect x="15" y="15" width="13" height="13" fill="#ffb900"/>
+  </g>
+
+  <!-- Text -->
+  <g transform="translate(58, 22)">
+    <text x="0" y="6" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto" font-size="10" font-weight="500" letter-spacing="0.5">GET IT FROM</text>
+    <text x="0" y="24" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto" font-size="15" font-weight="600">Microsoft Store</text>
+  </g>
+</svg>

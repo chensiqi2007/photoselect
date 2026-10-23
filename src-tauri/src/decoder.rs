@@ -1048,6 +1048,19 @@ impl ImageDecoder {
                         }
                     }
                 }
+                // 连拍微秒/毫秒时间戳 (SubSecTime / SubSecTimeOriginal / SubSecTimeDigitized)
+                0x9290 | 0x9291 | 0x9292 => {
+                    if summary.sub_sec_time.is_none() {
+                        if let Some(sub) =
+                            Self::read_tiff_ascii(file, tiff_base, count, &entry[8..12], is_le)
+                        {
+                            let clean = sub.trim().to_string();
+                            if !clean.is_empty() {
+                                summary.sub_sec_time = Some(clean);
+                            }
+                        }
+                    }
+                }
                 // 光圈 (FNumber)
                 0x829D => {
                     if let Some((num, den)) =

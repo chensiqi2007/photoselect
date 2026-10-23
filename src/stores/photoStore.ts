@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import type {
   ColorLabel,
   FilterState,
@@ -8,6 +9,10 @@ import type {
   ScanResult,
   ViewMode,
   WorkspaceRecord,
+  BurstConfig,
+  BurstCluster,
+  SimilarityConfig,
+  SubjectCluster,
 } from "../types/photo";
 import type { DetectedFace, DetectedEye } from "../types/eye";
 import { detectEyesInImage } from "../utils/eyeDetector";
@@ -89,6 +94,9 @@ export const usePhotoStore = defineStore("photo", {
     // 系统外观模式 (dark / light)
     theme: (typeof localStorage !== "undefined" && (localStorage.getItem("photoselect_theme") as "dark" | "light")) || "dark",
 
+    // 页面与字体缩放级别 (100% / 125% / 150% / 200%)
+    uiScale: (typeof localStorage !== "undefined" && parseInt(localStorage.getItem("photoselect_ui_scale") || "100", 10)) || 100,
+
     // 智能人眼对焦与人脸识别检测 (Narrative Select 级 Eye AF 引擎)
     eyeAfEnabled: (typeof localStorage !== "undefined" && localStorage.getItem("photoselect_eye_af") !== "false"), // 是否开启人眼识别
     eyePanelOpen: (typeof localStorage !== "undefined" && localStorage.getItem("photoselect_eye_panel") !== "false"), // 是否展开人眼特写检视面板
@@ -96,12 +104,24 @@ export const usePhotoStore = defineStore("photo", {
     isDetectingEyes: false as boolean,
     eyeDetectionFailed: false as boolean,
     targetLockOnEye: null as { x: number; y: number } | null, // 智能吸附定位目标
+
+    // 毫秒级高速连拍聚合实体状态
+    burstClusters: [] as BurstCluster[],
+    isBurstClustering: false as boolean,
+
+    // 严格去重与同主体视觉聚类状态
+    subjectClusters: [] as SubjectCluster[],
+    isAnalyzingSimilarity: false as boolean,
+
+    // 分组折叠选片视图 (Group Stacking / Folding View)
+    isGroupFoldedMode: (typeof localStorage !== "undefined" && localStorage.getItem("photoselect_group_folded") === "true") as boolean,
+    expandedGroupIds: [] as string[],
   }),
 
   getters: {
     /// 根据当前所有过滤条件得出的动态展示序列 (秒级响应)
     filteredGroups(state): PhotoGroup[] {
-      return state.groups.filter((g) => {
+      const baseFiltered = state.groups.filter((g) => {
         // 1. 最低星级过滤
         if (g.rating < state.filter.min_rating) return false;
 
@@ -134,6 +154,59 @@ export const usePhotoStore = defineStore("photo", {
             return true;
         }
       });
+
+      // 如果未开启分组折叠模式，直接平铺展示全量照片
+      if (!state.isGroupFoldedMode) {
+        return baseFiltered;
+      }
+
+      // 分组折叠逻辑: 未展开的组仅展示其 Best Shot 最佳代表帧 (若无可退化为组内第一张)
+      const groupRepPhotoIdMap = new Map<string, string>();
+      for (const photo of baseFiltered) {
+        const gid = photo.burst_group_id || photo.subject_group_id;
+        if (!gid) continue;
+        if (!groupRepPhotoIdMap.has(gid)) {
+          groupRepPhotoIdMap.set(gid, photo.id);
+        }
+        if (photo.is_burst_best || photo.is_subject_best) {
+          groupRepPhotoIdMap.set(gid, photo.id);
+        }
+      }
+
+      return baseFiltered.filter((photo) => {
+        const gid = photo.burst_group_id || photo.subject_group_id;
+        if (!gid) return true; // 独立散片正常显示
+        // 如果该组已被展开，显示组内全部成员照片
+        if (state.expandedGroupIds.includes(gid)) {
+          return true;
+        }
+        // 如果处于折叠叠放状态，仅展示被选为代表帧的照片
+        return photo.id === groupRepPhotoIdMap.get(gid);
+      });
+    },
+
+    /// 聚合组元数据映射表，方便网格卡片即时获取叠放张数与展开状态
+    groupInfoMap(state): Map<string, { count: number; bestId: string | null; isExpanded: boolean; type: "burst" | "subject" }> {
+      const map = new Map<string, { count: number; bestId: string | null; isExpanded: boolean; type: "burst" | "subject" }>();
+      for (const bc of state.burstClusters) {
+        map.set(bc.group_id, {
+          count: bc.count,
+          bestId: bc.best_photo_id,
+          isExpanded: state.expandedGroupIds.includes(bc.group_id),
+          type: "burst",
+        });
+      }
+      for (const sc of state.subjectClusters) {
+        if (!map.has(sc.group_id)) {
+          map.set(sc.group_id, {
+            count: sc.count,
+            bestId: sc.best_photo_id,
+            isExpanded: state.expandedGroupIds.includes(sc.group_id),
+            type: "subject",
+          });
+        }
+      }
+      return map;
     },
 
     /// 当前选中的高亮照片实体 (在对比模式中作为基准图 A)
@@ -276,6 +349,9 @@ export const usePhotoStore = defineStore("photo", {
 
         this.currentFolderPath = result.folder_path;
         this.groups = result.groups;
+        this.burstClusters = [];
+        this.subjectClusters = [];
+        this.expandedGroupIds = [];
         this.selectedIndex = 0;
         await this.loadRecentWorkspaces();
       } catch (err) {
@@ -589,6 +665,79 @@ export const usePhotoStore = defineStore("photo", {
       }
     },
 
+    /// 页面与字体缩放级别设定 (100 | 125 | 150 | 200) 并持久化
+    setUiScale(scale: number) {
+      const allowedScales = [100, 125, 150, 200];
+      const target = allowedScales.includes(scale) ? scale : 100;
+      this.uiScale = target;
+      try {
+        localStorage.setItem("photoselect_ui_scale", String(target));
+      } catch (e) {
+        // ignore
+      }
+      this.applyUiScale(target);
+    },
+
+    /// 将缩放比例应用到视图 (支持 Tauri WebView2 原生 setZoom 与 CSS zoom 双模自适应)
+    async applyUiScale(scale: number) {
+      const factor = scale / 100;
+      let nativeApplied = false;
+      try {
+        const webview = getCurrentWebview();
+        if (webview && typeof webview.setZoom === "function") {
+          await webview.setZoom(factor);
+          nativeApplied = true;
+        }
+      } catch (e) {
+        // 在非 Tauri Webview 环境静默回退
+      }
+
+      if (typeof document !== "undefined") {
+        if (!nativeApplied) {
+          (document.documentElement.style as any).zoom = `${factor}`;
+        } else {
+          // 原生 webview 已缩放，重置 CSS zoom 避免二次放大
+          (document.documentElement.style as any).zoom = "1";
+        }
+        document.documentElement.style.setProperty("--app-ui-scale", `${factor}`);
+        document.documentElement.setAttribute("data-ui-scale", `${scale}`);
+
+        // 关键：通知所有 Canvas / WebGL 视口与虚拟列表重算尺寸
+        window.dispatchEvent(new Event("resize"));
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 50);
+      }
+    },
+
+    /// 初始化 UI 缩放比例
+    initUiScale() {
+      this.applyUiScale(this.uiScale);
+    },
+
+    /// 快捷键步进放大 (100% -> 125% -> 150% -> 200%)
+    zoomInUiScale() {
+      const scales = [100, 125, 150, 200];
+      const currentIdx = scales.indexOf(this.uiScale);
+      if (currentIdx < scales.length - 1) {
+        this.setUiScale(scales[currentIdx + 1]);
+      }
+    },
+
+    /// 快捷键步进缩小 (200% -> 150% -> 125% -> 100%)
+    zoomOutUiScale() {
+      const scales = [100, 125, 150, 200];
+      const currentIdx = scales.indexOf(this.uiScale);
+      if (currentIdx > 0) {
+        this.setUiScale(scales[currentIdx - 1]);
+      }
+    },
+
+    /// 快捷键重置为 100%
+    resetUiScale() {
+      this.setUiScale(100);
+    },
+
     /// 切换人眼对焦识别开关并持久化
     toggleEyeAf() {
       this.eyeAfEnabled = !this.eyeAfEnabled;
@@ -674,6 +823,170 @@ export const usePhotoStore = defineStore("photo", {
     lockOnEye(eye: DetectedEye | null) {
       if (!eye) return;
       this.targetLockOnEye = { x: eye.x, y: eye.y };
+    },
+
+    /// 触发高速连拍动作聚合识别 (毫秒级与文件名序列混合判定，标定 Best Shot)
+    async clusterBursts(config?: BurstConfig) {
+      if (!this.groups.length) return [];
+      this.isBurstClustering = true;
+      try {
+        const [updatedPhotos, clusters] = await invoke<[PhotoGroup[], BurstCluster[]]>(
+          "cluster_burst_photos",
+          {
+            photos: this.groups,
+            config: config || { threshold_ms: 500, min_burst_count: 2, auto_flag_best: false },
+          }
+        );
+        this.groups = updatedPhotos;
+        this.burstClusters = clusters;
+        return clusters;
+      } catch (err) {
+        console.error("连拍聚合识别失败:", err);
+        throw err;
+      } finally {
+        this.isBurstClustering = false;
+      }
+    },
+
+    /// 为指定单张照片在其原图同目录下写入/更新行业标准 XMP 侧车文件 (含星级、旗标、色彩标签及生态关键字)
+    async writePhotoXmp(photo?: PhotoGroup | null, extraKeywords?: string[]): Promise<string | null> {
+      const target = photo || this.currentPhoto;
+      if (!target) return null;
+      try {
+        const xmpPath = await invoke<string>("write_photo_xmp", {
+          photo: target,
+          extraKeywords: extraKeywords || null,
+        });
+        target.xmp_sidecar = xmpPath;
+        return xmpPath;
+      } catch (err) {
+        console.error("写入 XMP 侧车文件失败:", err);
+        throw err;
+      }
+    },
+
+    /// 为指定照片更新标签/关键字 (持久化至 SQLite)
+    async updatePhotoTags(photo: PhotoGroup | null, tags: string[]) {
+      if (!photo) return;
+      photo.tags = [...tags];
+      const sig = `${photo.folder_path.replace(/\\/g, "/")}:${photo.base_name.toUpperCase()}`;
+      try {
+        await invoke("update_photo_tags", {
+          signature: sig,
+          baseName: photo.base_name,
+          folderPath: photo.folder_path,
+          tags,
+        });
+      } catch (err) {
+        console.error("更新照片标签持久化失败:", err);
+      }
+    },
+
+    /// 为指定照片添加标签 (若不存在)
+    async addPhotoTag(photo: PhotoGroup | null, tag: string) {
+      if (!photo || !tag.trim()) return;
+      const cleanTag = tag.trim();
+      const currentTags = photo.tags || [];
+      if (!currentTags.includes(cleanTag)) {
+        await this.updatePhotoTags(photo, [...currentTags, cleanTag]);
+      }
+    },
+
+    /// 为指定照片移除标签
+    async removePhotoTag(photo: PhotoGroup | null, tag: string) {
+      if (!photo) return;
+      const currentTags = photo.tags || [];
+      const filtered = currentTags.filter((t) => t !== tag);
+      await this.updatePhotoTags(photo, filtered);
+    },
+
+    /// 切换「分组折叠选片」视图模式
+    toggleGroupFoldedMode(enabled?: boolean) {
+      const target = typeof enabled === "boolean" ? enabled : !this.isGroupFoldedMode;
+      this.isGroupFoldedMode = target;
+      try {
+        localStorage.setItem("photoselect_group_folded", target ? "true" : "false");
+      } catch {}
+    },
+
+    /// 展开或折叠单个连拍/同主体动作组
+    toggleGroupExpanded(groupId: string) {
+      const idx = this.expandedGroupIds.indexOf(groupId);
+      if (idx >= 0) {
+        this.expandedGroupIds.splice(idx, 1);
+      } else {
+        this.expandedGroupIds.push(groupId);
+      }
+    },
+
+    /// 展开全部组
+    expandAllGroups() {
+      const allGroupIds = new Set<string>();
+      for (const g of this.groups) {
+        const gid = g.burst_group_id || g.subject_group_id;
+        if (gid) allGroupIds.add(gid);
+      }
+      this.expandedGroupIds = Array.from(allGroupIds);
+    },
+
+    /// 折叠全部组
+    collapseAllGroups() {
+      this.expandedGroupIds = [];
+    },
+
+    /// 触发严格去重与同主体视觉聚类分析 (基于 dHash 算法与滑动时序窗口)
+    async detectSimilarityAndDuplicates(config?: SimilarityConfig) {
+      if (!this.groups.length) return [];
+      this.isAnalyzingSimilarity = true;
+      try {
+        const [updatedPhotos, clusters] = await invoke<[PhotoGroup[], SubjectCluster[]]>(
+          "detect_similarity_and_duplicates",
+          {
+            photos: this.groups,
+            config: config || {
+              dedup_threshold: 3,
+              subject_threshold: 12,
+              time_window_secs: 60,
+              min_group_count: 2,
+              auto_reject_duplicates: false,
+              auto_flag_best: false,
+            },
+          }
+        );
+        this.groups = updatedPhotos;
+        this.subjectClusters = clusters;
+        return clusters;
+      } catch (err) {
+        console.error("相似度分析与去重失败:", err);
+        throw err;
+      } finally {
+        this.isAnalyzingSimilarity = false;
+      }
+    },
+
+    /// 核心暗房高能动作：保留组内最佳帧 (Pick: 1)，并自动将组内其余所有候选过渡帧标记为淘汰 (Reject: -1)
+    async pickBestAndRejectRest(groupId: string) {
+      const memberPhotos = this.groups.filter(
+        (g) => g.burst_group_id === groupId || g.subject_group_id === groupId
+      );
+      if (memberPhotos.length === 0) return;
+
+      const bestPhoto =
+        memberPhotos.find((p) => p.is_burst_best || p.is_subject_best) || memberPhotos[0];
+
+      const records: [string, string, string, number, FlagStatus, ColorLabel][] = [];
+      for (const p of memberPhotos) {
+        const flag: FlagStatus = p.id === bestPhoto.id ? 1 : -1;
+        p.flag = flag;
+        const sig = `${p.folder_path.replace(/\\/g, "/")}:${p.base_name.toUpperCase()}`;
+        records.push([sig, p.base_name, p.folder_path, p.rating, flag, p.color_label]);
+      }
+
+      try {
+        await invoke("batch_update_photo_status", { records });
+      } catch (err) {
+        console.error("批量更新组内打标失败:", err);
+      }
     },
   },
 });

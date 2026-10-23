@@ -1,7 +1,8 @@
 {
   "name": "photoselect-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond-level RAW+JPG Culling Platform",
+  "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
   "scripts": {

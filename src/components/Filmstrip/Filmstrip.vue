@@ -50,20 +50,28 @@ const colorClassMap: Record<string, string> = {
 
 <template>
   <div
-    class="h-[130px] flex-shrink-0 bg-[#141414] border-t border-[#2A2A2A] flex flex-col select-none overflow-hidden transition-colors"
+    class="h-[132px] flex-shrink-0 bg-[#16161A] border-t border-[#26262C] flex flex-col select-none overflow-hidden transition-colors"
   >
     <!-- 胶片栏顶部微信息条 -->
     <div
-      class="h-5 px-3 bg-[#181818] border-b border-[#222222] flex items-center justify-between text-[10px] text-[#8C8C8C] font-mono transition-colors"
+      class="h-6 px-3.5 bg-[#131316] border-b border-[#222228] flex items-center justify-between text-[11px] text-[#8E8E98] font-mono transition-colors"
     >
-      <div class="flex items-center space-x-2">
-        <span>当前序列: {{ store.filteredGroups.length > 0 ? store.selectedIndex + 1 : 0 }} / {{ store.filteredGroups.length }}</span>
-        <span v-if="store.currentPhoto" class="text-[#E5E5E5] font-semibold">
+      <div class="flex items-center space-x-2.5">
+        <span class="text-[#71717A]">序列:</span>
+        <span class="font-bold text-[#F4F4F5]">
+          {{ store.filteredGroups.length > 0 ? store.selectedIndex + 1 : 0 }} / {{ store.filteredGroups.length }}
+        </span>
+        <span v-if="store.currentPhoto" class="text-white/30">|</span>
+        <span v-if="store.currentPhoto" class="text-[#F4F4F5] font-semibold truncate max-w-[240px]">
           {{ store.currentPhoto.base_name }}
         </span>
       </div>
       <div class="flex items-center space-x-3">
-        <span v-if="store.currentPhoto">
+        <span
+          v-if="store.currentPhoto"
+          class="px-1.5 py-0.2 rounded text-[10px] font-bold"
+          :class="isRawPlusJpg(store.currentPhoto) ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-[#A1A1AA]'"
+        >
           {{ getBadgeLabel(store.currentPhoto) }}
         </span>
       </div>
@@ -72,30 +80,30 @@ const colorClassMap: Record<string, string> = {
     <!-- 横向胶片卡片流 -->
     <div
       ref="filmstripContainer"
-      class="flex-1 flex items-center overflow-x-auto px-2 py-1 space-x-2 scroll-smooth"
+      class="flex-1 flex items-center overflow-x-auto px-2.5 py-1.5 space-x-2 scroll-smooth"
     >
       <div
         v-for="(photo, index) in store.filteredGroups"
         :key="photo.id"
         @click="(e) => store.selectIndex(index, e.ctrlKey || e.metaKey)"
         :class="[
-          'relative h-[96px] w-[96px] flex-shrink-0 rounded bg-[#1C1C1C] cursor-pointer overflow-hidden transition-all duration-150 ease-linear flex flex-col justify-between',
+          'relative h-[94px] w-[94px] flex-shrink-0 rounded-lg bg-[#1A1A20] border cursor-pointer overflow-hidden transition-all duration-150 ease-out flex flex-col justify-between shadow-sm',
           index === store.selectedIndex
             ? (store.viewMode === 'compare' || store.compareIndex !== null)
-              ? 'ring-2 ring-blue-500 scale-[1.02] shadow-xl z-10'
-              : 'ring-2 ring-[#E5E5E5] scale-[1.02] shadow-xl z-10'
+              ? 'ring-2 ring-blue-500 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(59,130,246,0.35)] z-10'
+              : 'ring-2 ring-sky-400 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(56,189,248,0.35)] z-10'
             : index === store.compareIndex
-            ? 'ring-2 ring-emerald-500 scale-[1.02] shadow-xl z-10'
-            : 'hover:ring-1 hover:ring-[#444444] opacity-85 hover:opacity-100',
+            ? 'ring-2 ring-emerald-400 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(52,211,153,0.35)] z-10'
+            : 'border-[#2A2A34] hover:border-[#4A4A58] opacity-80 hover:opacity-100 hover:scale-[1.01]',
           colorClassMap[photo.color_label] || '',
         ]"
       >
         <!-- 淘汰状态下的全卡半透明黑遮罩 -->
         <div
           v-if="photo.flag === -1"
-          class="absolute inset-0 bg-black/60 z-10 flex items-center justify-center pointer-events-none"
+          class="absolute inset-0 bg-black/65 z-10 flex items-center justify-center pointer-events-none backdrop-blur-[0.5px]"
         >
-          <X class="w-8 h-8 text-rose-500/80 stroke-[2.5]" />
+          <X class="w-8 h-8 text-rose-500/90 stroke-[2.5]" />
         </div>
 
         <!-- 缩略图主体 (极速 20KB 缩略图流，避免 45MP 解压内存爆炸) -->
@@ -109,40 +117,57 @@ const colorClassMap: Record<string, string> = {
 
         <!-- 卡片左上角序号与对比角色徽章 -->
         <div class="relative z-20 p-1 flex items-start justify-between">
-          <div class="flex items-center space-x-1">
-            <span class="text-[9px] font-mono font-bold text-white/90 bg-black/60 px-1 rounded backdrop-blur-xs">
+          <div class="flex items-center space-x-0.5">
+            <span class="text-[9px] font-mono font-bold text-white/90 bg-black/70 px-1 py-0.2 rounded backdrop-blur-sm">
               {{ index + 1 }}
             </span>
             <span
               v-if="index === store.selectedIndex && (store.viewMode === 'compare' || store.compareIndex !== null)"
-              class="text-[8px] font-mono font-bold px-1 rounded bg-blue-600 text-white shadow"
+              class="text-[8px] font-mono font-bold px-1 rounded bg-blue-600 text-white shadow-sm"
             >
               A
             </span>
             <span
               v-else-if="index === store.compareIndex"
-              class="text-[8px] font-mono font-bold px-1 rounded bg-emerald-600 text-white shadow"
+              class="text-[8px] font-mono font-bold px-1 rounded bg-emerald-600 text-white shadow-sm"
             >
               B
+            </span>
+            <span
+              v-if="photo.burst_group_id || photo.subject_group_id"
+              :class="[
+                'text-[8px] font-mono font-bold px-1 rounded shadow-sm',
+                (photo.is_burst_best || photo.is_subject_best) ? 'bg-amber-400 text-black font-extrabold' : 'bg-purple-600/90 text-white'
+              ]"
+              :title="(photo.is_burst_best || photo.is_subject_best) ? '推荐最佳代表帧' : `组 ${photo.burst_group_id || photo.subject_group_id}`"
+            >
+              {{ (photo.is_burst_best || photo.is_subject_best) ? '★' : '⧉' }}
+            </span>
+            <span
+              v-if="photo.is_duplicate"
+              class="text-[8px] font-mono font-bold px-0.5 rounded bg-rose-600/90 text-white shadow-sm"
+              title="重复雷同帧"
+            >
+              DUP
             </span>
           </div>
 
           <!-- 右上角旗标徽章 -->
-          <div v-if="photo.flag === 1" class="bg-emerald-500 text-white rounded p-0.5 shadow">
+          <div v-if="photo.flag === 1" class="bg-emerald-500 text-white rounded p-0.5 shadow-md">
             <Check class="w-2.5 h-2.5 stroke-[3]" />
           </div>
         </div>
 
         <!-- 卡片底部格式徽章与星级点阵 -->
-        <div class="relative z-20 p-1 flex items-end justify-between bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div class="relative z-20 p-1 flex items-end justify-between bg-gradient-to-t from-black/85 via-black/45 to-transparent">
           <span
             :class="[
               'text-[8px] font-mono font-bold px-1 rounded',
               isRawPlusJpg(photo)
-                ? 'bg-blue-600/80 text-white'
+                ? 'bg-blue-600/90 text-white'
                 : isRawOnly(photo)
-                ? 'bg-amber-600/80 text-white'
-                : 'bg-zinc-700/80 text-zinc-200',
+                ? 'bg-amber-600/90 text-white'
+                : 'bg-zinc-700/90 text-zinc-200',
             ]"
           >
             {{ getBadgeLabel(photo) }}
@@ -161,9 +186,9 @@ const colorClassMap: Record<string, string> = {
 
       <div
         v-if="store.filteredGroups.length === 0"
-        class="w-full text-center text-xs text-[#4D4D4D] italic py-8"
+        class="w-full text-center text-xs text-[#55555C] italic py-8 font-medium"
       >
-        暂无符合筛选条件的照片
+        暂无符合当前筛选条件的照片
       </div>
     </div>
   </div>

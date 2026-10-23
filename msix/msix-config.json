@@ -4,7 +4,7 @@
   "PackageDisplayName": "PhotoSelect",
   "PublisherId": "CN=8BABBFD4-2819-444B-9628-8A6896C1313E",
   "PublisherDisplayName": "URL Time",
-  "Version": "1.0.0.0",
+  "Version": "1.1.0.0",
   "Description": "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond-level RAW+JPG Culling Platform",
   "BackgroundColor": "#121212",
   "Executable": "photoselect-desktop.exe"

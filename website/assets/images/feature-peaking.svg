@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="peakingBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141822"/>
+      <stop offset="100%" stop-color="#090b10"/>
+    </linearGradient>
+    <filter id="neonPeakingGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <rect width="600" height="400" rx="16" fill="url(#peakingBg)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Left: Original Micro Blur / Right: WebGL 2.0 Peaking Contrast -->
+  <g transform="translate(40, 45)">
+    <text x="0" y="0" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="12" font-weight="700" letter-spacing="1.5">WEBGL 2.0 FRAGMENT SHADER · NATIVE FOCUS PEAKING</text>
+  </g>
+
+  <!-- Macro Portrait & Eye Focus Canvas -->
+  <g transform="translate(50, 75)">
+    <!-- Canvas Box -->
+    <rect x="0" y="0" width="500" height="280" rx="10" fill="#1b202c" stroke="#334155" stroke-width="1"/>
+
+    <!-- Subject Eyelash & Iris Illustration -->
+    <!-- Iris base -->
+    <ellipse cx="250" cy="140" rx="90" ry="85" fill="#1e3a5f"/>
+    <ellipse cx="250" cy="140" rx="55" ry="55" fill="#0c4a6e"/>
+    <circle cx="250" cy="140" r="32" fill="#020617"/>
+    <!-- Iris Specular Catchlight -->
+    <circle cx="265" cy="125" r="10" fill="#f8fafc"/>
+    <circle cx="272" cy="120" r="4" fill="#ffffff"/>
+
+    <!-- Eye Eyelids -->
+    <path d="M 120 140 Q 250 50 380 140" fill="none" stroke="#475569" stroke-width="6"/>
+    <path d="M 120 140 Q 250 215 380 140" fill="none" stroke="#334155" stroke-width="4"/>
+
+    <!-- Focus Peaking Glowing Edges (Cyan and Emerald Green Neon Lines) -->
+    <g filter="url(#neonPeakingGlow)">
+      <!-- Eyelashes in Sharp Focus -->
+      <path d="M 160 115 Q 150 90 140 70" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 190 100 Q 185 75 180 50" stroke="#00f2fe" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 220 90 Q 220 65 220 40" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 250 85 Q 255 60 260 35" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 280 88 Q 290 62 300 42" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 310 95 Q 325 72 340 55" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 340 110 Q 360 90 375 75" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Pupil & Catchlight Edge Highlighting -->
+      <circle cx="250" cy="140" r="33" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 2"/>
+      <circle cx="265" cy="125" r="11" fill="none" stroke="#00f2fe" stroke-width="2"/>
+
+      <!-- Iris Fiber Rings in Crisp Focus -->
+      <path d="M 220 120 Q 235 110 250 110 Q 265 110 280 120" fill="none" stroke="#00f2fe" stroke-width="1.8"/>
+      <path d="M 215 155 Q 235 168 250 168 Q 265 168 285 155" fill="none" stroke="#00f2fe" stroke-width="1.8"/>
+    </g>
+
+    <!-- Interactive Status HUD Overlay -->
+    <g transform="translate(20, 20)">
+      <rect x="0" y="0" width="130" height="28" rx="5" fill="#090d16" fill-opacity="0.9" stroke="#10b981" stroke-width="1"/>
+      <circle cx="14" cy="14" r="5" fill="#10b981"/>
+      <text x="26" y="18" fill="#34d399" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="bold">GPU 峰值对焦 [开]</text>
+    </g>
+
+    <g transform="translate(350, 20)">
+      <rect x="0" y="0" width="130" height="28" rx="5" fill="#090d16" fill-opacity="0.9" stroke="#38bdf8" stroke-width="1"/>
+      <text x="65" y="18" fill="#38bdf8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11" font-weight="bold" text-anchor="middle">100% 真实物理像素</text>
+    </g>
+
+    <g transform="translate(20, 235)">
+      <text x="0" y="0" fill="#94a3b8" font-family="-apple-system,BlinkMacSystemFont,Segoe UI" font-size="11">💡 毫秒级着色器计算，无需逐张点开放大，焦点落在哪一目了然</text>
+    </g>
+  </g>
+</svg>

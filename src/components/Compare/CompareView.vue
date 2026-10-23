@@ -110,25 +110,26 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
 
 <template>
   <div
-    class="w-full h-full flex flex-col bg-[#161616] select-none overflow-hidden transition-colors"
+    class="w-full h-full flex flex-col bg-[#0E0E11] select-none overflow-hidden transition-colors"
     @mousemove="handleMouseMove"
     @mouseup="handleMouseUp"
     @mouseleave="handleMouseUp"
   >
-    <!-- 顶部对比控制条 (38px) -->
+    <!-- 顶部对比控制条 (40px) -->
     <div
-      class="h-9 px-4 bg-[#1C1C1C] border-b border-[#2A2A2A] flex items-center justify-between text-xs flex-shrink-0 z-20 transition-colors"
+      class="h-10 px-4 bg-[#141418]/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between text-xs flex-shrink-0 z-20 transition-colors"
     >
       <!-- 左侧: 图 A 简标与互换 -->
-      <div class="flex items-center space-x-2">
-        <span class="px-2 py-0.5 rounded bg-blue-600/30 border border-blue-500/40 text-blue-300 font-mono text-[11px] font-bold">
-          [A] {{ t.compare.refPhoto }}: {{ photoA ? photoA.base_name : "--" }}
+      <div class="flex items-center space-x-2.5">
+        <span class="px-2.5 py-1 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-400 font-mono text-[11px] font-semibold tracking-wide flex items-center gap-1.5 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+          <span>[A] {{ t.compare.refPhoto }}: {{ photoA ? photoA.base_name : "--" }}</span>
         </span>
 
         <!-- 互换位置按钮 [S] -->
         <button
           @click="store.swapComparePhotos"
-          class="flex items-center space-x-1 px-2.5 py-1 rounded bg-[#262626] hover:bg-[#333333] text-[#E5E5E5] border border-[#3A3A3A] transition-all duration-150 ease-linear cursor-pointer font-medium text-[11px] active:scale-95 shadow-sm"
+          class="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[#E5E5E5] border border-white/10 hover:border-white/20 transition-all duration-150 ease-out cursor-pointer font-medium text-[11px] active:scale-95 shadow-sm"
           :title="t.compare.swap"
         >
           <ArrowLeftRight class="w-3.5 h-3.5 text-sky-400" />
@@ -141,7 +142,7 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 留用 A · 淘汰 B -->
         <button
           @click="pickAAndRejectB"
-          class="flex items-center space-x-1 px-2.5 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition-all duration-150 ease-linear cursor-pointer font-medium text-[11px]"
+          class="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-150 ease-out cursor-pointer font-medium text-[11px] shadow-sm hover:shadow-emerald-500/10 active:scale-95"
           :title="t.compare.pickARejectB"
         >
           <Check class="w-3.5 h-3.5 stroke-[2.5]" />
@@ -151,23 +152,23 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 留用 B · 淘汰 A -->
         <button
           @click="pickBAndRejectA"
-          class="flex items-center space-x-1 px-2.5 py-1 rounded bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 transition-all duration-150 ease-linear cursor-pointer font-medium text-[11px]"
+          class="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 hover:border-teal-500/50 transition-all duration-150 ease-out cursor-pointer font-medium text-[11px] shadow-sm hover:shadow-teal-500/10 active:scale-95"
           :title="t.compare.pickBRejectA"
         >
           <Check class="w-3.5 h-3.5 stroke-[2.5]" />
           <span>{{ t.compare.pickBRejectA }}</span>
         </button>
 
-        <div class="h-4 w-[1px] bg-[#333333]"></div>
+        <div class="h-4 w-[1px] bg-white/10 mx-1"></div>
 
         <!-- 双图同步缩放联动切换 -->
         <button
           @click="store.syncCompareZoom = !store.syncCompareZoom"
           :class="[
-            'flex items-center space-x-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors cursor-pointer',
+            'flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all cursor-pointer shadow-sm active:scale-95',
             store.syncCompareZoom
-              ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-              : 'bg-[#222222] border-[#333333] text-[#8C8C8C] hover:text-[#E5E5E5]',
+              ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 shadow-amber-500/10'
+              : 'bg-white/5 border-white/10 text-[#8C8C8C] hover:text-[#E5E5E5] hover:bg-white/10',
           ]"
           :title="store.syncCompareZoom ? t.compare.syncZoom : t.compare.indepZoom"
         >
@@ -178,37 +179,38 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 100% 锐度检查切换 -->
         <button
           @click="toggle100Percent"
-          class="flex items-center space-x-1 px-2 py-1 rounded bg-[#262626] hover:bg-[#333333] text-[#CCCCCC] border border-[#3A3A3A] text-[11px] transition-colors cursor-pointer"
+          class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[#CCCCCC] hover:text-white border border-white/10 hover:border-white/20 text-[11px] transition-all cursor-pointer shadow-sm active:scale-95"
           :title="is100Percent ? t.compare.fitScreen : t.compare.sharpness100"
         >
-          <component :is="is100Percent ? Minimize2 : Maximize2" class="w-3 h-3" />
+          <component :is="is100Percent ? Minimize2 : Maximize2" class="w-3 h-3 text-sky-400" />
           <span>{{ is100Percent ? t.compare.fitScreen : t.compare.sharpness100 }}</span>
         </button>
       </div>
 
       <!-- 右侧: 图 B 简标与操作提示 -->
-      <div class="flex items-center space-x-2">
-        <span class="px-2 py-0.5 rounded bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-mono text-[11px] font-bold">
-          [B] {{ t.compare.candPhoto }}: {{ photoB ? photoB.base_name : "--" }}
+      <div class="flex items-center space-x-2.5">
+        <span class="px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[11px] font-semibold tracking-wide flex items-center gap-1.5 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>[B] {{ t.compare.candPhoto }}: {{ photoB ? photoB.base_name : "--" }}</span>
         </span>
       </div>
     </div>
 
     <!-- 中间: 双图左右并排视口 -->
-    <div class="flex-1 flex overflow-hidden p-2 space-x-2">
+    <div class="flex-1 flex overflow-hidden p-2.5 gap-2.5">
       <!-- 1. 左侧面板: 图 A (参考基准) -->
       <div
-        class="flex-1 relative rounded-xl bg-[#111111] border border-[#2A2A2A] overflow-hidden flex flex-col justify-between"
+        class="flex-1 relative rounded-2xl bg-[#111114] border border-white/10 shadow-2xl overflow-hidden flex flex-col justify-between"
       >
         <!-- 顶部身份浮标 -->
         <div class="absolute top-3 left-3 z-20 flex items-center space-x-2">
-          <span class="px-2 py-1 rounded bg-blue-600 text-white font-mono font-bold text-xs shadow-md">
+          <span class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-mono font-bold text-xs shadow-lg shadow-blue-600/30 tracking-wide">
             {{ t.compare.refPhoto }}
           </span>
-          <span v-if="photoA" class="px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[#E5E5E5] font-mono text-xs border border-[#333333]">
+          <span v-if="photoA" class="px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-xl text-[#E5E5E5] font-mono text-xs border border-white/10 shadow-md">
             {{ photoA.base_name }}
           </span>
-          <span v-if="photoA" class="px-1.5 py-0.5 rounded bg-black/60 text-[10px] font-mono text-blue-300 border border-blue-500/30">
+          <span v-if="photoA" class="px-2 py-0.5 rounded-md bg-blue-500/15 text-[10px] font-mono font-semibold text-blue-300 border border-blue-500/30">
             {{ getBadgeLabel(photoA) }}
           </span>
         </div>
@@ -230,7 +232,7 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
             <img
               :src="store.getPreviewUrl(photoA)"
               alt=""
-              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-2xl"
+              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               draggable="false"
             />
           </div>
@@ -240,10 +242,10 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 淘汰黑遮罩 -->
         <div
           v-if="photoA && photoA.flag === -1"
-          class="absolute inset-0 bg-black/65 z-10 flex items-center justify-center pointer-events-none"
+          class="absolute inset-0 bg-black/70 backdrop-blur-xs z-10 flex items-center justify-center pointer-events-none transition-opacity"
         >
-          <div class="p-4 bg-black/80 rounded-xl border border-rose-500/50 backdrop-blur-md flex items-center space-x-2 text-rose-400">
-            <X class="w-8 h-8 stroke-[2.5]" />
+          <div class="px-5 py-3.5 bg-black/85 rounded-2xl border border-rose-500/50 backdrop-blur-xl flex items-center space-x-2.5 text-rose-400 shadow-2xl shadow-rose-500/20">
+            <X class="w-7 h-7 stroke-[2.5]" />
             <span class="text-xs font-bold uppercase tracking-wider">{{ t.compare.rejectedBadge }}</span>
           </div>
         </div>
@@ -251,17 +253,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 底部照片控制工具栏 -->
         <div
           v-if="photoA"
-          class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-[#333333]"
+          class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl"
         >
           <!-- 旗标 -->
-          <div class="flex items-center space-x-1">
+          <div class="flex items-center space-x-1.5">
             <button
               @click="store.setFlagForPhoto(photoA, 1 as FlagStatus)"
               :class="[
-                'flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer',
+                'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
                 photoA.flag === 1
-                  ? 'bg-emerald-500 text-white shadow'
-                  : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-600/30'
+                  : 'bg-white/5 text-[#8C8C8C] hover:text-[#E5E5E5] hover:bg-white/10 border border-white/5',
               ]"
             >
               <Check class="w-3 h-3 stroke-[3]" />
@@ -270,10 +272,10 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
             <button
               @click="store.setFlagForPhoto(photoA, -1 as FlagStatus)"
               :class="[
-                'flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer',
+                'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
                 photoA.flag === -1
-                  ? 'bg-rose-500 text-white shadow'
-                  : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+                  ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-rose-600/30'
+                  : 'bg-white/5 text-[#8C8C8C] hover:text-[#E5E5E5] hover:bg-white/10 border border-white/5',
               ]"
             >
               <X class="w-3 h-3 stroke-[3]" />
@@ -282,17 +284,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
           </div>
 
           <!-- 星级评分 -->
-          <div class="flex items-center space-x-0.5">
+          <div class="flex items-center space-x-1">
             <button
               v-for="star in 5"
               :key="star"
               @click="store.setRatingForPhoto(photoA, photoA.rating === star ? 0 : star)"
-              class="p-0.5 hover:scale-120 transition-transform cursor-pointer"
+              class="p-0.5 hover:scale-125 transition-transform cursor-pointer"
             >
               <Star
                 :class="[
-                  'w-3.5 h-3.5',
-                  photoA.rating >= star ? 'text-amber-400 fill-amber-400' : 'text-[#444444] hover:text-[#888888]',
+                  'w-4 h-4 transition-colors',
+                  photoA.rating >= star ? 'text-amber-400 fill-amber-400 filter drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]' : 'text-[#444444] hover:text-[#888888]',
                 ]"
               />
             </button>
@@ -305,8 +307,8 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
               :key="color"
               @click="store.setColorLabelForPhoto(photoA, color)"
               :class="[
-                'w-3.5 h-3.5 rounded-full transition-transform cursor-pointer',
-                photoA.color_label === color ? 'ring-2 ring-white scale-125' : 'opacity-70 hover:opacity-100',
+                'w-3.5 h-3.5 rounded-full transition-transform cursor-pointer shadow-sm',
+                photoA.color_label === color ? 'ring-2 ring-white scale-125 shadow-lg' : 'opacity-70 hover:opacity-100 hover:scale-110',
                 color === 'red' ? 'bg-[#EF4444]' : '',
                 color === 'yellow' ? 'bg-[#F59E0B]' : '',
                 color === 'green' ? 'bg-[#10B981]' : '',
@@ -320,17 +322,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
 
       <!-- 2. 右侧面板: 图 B (候选对比) -->
       <div
-        class="flex-1 relative rounded-xl bg-[#111111] border border-[#2A2A2A] overflow-hidden flex flex-col justify-between"
+        class="flex-1 relative rounded-2xl bg-[#111114] border border-white/10 shadow-2xl overflow-hidden flex flex-col justify-between"
       >
         <!-- 顶部身份浮标 -->
         <div class="absolute top-3 left-3 z-20 flex items-center space-x-2">
-          <span class="px-2 py-1 rounded bg-emerald-600 text-white font-mono font-bold text-xs shadow-md">
+          <span class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-mono font-bold text-xs shadow-lg shadow-emerald-600/30 tracking-wide">
             {{ t.compare.candPhoto }}
           </span>
-          <span v-if="photoB" class="px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[#E5E5E5] font-mono text-xs border border-[#333333]">
+          <span v-if="photoB" class="px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-xl text-[#E5E5E5] font-mono text-xs border border-white/10 shadow-md">
             {{ photoB.base_name }}
           </span>
-          <span v-if="photoB" class="px-1.5 py-0.5 rounded bg-black/60 text-[10px] font-mono text-emerald-300 border border-emerald-500/30">
+          <span v-if="photoB" class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-[10px] font-mono font-semibold text-emerald-300 border border-emerald-500/30">
             {{ getBadgeLabel(photoB) }}
           </span>
         </div>
@@ -352,7 +354,7 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
             <img
               :src="store.getPreviewUrl(photoB)"
               alt=""
-              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-2xl"
+              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               draggable="false"
             />
           </div>
@@ -362,10 +364,10 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 淘汰黑遮罩 -->
         <div
           v-if="photoB && photoB.flag === -1"
-          class="absolute inset-0 bg-black/65 z-10 flex items-center justify-center pointer-events-none"
+          class="absolute inset-0 bg-black/70 backdrop-blur-xs z-10 flex items-center justify-center pointer-events-none transition-opacity"
         >
-          <div class="p-4 bg-black/80 rounded-xl border border-rose-500/50 backdrop-blur-md flex items-center space-x-2 text-rose-400">
-            <X class="w-8 h-8 stroke-[2.5]" />
+          <div class="px-5 py-3.5 bg-black/85 rounded-2xl border border-rose-500/50 backdrop-blur-xl flex items-center space-x-2.5 text-rose-400 shadow-2xl shadow-rose-500/20">
+            <X class="w-7 h-7 stroke-[2.5]" />
             <span class="text-xs font-bold uppercase tracking-wider">{{ t.compare.rejectedBadge }}</span>
           </div>
         </div>
@@ -373,17 +375,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
         <!-- 底部照片控制工具栏 -->
         <div
           v-if="photoB"
-          class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between px-3 py-2 rounded-lg bg-black/75 backdrop-blur-md border border-[#333333]"
+          class="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between px-3.5 py-2 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl"
         >
           <!-- 旗标 -->
-          <div class="flex items-center space-x-1">
+          <div class="flex items-center space-x-1.5">
             <button
               @click="store.setFlagForPhoto(photoB, 1 as FlagStatus)"
               :class="[
-                'flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer',
+                'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
                 photoB.flag === 1
-                  ? 'bg-emerald-500 text-white shadow'
-                  : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-600/30'
+                  : 'bg-white/5 text-[#8C8C8C] hover:text-[#E5E5E5] hover:bg-white/10 border border-white/5',
               ]"
             >
               <Check class="w-3 h-3 stroke-[3]" />
@@ -392,10 +394,10 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
             <button
               @click="store.setFlagForPhoto(photoB, -1 as FlagStatus)"
               :class="[
-                'flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-semibold transition-all cursor-pointer',
+                'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
                 photoB.flag === -1
-                  ? 'bg-rose-500 text-white shadow'
-                  : 'bg-[#262626] text-[#8C8C8C] hover:text-[#E5E5E5]',
+                  ? 'bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-rose-600/30'
+                  : 'bg-white/5 text-[#8C8C8C] hover:text-[#E5E5E5] hover:bg-white/10 border border-white/5',
               ]"
             >
               <X class="w-3 h-3 stroke-[3]" />
@@ -404,17 +406,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
           </div>
 
           <!-- 星级评分 -->
-          <div class="flex items-center space-x-0.5">
+          <div class="flex items-center space-x-1">
             <button
               v-for="star in 5"
               :key="star"
               @click="store.setRatingForPhoto(photoB, photoB.rating === star ? 0 : star)"
-              class="p-0.5 hover:scale-120 transition-transform cursor-pointer"
+              class="p-0.5 hover:scale-125 transition-transform cursor-pointer"
             >
               <Star
                 :class="[
-                  'w-3.5 h-3.5',
-                  photoB.rating >= star ? 'text-amber-400 fill-amber-400' : 'text-[#444444] hover:text-[#888888]',
+                  'w-4 h-4 transition-colors',
+                  photoB.rating >= star ? 'text-amber-400 fill-amber-400 filter drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]' : 'text-[#444444] hover:text-[#888888]',
                 ]"
               />
             </button>
@@ -427,8 +429,8 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
               :key="color"
               @click="store.setColorLabelForPhoto(photoB, color)"
               :class="[
-                'w-3.5 h-3.5 rounded-full transition-transform cursor-pointer',
-                photoB.color_label === color ? 'ring-2 ring-white scale-125' : 'opacity-70 hover:opacity-100',
+                'w-3.5 h-3.5 rounded-full transition-transform cursor-pointer shadow-sm',
+                photoB.color_label === color ? 'ring-2 ring-white scale-125 shadow-lg' : 'opacity-70 hover:opacity-100 hover:scale-110',
                 color === 'red' ? 'bg-[#EF4444]' : '',
                 color === 'yellow' ? 'bg-[#F59E0B]' : '',
                 color === 'green' ? 'bg-[#10B981]' : '',
@@ -446,10 +448,10 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
 
     <!-- 底部选片提示微条 -->
     <div
-      class="h-6 px-4 bg-[#141414] border-t border-[#222222] flex items-center justify-between text-[11px] text-[#777777] font-mono transition-colors"
+      class="h-6 px-4 bg-[#121215] border-t border-white/5 flex items-center justify-between text-[11px] text-[#71717A] font-mono transition-colors"
     >
       <div class="flex items-center space-x-1.5">
-        <Info class="w-3 h-3 text-sky-400" />
+        <Info class="w-3.5 h-3.5 text-sky-400" />
         <span>{{ t.compare.compareTip }}</span>
       </div>
       <div>

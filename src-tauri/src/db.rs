@@ -62,6 +62,9 @@ impl Database {
             "#,
         )?;
 
+        // 动态增加 tags 字段支持生态与通用关键字 (若已存在则忽略)
+        let _ = conn.execute("ALTER TABLE photo_metadata ADD COLUMN tags TEXT DEFAULT ''", []);
+
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),
             db_path,
@@ -299,6 +302,30 @@ impl Database {
         Ok(())
     }
 
+    /// 更新照片的关键字与生态标签 (保留既有星级、旗标与色标)
+    pub fn update_tags(
+        &self,
+        file_signature: &str,
+        base_name: &str,
+        folder_path: &str,
+        tags: &[String],
+    ) -> Result<()> {
+        let norm_folder = folder_path.replace('\\', "/");
+        let tags_json = serde_json::to_string(tags).unwrap_or_else(|_| "[]".to_string());
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            r#"
+            INSERT INTO photo_metadata (file_signature, base_name, folder_path, rating, flag, color_label, tags, updated_at)
+            VALUES (?1, ?2, ?3, 0, 0, 'none', ?4, CURRENT_TIMESTAMP)
+            ON CONFLICT(file_signature) DO UPDATE SET
+                tags = excluded.tags,
+                updated_at = CURRENT_TIMESTAMP
+            "#,
+            params![file_signature, base_name, norm_folder, tags_json],
+        )?;
+        Ok(())
+    }
+
     /// 查询指定物理目录下所有已保存的照片状态
     /// 自动容错匹配正斜杠与反斜杠路径
     pub fn get_metadata_for_folder(
@@ -309,7 +336,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
             r#"
-            SELECT file_signature, base_name, folder_path, rating, flag, color_label, updated_at
+            SELECT file_signature, base_name, folder_path, rating, flag, color_label, updated_at, tags
             FROM photo_metadata
             WHERE folder_path = ?1 OR folder_path = ?2
             "#,
@@ -317,6 +344,12 @@ impl Database {
 
         let alt_folder = folder_path.replace('/', "\\");
         let rows = stmt.query_map(params![norm_folder, alt_folder], |row| {
+            let tags_str: Option<String> = row.get(7).ok();
+            let tags: Vec<String> = tags_str
+                .filter(|s| !s.trim().is_empty())
+                .and_then(|s| serde_json::from_str(&s).ok())
+                .unwrap_or_default();
+
             Ok(PhotoMetadataRecord {
                 file_signature: row.get(0)?,
                 base_name: row.get(1)?,
@@ -324,6 +357,7 @@ impl Database {
                 rating: row.get(3)?,
                 flag: row.get(4)?,
                 color_label: row.get(5)?,
+                tags,
                 updated_at: row.get(6)?,
             })
         })?;

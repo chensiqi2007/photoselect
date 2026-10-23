@@ -35,6 +35,8 @@ pub struct ExifSummary {
     pub iso: Option<u32>,
     pub exposure_compensation: Option<String>,
     pub capture_time: Option<String>,
+    #[serde(default)]
+    pub sub_sec_time: Option<String>,
     pub width: Option<u32>,
     pub height: Option<u32>,
     pub orientation: Option<u32>,
@@ -61,6 +63,30 @@ pub struct PhotoGroup {
     pub flag: i8,
     /// 色标: "none", "red", "yellow", "green", "blue", "purple"
     pub color_label: String,
+    /// 关键字与生态标签 (例如: ["红嘴相思鸟", "Leiothrix lutea", "动物|鸟类|红嘴相思鸟"])
+    #[serde(default)]
+    pub tags: Vec<String>,
+    /// 连拍动作组 ID (如 "burst_001")
+    #[serde(default)]
+    pub burst_group_id: Option<String>,
+    /// 是否为当前连拍动作组内最佳推荐帧 (Best Shot)
+    #[serde(default)]
+    pub is_burst_best: bool,
+    /// 图像感知哈希 64-bit dHash (如 "a1b2c3d4e5f60718")
+    #[serde(default)]
+    pub phash: Option<String>,
+    /// 同主体/场景聚类 ID (如 "subj_001")
+    #[serde(default)]
+    pub subject_group_id: Option<String>,
+    /// 是否为当前同主体组内最佳推荐帧 (Best Shot)
+    #[serde(default)]
+    pub is_subject_best: bool,
+    /// 是否为严格重复或极度雷同帧 (Duplicate)
+    #[serde(default)]
+    pub is_duplicate: bool,
+    /// 若为重复帧，指向的主参考照片 ID
+    #[serde(default)]
+    pub duplicate_of: Option<String>,
     /// 主文件字节数 (用于统计与安全校验)
     pub file_size_bytes: u64,
     /// 拍摄时间戳 ISO 8601
@@ -82,6 +108,14 @@ impl PhotoGroup {
             rating: 0,
             flag: 0,
             color_label: "none".to_string(),
+            tags: Vec::new(),
+            burst_group_id: None,
+            is_burst_best: false,
+            phash: None,
+            subject_group_id: None,
+            is_subject_best: false,
+            is_duplicate: false,
+            duplicate_of: None,
             file_size_bytes: 0,
             capture_time: None,
             exif: None,
@@ -250,6 +284,8 @@ pub struct PhotoMetadataRecord {
     pub rating: u8,
     pub flag: i8,
     pub color_label: String,
+    #[serde(default)]
+    pub tags: Vec<String>,
     pub updated_at: String,
 }
 
@@ -260,4 +296,114 @@ pub struct WorkspaceRecord {
     pub folder_path: String,
     pub volume_uuid: Option<String>,
     pub last_opened_at: String,
+}
+
+/// 连拍聚合分组配置
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BurstConfig {
+    /// 判定为连拍的最大时间间隔（毫秒），默认 500ms
+    #[serde(default = "default_burst_threshold_ms")]
+    pub threshold_ms: u64,
+    /// 构成连拍组的最少照片数量，默认 2 张
+    #[serde(default = "default_min_burst_count")]
+    pub min_burst_count: usize,
+    /// 是否自动将每组的 Best Shot 推荐标记为 Pick (flag = 1)
+    #[serde(default)]
+    pub auto_flag_best: bool,
+}
+
+impl Default for BurstConfig {
+    fn default() -> Self {
+        Self {
+            threshold_ms: 500,
+            min_burst_count: 2,
+            auto_flag_best: false,
+        }
+    }
+}
+
+fn default_burst_threshold_ms() -> u64 {
+    500
+}
+
+fn default_min_burst_count() -> usize {
+    2
+}
+
+/// 识别出的单组连拍聚合实体
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BurstCluster {
+    pub group_id: String,
+    pub photo_ids: Vec<String>,
+    pub count: usize,
+    pub best_photo_id: Option<String>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+    pub time_span_ms: u64,
+}
+
+/// 严格去重与同主体聚类配置
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SimilarityConfig {
+    /// 判定为严格重复的 dHash 最大海明距离（默认 3，即 64 位中最多 3 位差异）
+    #[serde(default = "default_dedup_threshold")]
+    pub dedup_threshold: u32,
+    /// 判定为同主体的 dHash 最大海明距离（默认 12，约 80%+ 视觉相似度）
+    #[serde(default = "default_subject_threshold")]
+    pub subject_threshold: u32,
+    /// 同主体最大时间窗口（秒，默认 60s 内同场景同主体聚为一组）
+    #[serde(default = "default_time_window_secs")]
+    pub time_window_secs: u64,
+    /// 构成组的最少照片数，默认 2 张
+    #[serde(default = "default_min_group_count")]
+    pub min_group_count: usize,
+    /// 自动将严格重复的次选帧标记为淘汰 (Reject, flag = -1)
+    #[serde(default)]
+    pub auto_reject_duplicates: bool,
+    /// 自动将同主体最佳推荐帧标记为留用 (Pick, flag = 1)
+    #[serde(default)]
+    pub auto_flag_best: bool,
+}
+
+impl Default for SimilarityConfig {
+    fn default() -> Self {
+        Self {
+            dedup_threshold: 3,
+            subject_threshold: 12,
+            time_window_secs: 60,
+            min_group_count: 2,
+            auto_reject_duplicates: false,
+            auto_flag_best: false,
+        }
+    }
+}
+
+fn default_dedup_threshold() -> u32 {
+    3
+}
+
+fn default_subject_threshold() -> u32 {
+    12
+}
+
+fn default_time_window_secs() -> u64 {
+    60
+}
+
+fn default_min_group_count() -> usize {
+    2
+}
+
+/// 同主体/场景聚类与去重结果实体
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubjectCluster {
+    pub group_id: String,
+    pub cluster_type: String, // "subject" | "duplicate"
+    pub photo_ids: Vec<String>,
+    pub count: usize,
+    pub best_photo_id: Option<String>,
+    pub duplicate_ids: Vec<String>,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
+    pub time_span_secs: u64,
 }

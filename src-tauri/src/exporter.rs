@@ -172,9 +172,9 @@ impl Exporter {
             Self::transfer_file_safe(src_path, dst_path, config.operation)?;
         }
 
-        // 生成 Adobe Lightroom Classic 兼容的 .xmp 侧车文件
+        // 生成 Adobe Lightroom Classic 兼容的 .xmp 侧车文件 (包含生态/通用关键字)
         if config.generate_xmp {
-            let xmp_content = Self::generate_xmp_content(item.rating, &item.color_label, item.flag);
+            let xmp_content = Self::generate_xmp_content(item.rating, &item.color_label, item.flag, &item.tags);
 
             // 若导出了 RAW，XMP 与 RAW 存放在一起；否则与 JPG 放在一起
             let xmp_dest_dir =
@@ -284,8 +284,29 @@ impl Exporter {
             .replace("{seq5}", &format!("{:05}", seq_num))
     }
 
-    /// 生成符合 Adobe Lightroom Classic 标准的 XMP 元数据侧车内容
-    pub fn generate_xmp_content(rating: u8, color_label: &str, flag: i8) -> String {
+    /// 对 XML 文本进行特殊字符转义 (&, <, >, ", ')
+    fn xml_escape(text: &str) -> String {
+        text.replace('&', "&amp;")
+            .replace('<', "&lt;")
+            .replace('>', "&gt;")
+            .replace('"', "&quot;")
+            .replace('\'', "&apos;")
+    }
+
+    /// 生成符合 Adobe Lightroom Classic、Bridge、Capture One 标准的 XMP 元数据侧车内容
+    ///
+    /// 包含：
+    /// - `xmp:Rating` (0-5星)
+    /// - `xmp:Label` (色彩标签)
+    /// - `photoshop:Urgency="1"` (Pick 留用旗标)
+    /// - `dc:subject` (Dublin Core 平铺关键字列表，支持中英文鸟种、学名、特征)
+    /// - `lr:hierarchicalSubject` (Lightroom 层级关键字，如 "动物|鸟类|红嘴相思鸟")
+    pub fn generate_xmp_content(
+        rating: u8,
+        color_label: &str,
+        flag: i8,
+        keywords: &[String],
+    ) -> String {
         let lrc_label = match color_label.to_lowercase().as_str() {
             "red" => "Red",
             "yellow" => "Yellow",
@@ -308,6 +329,60 @@ impl Exporter {
             String::new()
         };
 
+        // 整理平铺关键字与层级关键字
+        let mut flat_keywords: Vec<String> = Vec::new();
+        let mut hierarchical_keywords: Vec<String> = Vec::new();
+
+        for kw in keywords {
+            let trimmed = kw.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+
+            if trimmed.contains('|') {
+                hierarchical_keywords.push(Self::xml_escape(trimmed));
+                // 提取层级末尾叶子节点也放入平铺关键字
+                if let Some(leaf) = trimmed.split('|').last() {
+                    let clean_leaf = leaf.trim();
+                    let escaped_leaf = Self::xml_escape(clean_leaf);
+                    if !clean_leaf.is_empty() && !flat_keywords.contains(&escaped_leaf) {
+                        flat_keywords.push(escaped_leaf);
+                    }
+                }
+            } else {
+                let escaped = Self::xml_escape(trimmed);
+                if !flat_keywords.contains(&escaped) {
+                    flat_keywords.push(escaped);
+                }
+            }
+        }
+
+        let dc_subject_xml = if !flat_keywords.is_empty() {
+            let mut lis = String::new();
+            for kw in &flat_keywords {
+                lis.push_str(&format!("     <rdf:li>{}</rdf:li>\n", kw));
+            }
+            format!(
+                "   <dc:subject>\n    <rdf:Bag>\n{}    </rdf:Bag>\n   </dc:subject>\n",
+                lis
+            )
+        } else {
+            String::new()
+        };
+
+        let lr_hierarchical_xml = if !hierarchical_keywords.is_empty() {
+            let mut lis = String::new();
+            for kw in &hierarchical_keywords {
+                lis.push_str(&format!("     <rdf:li>{}</rdf:li>\n", kw));
+            }
+            format!(
+                "   <lr:hierarchicalSubject>\n    <rdf:Bag>\n{}    </rdf:Bag>\n   </lr:hierarchicalSubject>\n",
+                lis
+            )
+        } else {
+            String::new()
+        };
+
         format!(
             r#"<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="PhotoSelect Desktop 1.0">
@@ -315,14 +390,71 @@ impl Exporter {
   <rdf:Description rdf:about=""
     xmlns:xmp="http://ns.adobe.com/xap/1.0/"
     xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:lr="http://ns.adobe.com/lightroom/1.0/"
     xmp:Rating="{rating}"
     {label_tag}
     {urgency_tag}>
-  </rdf:Description>
+{dc_subject_xml}{lr_hierarchical_xml}  </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>
 <?xpacket end="w"?>
 "#
         )
+    }
+
+    /// 为指定单张照片在其原图同目录下生成/更新同名 .xmp 侧车文件 (直接回写)
+    pub fn write_xmp_sidecar_for_photo(
+        item: &PhotoGroup,
+        extra_keywords: Option<&[String]>,
+    ) -> Result<PathBuf> {
+        let mut all_tags = item.tags.clone();
+        if let Some(extra) = extra_keywords {
+            for tag in extra {
+                if !all_tags.contains(tag) {
+                    all_tags.push(tag.clone());
+                }
+            }
+        }
+
+        let xmp_content = Self::generate_xmp_content(item.rating, &item.color_label, item.flag, &all_tags);
+
+        // 首选与 RAW 同目录同名，无 RAW 则与 JPG 同名
+        let target_dir = &item.folder_path;
+        let xmp_path = target_dir.join(format!("{}.xmp", item.base_name));
+
+        let mut file = File::create(&xmp_path)
+            .with_context(|| format!("Failed to create XMP file: {:?}", xmp_path))?;
+        file.write_all(xmp_content.as_bytes())?;
+        file.sync_all()?;
+
+        Ok(xmp_path)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_xmp_content_generation() {
+        let tags = vec![
+            "红嘴相思鸟".to_string(),
+            "Leiothrix lutea".to_string(),
+            "动物|鸟类|红嘴相思鸟".to_string(),
+        ];
+
+        let xmp = Exporter::generate_xmp_content(5, "green", 1, &tags);
+
+        assert!(xmp.contains(r#"xmp:Rating="5""#));
+        assert!(xmp.contains(r#"photoshop:Urgency="1""#));
+        assert!(xmp.contains(r#"xmp:Label="Green""#));
+        // Flat keywords
+        assert!(xmp.contains("<dc:subject>"));
+        assert!(xmp.contains("<rdf:li>红嘴相思鸟</rdf:li>"));
+        assert!(xmp.contains("<rdf:li>Leiothrix lutea</rdf:li>"));
+        // Hierarchical keywords
+        assert!(xmp.contains("<lr:hierarchicalSubject>"));
+        assert!(xmp.contains("<rdf:li>动物|鸟类|红嘴相思鸟</rdf:li>"));
     }
 }

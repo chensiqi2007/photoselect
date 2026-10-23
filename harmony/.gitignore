@@ -1,0 +1,11 @@
+.hvigor/
+oh_modules/
+entry/build/
+build/
+rust-core/target/
+entry/src/main/cpp/prebuilt/
+*.hap
+*.app
+*.log
+.cxx/
+**/entry/.cxx/
