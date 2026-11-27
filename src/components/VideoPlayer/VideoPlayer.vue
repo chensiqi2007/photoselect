@@ -16,7 +16,10 @@ import {
   Star,
   Film,
   Loader2,
+  AlertTriangle,
+  ExternalLink,
 } from "lucide-vue-next";
+import { open as openExternal } from "@tauri-apps/plugin-shell";
 import { usePhotoStore } from "../../stores/photoStore";
 import type { FlagStatus } from "../../types/photo";
 
@@ -38,6 +41,7 @@ const playbackRate = ref(1.0);
 const isLooping = ref(false);
 const isFullscreen = ref(false);
 const isBuffering = ref(false);
+const playbackError = ref<string | null>(null);
 const showCenterFeedback = ref<"play" | "pause" | null>(null);
 const centerFeedbackTimer = ref<number | null>(null);
 
@@ -183,15 +187,19 @@ watch(
     bufferedEnd.value = 0;
     isPlaying.value = false;
     isBuffering.value = true;
+    playbackError.value = null;
     showControls.value = true;
     if (videoRef.value) {
+      videoRef.value.pause();
       videoRef.value.currentTime = 0;
       videoRef.value.load();
       // 切换视频时自动播放第一段
       videoRef.value.play().then(() => {
         isPlaying.value = true;
+        isBuffering.value = false;
       }).catch(() => {
         isPlaying.value = false;
+        isBuffering.value = false;
       });
     }
   }
@@ -201,12 +209,41 @@ watch(
 const onLoadedMetadata = () => {
   const el = videoRef.value;
   if (!el) return;
-  duration.value = el.duration;
+  duration.value = Number.isFinite(el.duration) ? el.duration : 0;
   el.playbackRate = playbackRate.value;
   el.loop = isLooping.value;
   el.volume = volume.value;
   el.muted = isMuted.value;
   isBuffering.value = false;
+  playbackError.value = null;
+};
+
+const onCanPlay = () => {
+  isBuffering.value = false;
+  playbackError.value = null;
+};
+
+const onVideoError = () => {
+  isBuffering.value = false;
+  isPlaying.value = false;
+  const err = videoRef.value?.error;
+  if (err?.code === 4) {
+    playbackError.value = "当前系统解码器不支持该视频编码格式（如 10-bit 4:2:2 / ProRes / MTS）";
+  } else if (err?.code === 2 || err?.code === 3) {
+    playbackError.value = "视频流读取或解码失败，请检查文件是否完整";
+  } else {
+    playbackError.value = "无法在内置播放器中加载此视频";
+  }
+};
+
+const handleOpenInSystemPlayer = async () => {
+  const filePath = currentPhoto.value?.video_file;
+  if (!filePath) return;
+  try {
+    await openExternal(filePath);
+  } catch (err) {
+    console.warn("调用系统播放器失败:", err);
+  }
 };
 
 const onTimeUpdate = () => {
@@ -289,6 +326,10 @@ const handlePlayerKeyDown = (e: KeyboardEvent) => {
   }
 };
 
+const handleFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+};
+
 onMounted(() => {
   // 恢复上次保存的音量设置
   try {
@@ -299,13 +340,12 @@ onMounted(() => {
   } catch {}
 
   window.addEventListener("keydown", handlePlayerKeyDown);
-  document.addEventListener("fullscreenchange", () => {
-    isFullscreen.value = !!document.fullscreenElement;
-  });
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener("keydown", handlePlayerKeyDown);
+  document.removeEventListener("fullscreenchange", handleFullscreenChange);
   if (hideControlsTimer) clearTimeout(hideControlsTimer);
   if (centerFeedbackTimer.value) clearTimeout(centerFeedbackTimer.value);
 });
@@ -327,6 +367,9 @@ onUnmounted(() => {
       class="w-full h-full object-contain cursor-pointer"
       @click="togglePlay"
       @loadedmetadata="onLoadedMetadata"
+      @canplay="onCanPlay"
+      @loadeddata="onCanPlay"
+      @error="onVideoError"
       @timeupdate="onTimeUpdate"
       @play="onPlay"
       @pause="onPause"
@@ -355,9 +398,27 @@ onUnmounted(() => {
       </div>
     </transition>
 
-    <!-- 3. 加载与缓冲状态微标 -->
+    <!-- 3. 加载与缓冲状态微标 / 解码异常降级提示 -->
     <div
-      v-if="isBuffering"
+      v-if="playbackError"
+      class="absolute inset-0 flex items-center justify-center z-25 bg-black/75 backdrop-blur-sm p-6"
+    >
+      <div class="max-w-md w-full rounded-2xl bg-[#18181C] border border-rose-500/35 p-5 text-center space-y-3 shadow-2xl">
+        <AlertTriangle class="w-10 h-10 text-amber-400 mx-auto" />
+        <div class="text-sm font-semibold text-white">视频内置解码受限</div>
+        <p class="text-xs text-zinc-400 leading-relaxed">{{ playbackError }}</p>
+        <button
+          @click="handleOpenInSystemPlayer"
+          class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium cursor-pointer transition-all active:scale-95"
+        >
+          <ExternalLink class="w-3.5 h-3.5" />
+          <span>使用系统默认播放器打开</span>
+        </button>
+      </div>
+    </div>
+
+    <div
+      v-else-if="isBuffering"
       class="absolute inset-0 flex items-center justify-center pointer-events-none z-20 bg-black/25 backdrop-blur-[1px]"
     >
       <div class="flex items-center space-x-2.5 px-4 py-2 rounded-xl bg-black/80 border border-white/10 text-white shadow-2xl">
@@ -462,26 +523,29 @@ onUnmounted(() => {
     >
       <div
         v-if="showControls"
-        class="absolute bottom-4 left-4 right-4 z-30 flex flex-col space-y-2 pointer-events-auto max-w-4xl mx-auto"
+        class="absolute bottom-4 left-4 right-4 z-30 pointer-events-auto max-w-4xl mx-auto rounded-2xl bg-[#1C1C1E]/82 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] px-4 pt-2.5 pb-2.5 shadow-[0_16px_40px_rgba(0,0,0,0.55)] space-y-2"
         @click.stop
       >
         <!-- 进度条与缓冲指示器 (可点选、可拖拽) -->
-        <div class="relative w-full flex items-center group/progress cursor-pointer">
-          <!-- 缓冲段进度条 -->
-          <div class="absolute inset-y-1.5 left-0 right-0 rounded-full bg-white/10 overflow-hidden pointer-events-none">
+        <div class="relative w-full h-4 flex items-center group/progress cursor-pointer">
+          <!-- 背景轨道与缓冲段 -->
+          <div class="relative w-full h-1.5 group-hover/progress:h-2 rounded-full bg-white/15 overflow-hidden transition-all duration-150 pointer-events-none">
             <div
-              class="h-full bg-white/20 transition-all duration-150"
-              :style="{ width: `${duration ? (bufferedEnd / duration) * 100 : 0}%` }"
+              class="absolute inset-y-0 left-0 bg-white/25 transition-all duration-150"
+              :style="{ width: `${duration ? Math.min(100, (bufferedEnd / duration) * 100) : 0}%` }"
+            ></div>
+            <!-- 主播放进度条 (Apple Blue) -->
+            <div
+              class="absolute inset-y-0 left-0 rounded-full bg-[#0A84FF] shadow-[0_0_10px_rgba(10,132,255,0.6)] transition-all duration-75"
+              :style="{ width: `${duration ? Math.min(100, (currentTime / duration) * 100) : 0}%` }"
             ></div>
           </div>
 
-          <!-- 主播放进度条 (发光天蓝指示条) -->
-          <div class="absolute inset-y-1.5 left-0 right-0 rounded-full overflow-hidden pointer-events-none">
-            <div
-              class="h-full bg-gradient-to-r from-sky-500 to-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.5)] transition-all duration-75"
-              :style="{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }"
-            ></div>
-          </div>
+          <!-- 进度条圆形拖拽滑块 -->
+          <div
+            class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow-[0_1px_6px_rgba(0,0,0,0.6)] pointer-events-none opacity-85 scale-90 group-hover/progress:opacity-100 group-hover/progress:scale-110 transition-all duration-150"
+            :style="{ left: `${duration ? Math.min(100, (currentTime / duration) * 100) : 0}%` }"
+          ></div>
 
           <!-- 交互 Slider 输入元素 -->
           <input
@@ -493,12 +557,12 @@ onUnmounted(() => {
             @input="handleSeekInput"
             @mousedown="isSeeking = true"
             @mouseup="isSeeking = false"
-            class="relative z-10 w-full h-3 opacity-0 cursor-pointer"
+            class="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
 
         <!-- 底栏按钮矩阵 (Play/Pause, Seek ±5s, Time, Speed, Volume, Loop, Fullscreen) -->
-        <div class="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-black/85 backdrop-blur-2xl border border-white/10 text-white shadow-2xl">
+        <div class="flex items-center justify-between text-white">
           <!-- 左侧区: 播放/暂停 + 快进快退 + 时间显示 -->
           <div class="flex items-center space-x-3">
             <!-- 播放/暂停 -->

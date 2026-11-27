@@ -9,13 +9,27 @@ import {
   Eye,
   ZoomIn,
   Sliders,
+  Cpu,
 } from "lucide-vue-next";
 import { usePhotoStore } from "../../stores/photoStore";
 import { useI18n, type Locale } from "../../i18n";
 import { onMounted, ref } from "vue";
+import type { ComputeBackendMode } from "../../types/photo";
 
 const store = usePhotoStore();
 const { t, locale, setLocale } = useI18n();
+
+const backendOptions: { id: ComputeBackendMode; label: string; badge: string; desc: string }[] = [
+  { id: "auto", label: "Auto 智能调度", badge: "优先 NPU", desc: "自动探测并优先调用 Intel AI Boost NPU 硬件" },
+  { id: "npu", label: "Intel® NPU 驱动", badge: "W8A8 INT8", desc: "Level Zero 静态图对称 INT8 量化神经加速" },
+  { id: "gpu", label: "GPU 显卡驱动", badge: "DirectML", desc: "DirectX 12 FP16 半精度张量并行管线" },
+  { id: "cpu_ai", label: "CPU 神经网络", badge: "128-D 向量", desc: "Rayon 多核 INT8 语义嵌入与中心焦点锐度网" },
+  { id: "cpu_classic", label: "CPU 传统哈希", badge: "64-bit dHash", desc: "免模型 9x8 灰度差分感知哈希极速模式" },
+];
+
+const handleSelectBackend = async (mode: ComputeBackendMode) => {
+  await store.setComputeBackend(mode);
+};
 const aiEnabled = ref(false);
 const aiBaseUrl = ref("https://api.openai.com/v1");
 const aiModel = ref("gpt-4o-mini");
@@ -26,6 +40,9 @@ const aiMessage = ref("");
 
 onMounted(async () => {
   try {
+    if (!store.computeCapabilities) {
+      await store.loadComputeCapabilities();
+    }
     await store.loadAiSettings();
     aiEnabled.value = store.aiSettings?.enabled ?? false;
     aiBaseUrl.value = store.aiSettings?.baseUrl ?? aiBaseUrl.value;
@@ -411,6 +428,123 @@ const handleSelectViewportBg = (bg: string) => {
           </button>
         </div>
 
+        <!-- 5.5 聚合识别算力驱动 (NPU / GPU / CPU Compute Driver) -->
+        <section
+          class="pt-4 border-t space-y-3"
+          :class="store.theme === 'light' ? 'border-zinc-200' : 'border-zinc-800'"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-7 h-7 rounded-lg flex items-center justify-center border"
+                :class="[
+                  store.theme === 'light'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                ]"
+              >
+                <Cpu class="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <h3
+                  class="text-xs font-semibold"
+                  :class="store.theme === 'light' ? 'text-zinc-900' : 'text-zinc-100'"
+                >
+                  聚合识别与选优算力驱动
+                </h3>
+                <p
+                  class="text-[11px] leading-tight mt-0.5"
+                  :class="store.theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'"
+                >
+                  当前硬件: <span class="font-mono font-semibold">{{ store.computeCapabilities?.activeDeviceName || '正在探测硬件...' }}</span>
+                </p>
+              </div>
+            </div>
+            <span
+              class="px-2 py-0.5 rounded-full text-[10px] font-mono border"
+              :class="
+                store.computeCapabilities?.npuAvailable
+                  ? store.theme === 'light'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
+                  : store.theme === 'light'
+                    ? 'bg-sky-50 text-sky-700 border-sky-200'
+                    : 'bg-sky-500/15 text-sky-300 border-sky-500/35'
+              "
+            >
+              {{ store.computeCapabilities?.npuAvailable ? '⚡ NPU 已就绪' : '多核加速就绪' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 gap-1.5">
+            <button
+              v-for="opt in backendOptions"
+              :key="opt.id"
+              @click="handleSelectBackend(opt.id)"
+              :title="opt.desc"
+              :class="[
+                'w-full flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-all cursor-pointer text-xs',
+                store.selectedComputeBackend === opt.id
+                  ? store.theme === 'light'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold shadow-xs'
+                    : 'bg-emerald-500/15 border-emerald-500/50 text-white font-semibold shadow-xs'
+                  : store.theme === 'light'
+                    ? 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                    : 'bg-[#141418] border-[#26262E] text-zinc-300 hover:bg-[#1E1E26] hover:text-white',
+              ]"
+            >
+              <div class="flex items-center space-x-2 min-w-0">
+                <span
+                  class="w-2 h-2 rounded-full shrink-0"
+                  :class="
+                    store.selectedComputeBackend === opt.id
+                      ? 'bg-emerald-500'
+                      : store.theme === 'light'
+                        ? 'bg-zinc-300'
+                        : 'bg-zinc-700'
+                  "
+                ></span>
+                <div class="min-w-0">
+                  <div class="truncate">{{ opt.label }}</div>
+                  <div
+                    class="text-[10px] truncate"
+                    :class="store.theme === 'light' ? 'text-zinc-500 font-normal' : 'text-zinc-400 font-normal'"
+                  >
+                    {{ opt.desc }}
+                  </div>
+                </div>
+              </div>
+              <span
+                class="text-[10px] font-mono px-2 py-0.5 rounded border shrink-0 ml-2"
+                :class="
+                  store.selectedComputeBackend === opt.id
+                    ? store.theme === 'light'
+                      ? 'bg-emerald-100 border-emerald-300 text-emerald-800'
+                      : 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                    : store.theme === 'light'
+                      ? 'bg-white border-zinc-200 text-zinc-500'
+                      : 'bg-[#1C1C22] border-[#2C2C34] text-zinc-400'
+                "
+              >
+                {{ opt.badge }}
+              </span>
+            </button>
+          </div>
+
+          <label
+            class="flex items-center justify-between pt-1 text-xs cursor-pointer select-none"
+            :class="store.theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'"
+          >
+            <span>同主体聚类时自动识别场景并写入标签</span>
+            <input
+              type="checkbox"
+              :checked="store.autoTagScene"
+              @change="store.setAutoTagScene(($event.target as HTMLInputElement).checked)"
+              class="h-4 w-4 accent-emerald-500 rounded cursor-pointer"
+            />
+          </label>
+        </section>
+
         <!-- 6. AI 选片服务配置 -->
         <section
           class="pt-4 border-t space-y-3"
@@ -539,7 +673,7 @@ const handleSelectViewportBg = (bg: string) => {
                   : 'bg-[#202026] border-[#2E2E36] text-zinc-400'
               ]"
             >
-              PhotoSelect v1.1.0 • AGPL-3.0
+              PhotoSelect v0.2.0 • URL Time
             </span>
           </div>
           <p

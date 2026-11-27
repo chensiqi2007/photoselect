@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
   "productName": "PhotoSelect Desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "identifier": "com.photoselect.desktop",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost ipc: http://localhost:1420;"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost data: blob:; media-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' photoselect: asset: http://photoselect.localhost https://photoselect.localhost http://*.localhost https://*.localhost ipc: http://localhost:1420;"
     }
   },
   "bundle": {

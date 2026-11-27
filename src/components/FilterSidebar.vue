@@ -37,39 +37,39 @@ const toggleColorLabel = (color: ColorLabel) => {
 
 <template>
   <aside
-    class="w-60 flex-shrink-0 bg-[#16161A] border-r border-[#26262C] flex flex-col justify-between text-xs select-none overflow-hidden transition-colors"
+    class="w-60 flex-shrink-0 bg-[#18181A]/90 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col justify-between text-xs select-none overflow-hidden transition-colors"
   >
     <!-- 上半区: 物理挂载磁盘与 SD 卡直达 -->
-    <div class="flex-1 overflow-y-auto px-3 py-3 space-y-4">
+    <div class="flex-1 overflow-y-auto px-3 py-3.5 space-y-5">
       <div>
-        <div class="flex items-center justify-between text-[10px] font-bold text-[#71717A] uppercase tracking-wider mb-2">
+        <div class="flex items-center justify-between text-[11px] font-semibold text-[#8E8E93] px-1.5 mb-2">
           <span>{{ t.sidebar.storageDrives }}</span>
           <button
             @click="store.loadMountPoints"
-            class="p-0.5 hover:text-[#E5E5E5] transition-colors cursor-pointer"
+            class="p-0.5 rounded hover:bg-white/[0.08] hover:text-[#F5F5F7] transition-colors cursor-pointer"
             title="刷新系统挂载设备"
           >
-            <RefreshCw class="w-3 h-3 text-[#71717A] hover:text-[#F4F4F5]" />
+            <RefreshCw class="w-3 h-3 text-[#8E8E93] hover:text-[#F5F5F7]" />
           </button>
         </div>
 
-        <div class="space-y-1">
+        <div class="space-y-0.5">
           <button
             v-for="mount in store.mountPoints"
             :key="mount"
             @click="store.loadFolder(mount)"
             :class="[
-              'w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg transition-all text-left font-mono text-[11px] cursor-pointer',
+              'w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-[9px] transition-all text-left font-mono text-[11px] cursor-pointer',
               store.currentFolderPath.startsWith(mount)
-                ? 'bg-[#22222A] text-white border border-[#2E2E38] shadow-sm font-semibold'
-                : 'text-[#8E8E98] hover:bg-[#1C1C22] hover:text-[#F4F4F5] border border-transparent',
+                ? 'bg-white/[0.12] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] font-semibold'
+                : 'text-[#98989D] hover:bg-white/[0.06] hover:text-[#F5F5F7]',
             ]"
             :title="`打开存储卷: ${mount}`"
           >
-            <HardDrive class="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+            <HardDrive class="w-3.5 h-3.5 text-[#0A84FF] flex-shrink-0" />
             <span class="truncate font-medium">{{ mount }}</span>
           </button>
-          <div v-if="store.mountPoints.length === 0" class="text-[10px] text-[#55555C] italic px-2 py-1">
+          <div v-if="store.mountPoints.length === 0" class="text-[10px] text-[#636366] italic px-2.5 py-1">
             未检测到可移动设备
           </div>
         </div>
@@ -77,7 +77,7 @@ const toggleColorLabel = (color: ColorLabel) => {
 
       <!-- 智能分类集合 (Smart Collections) -->
       <div>
-        <div class="text-[10px] font-bold text-[#71717A] uppercase tracking-wider mb-2">
+        <div class="text-[11px] font-semibold text-[#8E8E93] px-1.5 mb-2">
           {{ t.sidebar.smartCollections }}
         </div>
         <div class="space-y-0.5">
@@ -85,17 +85,17 @@ const toggleColorLabel = (color: ColorLabel) => {
           <button
             @click="selectSmartCollection('all')"
             :class="[
-              'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-xs',
+              'w-full flex items-center justify-between px-2.5 py-1.5 rounded-[9px] transition-all cursor-pointer text-xs',
               store.filter.smart_collection === 'all'
-                ? 'bg-[#22222A] text-white font-semibold border border-[#2E2E38] shadow-sm'
-                : 'text-[#8E8E98] hover:bg-[#1C1C22] hover:text-[#F4F4F5] border border-transparent',
+                ? 'bg-white/[0.12] text-white font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                : 'text-[#98989D] hover:bg-white/[0.06] hover:text-[#F5F5F7]',
             ]"
           >
             <div class="flex items-center space-x-2">
-              <Images class="w-3.5 h-3.5 text-sky-400" />
+              <Images class="w-3.5 h-3.5 text-[#0A84FF]" />
               <span>{{ t.sidebar.allPhotos }}</span>
             </div>
-            <span class="tabular-nums font-mono text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-[#8E8E98]">
+            <span class="tabular-nums font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-white/[0.07] text-[#98989D]">
               {{ store.smartCounts.all }}
             </span>
           </button>

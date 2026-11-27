@@ -66,6 +66,49 @@ fn is_video_path(path: &Path) -> bool {
     )
 }
 
+const VIDEO_THUMB_FALLBACK_SVG: &[u8] = br##"<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"><rect width="320" height="240" fill="#18181b"/><circle cx="160" cy="120" r="34" fill="#a855f7" fill-opacity="0.22" stroke="#a855f7" stroke-width="2"/><polygon points="150,104 178,120 150,136" fill="#e9d5ff"/></svg>"##;
+
+/// 解析 HTTP Range: bytes=... 请求头，完整支持 start-end、start- 与 -suffix (moov atom 尾部请求)
+fn parse_byte_range(range_val: &str, file_len: u64, max_open_chunk: u64) -> Option<(u64, u64)> {
+    if file_len == 0 {
+        return None;
+    }
+    let spec = range_val.trim().strip_prefix("bytes=")?;
+    let first_range = spec.split(',').next()?.trim();
+    let (start_str, end_str) = first_range.split_once('-')?;
+    let start_str = start_str.trim();
+    let end_str = end_str.trim();
+
+    if start_str.is_empty() {
+        // Suffix range: bytes=-N (请求文件最后 N 字节)
+        let suffix_len: u64 = end_str.parse().ok()?;
+        if suffix_len == 0 {
+            return None;
+        }
+        let start = file_len.saturating_sub(suffix_len);
+        let end = file_len - 1;
+        return Some((start, end));
+    }
+
+    let start: u64 = start_str.parse().ok()?;
+    if start >= file_len {
+        return None;
+    }
+
+    let end: u64 = if end_str.is_empty() {
+        (start + max_open_chunk - 1).min(file_len - 1)
+    } else {
+        let parsed_end: u64 = end_str.parse().ok()?;
+        parsed_end.min(file_len - 1)
+    };
+
+    if start <= end {
+        Some((start, end))
+    } else {
+        None
+    }
+}
+
 /// 处理 photoselect:// (或 Windows 下 http://photoselect.localhost/) 协议的二进制图片请求
 /// 典型 URL 形态：
 /// - http://photoselect.localhost/F%3A%5CPhotos%2FDSC0001.JPG (Windows 全尺寸预览)
@@ -160,7 +203,7 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
     }
 
     // =========================================================================
-    // 视频流式传输与伴生缩略图处理 (支持 HTTP 206 Partial Content / Range 毫秒级拖拽快进)
+    // 视频流式传输与伴生缩略图处理 (支持 HTTP HEAD / 206 Partial Content / Range 毫秒级拖拽快进)
     // =========================================================================
     if is_video_path(&path) {
         if is_thumb {
@@ -179,32 +222,57 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
                     }
                 }
             }
+            // 无伴生缩略图时返回轻量 SVG 视频占位图，绝不把几十 MB 视频流塞进 <img>
+            return Response::builder()
+                .status(StatusCode::OK)
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(header::CONTENT_TYPE, "image/svg+xml")
+                .header(header::CONTENT_LENGTH, VIDEO_THUMB_FALLBACK_SVG.len().to_string())
+                .body(Cow::Borrowed(VIDEO_THUMB_FALLBACK_SVG))
+                .unwrap();
         }
 
-        // 全尺寸预览/播放模式：提供 Range 范围切片支持
+        // 全尺寸预览/播放模式：提供 Range 范围切片与 HEAD 探测支持
         let file_len = path.metadata().map(|m| m.len()).unwrap_or(0);
         let mime_type = detect_mime_type(&path);
 
+        if request.method() == Method::HEAD {
+            return Response::builder()
+                .status(StatusCode::OK)
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, HEAD, OPTIONS")
+                .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                .header(
+                    header::ACCESS_CONTROL_EXPOSE_HEADERS,
+                    "Content-Range, Accept-Ranges, Content-Length",
+                )
+                .header(header::ACCEPT_RANGES, "bytes")
+                .header(header::CONTENT_LENGTH, file_len.to_string())
+                .header(header::CONTENT_TYPE, mime_type)
+                .body(Cow::Borrowed(b"".as_slice()))
+                .unwrap();
+        }
+
+        if file_len == 0 {
+            return Response::builder()
+                .status(StatusCode::OK)
+                .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                .header(header::ACCEPT_RANGES, "bytes")
+                .header(header::CONTENT_LENGTH, "0")
+                .header(header::CONTENT_TYPE, mime_type)
+                .body(Cow::Borrowed(b"".as_slice()))
+                .unwrap();
+        }
+
+        const MAX_VIDEO_CHUNK: u64 = 8 * 1024 * 1024;
         let range_header = request
             .headers()
             .get(header::RANGE)
             .and_then(|v| v.to_str().ok());
 
         if let Some(range_val) = range_header {
-            if let Some(range_spec) = range_val.strip_prefix("bytes=") {
-                let mut parts = range_spec.split('-');
-                let start_str = parts.next().unwrap_or("").trim();
-                let end_str = parts.next().unwrap_or("").trim();
-
-                let start: u64 = start_str.parse().unwrap_or(0);
-                let end: u64 = if let Ok(e) = end_str.parse::<u64>() {
-                    e.min(file_len.saturating_sub(1))
-                } else {
-                    // 未指定 end 时，每次切片 8MB，大幅降低大视频内存开销并实现秒开
-                    (start + 8 * 1024 * 1024).min(file_len.saturating_sub(1))
-                };
-
-                if start <= end && start < file_len {
+            match parse_byte_range(range_val, file_len, MAX_VIDEO_CHUNK) {
+                Some((start, end)) => {
                     let chunk_len = end - start + 1;
                     use std::io::{Read, Seek, SeekFrom};
                     if let Ok(mut f) = std::fs::File::open(&path) {
@@ -216,8 +284,15 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
                                     .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                                     .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, HEAD, OPTIONS")
                                     .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                                    .header(
+                                        header::ACCESS_CONTROL_EXPOSE_HEADERS,
+                                        "Content-Range, Accept-Ranges, Content-Length",
+                                    )
                                     .header(header::ACCEPT_RANGES, "bytes")
-                                    .header(header::CONTENT_RANGE, format!("bytes {}-{}/{}", start, end, file_len))
+                                    .header(
+                                        header::CONTENT_RANGE,
+                                        format!("bytes {}-{}/{}", start, end, file_len),
+                                    )
                                     .header(header::CONTENT_LENGTH, chunk_len.to_string())
                                     .header(header::CONTENT_TYPE, mime_type)
                                     .body(Cow::Owned(buf))
@@ -226,31 +301,51 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
                         }
                     }
                 }
+                None => {
+                    return Response::builder()
+                        .status(StatusCode::RANGE_NOT_SATISFIABLE)
+                        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                        .header(header::CONTENT_RANGE, format!("bytes */{}", file_len))
+                        .body(Cow::Borrowed(b"".as_slice()))
+                        .unwrap();
+                }
             }
         }
 
-        // 无 Range 头时，若文件小于 32MB 直接返回；若很大则返回前 8MB 片段
-        let initial_chunk_size = (32 * 1024 * 1024).min(file_len);
+        // 无 Range 头时，若文件 <= 16MB 直接返回完整文件 (200 OK)；大文件返回前 8MB (206)
+        let initial_chunk_size = if file_len <= 16 * 1024 * 1024 {
+            file_len
+        } else {
+            MAX_VIDEO_CHUNK.min(file_len)
+        };
         use std::io::Read;
         if let Ok(mut f) = std::fs::File::open(&path) {
             let mut buf = vec![0u8; initial_chunk_size as usize];
             if f.read_exact(&mut buf).is_ok() {
-                let status = if initial_chunk_size < file_len {
-                    StatusCode::PARTIAL_CONTENT
-                } else {
-                    StatusCode::OK
-                };
-                return Response::builder()
-                    .status(status)
+                let is_partial = initial_chunk_size < file_len;
+                let mut builder = Response::builder()
+                    .status(if is_partial {
+                        StatusCode::PARTIAL_CONTENT
+                    } else {
+                        StatusCode::OK
+                    })
                     .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                     .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, HEAD, OPTIONS")
                     .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                    .header(
+                        header::ACCESS_CONTROL_EXPOSE_HEADERS,
+                        "Content-Range, Accept-Ranges, Content-Length",
+                    )
                     .header(header::ACCEPT_RANGES, "bytes")
-                    .header(header::CONTENT_RANGE, format!("bytes 0-{}/{}", initial_chunk_size.saturating_sub(1), file_len))
                     .header(header::CONTENT_LENGTH, initial_chunk_size.to_string())
-                    .header(header::CONTENT_TYPE, mime_type)
-                    .body(Cow::Owned(buf))
-                    .unwrap();
+                    .header(header::CONTENT_TYPE, mime_type);
+                if is_partial {
+                    builder = builder.header(
+                        header::CONTENT_RANGE,
+                        format!("bytes 0-{}/{}", initial_chunk_size - 1, file_len),
+                    );
+                }
+                return builder.body(Cow::Owned(buf)).unwrap();
             }
         }
     }
@@ -457,5 +552,23 @@ fn detect_mime_type(path: &Path) -> &'static str {
         "avi" => "video/x-msvideo",
         // 所有主流相机 RAW 提取出的内嵌预览图均为标准 JPEG 格式
         _ => "image/jpeg",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_byte_range;
+
+    #[test]
+    fn test_parse_byte_range_variants() {
+        let len = 10_000_000;
+        let max_chunk = 8 * 1024 * 1024;
+        assert_eq!(parse_byte_range("bytes=0-", len, max_chunk), Some((0, max_chunk - 1)));
+        assert_eq!(parse_byte_range("bytes=0-1023", len, max_chunk), Some((0, 1023)));
+        // Suffix range (critical for MP4/MOV moov atom at tail)
+        assert_eq!(parse_byte_range("bytes=-512", len, max_chunk), Some((len - 512, len - 1)));
+        assert_eq!(parse_byte_range("bytes=10000000-", len, max_chunk), None);
+        assert_eq!(parse_byte_range("bytes=-0", len, max_chunk), None);
+        assert_eq!(parse_byte_range("bytes=0-0", 0, max_chunk), None);
     }
 }

@@ -304,6 +304,83 @@ fn set_compute_backend(
     Ok(npu_engine::NpuEngine::probe_capabilities(Some(norm.as_str())))
 }
 
+/// 调用 NPU / GPU / CPU 神经大模型批量评估人眼 100% 裁切像素块的合焦锐度与诊断评语
+#[tauri::command]
+async fn evaluate_eye_focus_neural(
+    patches: Vec<npu_engine::EyePatchInput>,
+    compute_backend: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<npu_engine::EyeFocusBatchResponse, String> {
+    let saved_backend = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
+    tokio::task::spawn_blocking(move || {
+        let chosen = compute_backend.or(saved_backend);
+        let backend = npu_engine::ComputeBackend::from_str_opt(chosen.as_deref());
+        Ok(npu_engine::NpuEngine::evaluate_eye_focus(patches, backend))
+    })
+    .await
+    .map_err(|e| format!("人眼对焦神经网络评估异常: {}", e))?
+}
+
+/// 调用 MIT 许可的 YuNet ONNX 模型检出中远景/戴帽人像与双眼坐标 (作为 MediaPipe 漏检的强力接管)
+#[tauri::command]
+async fn detect_faces_yunet(
+    path: String,
+    compute_backend: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<Vec<npu_engine::YunetFaceDetection>, String> {
+    let saved_backend = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
+    tokio::task::spawn_blocking(move || {
+        let chosen = compute_backend.or(saved_backend);
+        let backend = npu_engine::ComputeBackend::from_str_opt(chosen.as_deref());
+        Ok(npu_engine::NpuEngine::detect_faces_yunet(
+            std::path::Path::new(&path),
+            backend,
+        ))
+    })
+    .await
+    .map_err(|e| format!("YuNet 人脸检测异常: {}", e))?
+}
+
+/// 使用 YuNet (MIT) + SFace (Apache 2.0) 对照片库按人物身份聚类 (支持合照多人识别)
+#[tauri::command]
+async fn cluster_faces_by_person(
+    mut photos: Vec<crate::models::PhotoGroup>,
+    threshold: Option<f32>,
+    compute_backend: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<
+    (
+        Vec<crate::models::PhotoGroup>,
+        Vec<crate::models::PersonCluster>,
+        npu_engine::InferenceTelemetry,
+    ),
+    String,
+> {
+    let saved_backend = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
+    tokio::task::spawn_blocking(move || {
+        let chosen = compute_backend.or(saved_backend);
+        let backend = npu_engine::ComputeBackend::from_str_opt(chosen.as_deref());
+        let th = threshold.unwrap_or(0.42);
+        let (clusters, telemetry) =
+            npu_engine::NpuEngine::cluster_faces_by_person(&mut photos, th, backend);
+        Ok((photos, clusters, telemetry))
+    })
+    .await
+    .map_err(|e| format!("人物聚类任务异常: {}", e))?
+}
+
 /// 执行毫秒级高速连拍聚合算法 (支持 NPU/GPU/CPU 驱动焦点锐度选优并标定 Best Shot)
 #[tauri::command]
 async fn cluster_burst_photos(
@@ -421,6 +498,9 @@ pub fn run() {
             detect_similarity_and_duplicates,
             get_compute_capabilities,
             set_compute_backend,
+            evaluate_eye_focus_neural,
+            detect_faces_yunet,
+            cluster_faces_by_person,
             write_photo_xmp,
             get_ai_selection_settings,
             save_ai_selection_settings,

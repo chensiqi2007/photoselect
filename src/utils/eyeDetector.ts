@@ -1,5 +1,26 @@
 import { FaceLandmarker, FilesetResolver, type NormalizedLandmark } from "@mediapipe/tasks-vision";
+import { invoke } from "@tauri-apps/api/core";
 import type { DetectedEye, DetectedFace, EyeDetectionResult } from "../types/eye";
+import type { InferenceTelemetry } from "../types/photo";
+
+interface EyePatchInput {
+  id: string;
+  cropDataUrl: string;
+  isOpen: boolean;
+  fallbackSharpness: number;
+}
+
+interface EyeNeuralScore {
+  id: string;
+  sharpness: number;
+  sharpnessLabel: "sharp" | "good" | "soft";
+  diagnosis: string;
+}
+
+interface EyeFocusBatchResponse {
+  scores: EyeNeuralScore[];
+  telemetry: InferenceTelemetry;
+}
 
 const cache = new Map<string, EyeDetectionResult>();
 let enginePromise: Promise<FaceLandmarker> | null = null;
@@ -10,7 +31,7 @@ async function getEngine(): Promise<FaceLandmarker> {
       const files = await FilesetResolver.forVisionTasks("/vision");
       const options = {
         runningMode: "IMAGE" as const, numFaces: 6,
-        minFaceDetectionConfidence: 0.65, minFacePresenceConfidence: 0.65,
+        minFaceDetectionConfidence: 0.35, minFacePresenceConfidence: 0.35,
         outputFaceBlendshapes: true,
       };
       try {
@@ -74,16 +95,46 @@ function eyeFromLandmarks(img: HTMLImageElement, points: NormalizedLandmark[], i
   };
 }
 
-export async function detectEyesInImage(img: HTMLImageElement, photoId: string, isCurrent: () => boolean = () => true): Promise<EyeDetectionResult> {
+interface YunetFaceDetection {
+  id: number;
+  centerX: number;
+  centerY: number;
+  boxX: number;
+  boxY: number;
+  boxWidth: number;
+  boxHeight: number;
+  faceCropDataUrl: string;
+  rightEyeX: number;
+  rightEyeY: number;
+  rightEyeCropDataUrl: string;
+  rightEyeSharpness: number;
+  rightEyeLabel: "sharp" | "good" | "soft";
+  rightEyeDiagnosis: string;
+  leftEyeX: number;
+  leftEyeY: number;
+  leftEyeCropDataUrl: string;
+  leftEyeSharpness: number;
+  leftEyeLabel: "sharp" | "good" | "soft";
+  leftEyeDiagnosis: string;
+  score: number;
+}
+
+export async function detectEyesInImage(
+  img: HTMLImageElement,
+  photoId: string,
+  isCurrent: () => boolean = () => true,
+  computeBackend: string = "auto",
+  rawFilePath?: string | null
+): Promise<EyeDetectionResult> {
   if (!isCurrent()) throw new DOMException("Superseded image", "AbortError");
-  const key = photoId + ":" + img.src;
+  const key = `${computeBackend}:${photoId}:${img.src}`;
   const cached = cache.get(key);
   if (cached) { cache.delete(key); cache.set(key, cached); return cached; }
   const engine = await getEngine();
   if (!isCurrent()) throw new DOMException("Superseded image", "AbortError");
   const start = performance.now();
   const canvas = document.createElement("canvas");
-  const scale = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight));
+  const scale = Math.min(1, 1920 / Math.max(img.naturalWidth, img.naturalHeight));
   canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
   canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
   const context = canvas.getContext("2d");
@@ -114,7 +165,139 @@ export async function detectEyesInImage(img: HTMLImageElement, photoId: string, 
       isBlinking: eyes.some((e) => !e.isOpen),
     });
   });
-  const result = { photoId, photoPath: img.src, faces, detectionTimeMs: Math.round(performance.now() - start) };
+
+  // 若 MediaPipe 在中远景或戴帽人像上未检出，自动接管调用 Rust 端 MIT 许可 YuNet ONNX 模型
+  if (faces.length === 0 && rawFilePath && isCurrent()) {
+    try {
+      const yunetFaces = await invoke<YunetFaceDetection[]>("detect_faces_yunet", {
+        path: rawFilePath,
+        computeBackend,
+      });
+      for (const yf of yunetFaces) {
+        const leftEye: DetectedEye = {
+          type: "left",
+          x: yf.leftEyeX,
+          y: yf.leftEyeY,
+          box: { x: yf.leftEyeX * img.naturalWidth - 32, y: yf.leftEyeY * img.naturalHeight - 32, width: 64, height: 64 },
+          sharpness: yf.leftEyeSharpness,
+          sharpnessLabel: yf.leftEyeLabel,
+          focusDiagnosis: yf.leftEyeDiagnosis,
+          isOpen: true,
+          opennessRatio: 1,
+          cropDataUrl: yf.leftEyeCropDataUrl,
+        };
+        const rightEye: DetectedEye = {
+          type: "right",
+          x: yf.rightEyeX,
+          y: yf.rightEyeY,
+          box: { x: yf.rightEyeX * img.naturalWidth - 32, y: yf.rightEyeY * img.naturalHeight - 32, width: 64, height: 64 },
+          sharpness: yf.rightEyeSharpness,
+          sharpnessLabel: yf.rightEyeLabel,
+          focusDiagnosis: yf.rightEyeDiagnosis,
+          isOpen: true,
+          opennessRatio: 1,
+          cropDataUrl: yf.rightEyeCropDataUrl,
+        };
+        const primaryEye = leftEye.sharpness >= rightEye.sharpness ? leftEye : rightEye;
+        faces.push({
+          id: yf.id,
+          centerX: yf.centerX,
+          centerY: yf.centerY,
+          box: { x: yf.boxX, y: yf.boxY, width: yf.boxWidth, height: yf.boxHeight },
+          faceCropDataUrl: yf.faceCropDataUrl,
+          leftEye,
+          rightEye,
+          primaryEye,
+          overallScore: Math.round((leftEye.sharpness + rightEye.sharpness) / 2),
+          isBlinking: false,
+        });
+      }
+      if (faces.length > 0) {
+        const result: EyeDetectionResult = {
+          photoId,
+          photoPath: img.src,
+          faces,
+          detectionTimeMs: Math.round(performance.now() - start),
+          computeDevice: "YuNet (MIT) + EyeMicroFocusNet",
+        };
+        if (isCurrent()) {
+          cache.set(key, result);
+          while (cache.size > 24) cache.delete(cache.keys().next().value!);
+        }
+        return result;
+      }
+    } catch (err) {
+      console.debug("YuNet 兜底检测跳过:", err);
+    }
+  }
+  // 调用 Rust NPU / 神经大模型引擎对每只眼睛的 100% 原生像素裁切块进行深度合焦评估
+  let computeDevice: string | undefined;
+  let precisionMode: string | undefined;
+  if (faces.length > 0 && isCurrent()) {
+    const patches: EyePatchInput[] = [];
+    faces.forEach((face) => {
+      if (face.leftEye) {
+        patches.push({
+          id: `${face.id}_left`,
+          cropDataUrl: face.leftEye.cropDataUrl,
+          isOpen: face.leftEye.isOpen,
+          fallbackSharpness: face.leftEye.sharpness,
+        });
+      }
+      if (face.rightEye) {
+        patches.push({
+          id: `${face.id}_right`,
+          cropDataUrl: face.rightEye.cropDataUrl,
+          isOpen: face.rightEye.isOpen,
+          fallbackSharpness: face.rightEye.sharpness,
+        });
+      }
+    });
+
+    if (patches.length > 0) {
+      try {
+        const res = await invoke<EyeFocusBatchResponse>("evaluate_eye_focus_neural", {
+          patches,
+          computeBackend,
+        });
+        const scoreMap = new Map(res.scores.map((s) => [s.id, s]));
+        computeDevice = res.telemetry.deviceName;
+        precisionMode = res.telemetry.precisionMode;
+
+        faces.forEach((face) => {
+          const applyScore = (eye: DetectedEye | null, keyId: string) => {
+            if (!eye) return;
+            const s = scoreMap.get(keyId);
+            if (s) {
+              eye.sharpness = s.sharpness;
+              eye.sharpnessLabel = s.sharpnessLabel;
+              eye.focusDiagnosis = s.diagnosis;
+            }
+          };
+          applyScore(face.leftEye, `${face.id}_left`);
+          applyScore(face.rightEye, `${face.id}_right`);
+
+          const eyes = [face.leftEye, face.rightEye].filter((v): v is DetectedEye => v !== null);
+          if (eyes.length > 0) {
+            face.primaryEye = eyes.reduce((a, b) => (a.sharpness >= b.sharpness ? a : b));
+            face.overallScore = Math.round(eyes.reduce((sum, e) => sum + e.sharpness, 0) / eyes.length);
+          }
+        });
+      } catch (err) {
+        // 非 Tauri 环境或调用失败时保持本地基础评分降级
+        console.debug("NPU 人眼对焦大模型评估回退:", err);
+      }
+    }
+  }
+
+  const result: EyeDetectionResult = {
+    photoId,
+    photoPath: img.src,
+    faces,
+    detectionTimeMs: Math.round(performance.now() - start),
+    computeDevice,
+    precisionMode,
+  };
   if (isCurrent()) {
     cache.set(key, result);
     while (cache.size > 24) cache.delete(cache.keys().next().value!);

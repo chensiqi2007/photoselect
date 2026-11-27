@@ -77,6 +77,7 @@ export interface PhotoGroup {
   neural_score?: number | null;    // NPU/神经网络综合焦点与美学选优分 (0-100)
   sharpness_score?: number | null; // 主体中心焦点高频锐度分 (0-100)
   scene_tag?: string | null;       // 神经网络识别场景/主体类别标签
+  person_group_ids?: string[];     // 画面中检测到的人物聚类 ID 列表
   file_size_bytes: number;         // 照片主文件大小
   capture_time: string | null;     // 拍摄时间戳 ISO 8601
   exif: ExifSummary | null;        // EXIF 核心元数据
@@ -93,6 +94,13 @@ export interface ScanResult {
   groups: PhotoGroup[];
 }
 
+export interface PersonCluster {
+  personId: string;
+  avatarDataUrl: string;
+  photoIds: string[];
+  count: number;
+}
+
 export interface FilterState {
   min_rating: number;              // 0-5
   flags: FlagStatus[];             // 允许展示的旗标
@@ -100,6 +108,7 @@ export interface FilterState {
   raw_plus_jpg_only: boolean;      // 仅展示 JPG+RAW 联动文件
   video_only?: boolean;            // 仅展示视频文件
   photo_only?: boolean;            // 仅展示静态图像文件
+  selected_person_id?: string | null; // 按指定人物聚类 ID 筛选
   smart_collection: "all" | "picked" | "rejected" | "unflagged" | "five_star" | "videos";
 }
 

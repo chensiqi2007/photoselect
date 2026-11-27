@@ -90,14 +90,14 @@ const getGroupSummary = (photo: PhotoGroup) => {
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col bg-[#141418] select-none overflow-hidden transition-colors">
+  <div class="w-full h-full flex flex-col bg-[#141416] select-none overflow-hidden transition-colors">
     <!-- 主网格滚动容器 -->
     <div
       ref="gridContainerRef"
       class="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth"
     >
       <div
-        class="grid gap-3.5 transition-all duration-150 ease-out"
+        class="grid gap-4 transition-all duration-150 ease-out"
         :style="{
           gridTemplateColumns: `repeat(auto-fill, minmax(${store.gridItemSize}px, 1fr))`,
         }"
@@ -108,17 +108,17 @@ const getGroupSummary = (photo: PhotoGroup) => {
           @click="(e) => handleCardClick(index, e)"
           @dblclick="handleDoubleClick(index)"
           :class="[
-            'group relative aspect-4/3 rounded-xl bg-[#1A1A20] cursor-pointer overflow-hidden transition-all duration-150 ease-out flex flex-col justify-between border shadow-sm',
+            'group relative aspect-4/3 rounded-2xl bg-[#1C1C1E] cursor-pointer overflow-hidden transition-all duration-200 ease-out flex flex-col justify-between border shadow-sm',
             // 折叠叠放视觉层次阴影
             isStackedCollapsed(photo)
-              ? 'shadow-[4px_4px_0px_#2E2E38,8px_8px_0px_#1C1C22] ring-1 ring-purple-500/80'
+              ? 'shadow-[4px_4px_0px_#2C2C2E,8px_8px_0px_#1C1C1E] ring-1 ring-[#BF5AF2]/70'
               : '',
-            // 选定高亮逻辑
+            // 选定高亮逻辑 (Apple Blue)
             index === store.selectedIndex
-              ? 'border-sky-400 ring-2 ring-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)] scale-[1.015] z-10'
+              ? 'border-[#0A84FF] ring-2 ring-[#0A84FF] shadow-[0_0_24px_rgba(10,132,255,0.35)] scale-[1.015] z-10'
               : index === store.compareIndex
-              ? 'border-emerald-400 ring-2 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.35)] scale-[1.015] z-10'
-              : 'border-[#26262C] hover:border-[#4A4A58] hover:-translate-y-0.5 hover:shadow-lg opacity-90 hover:opacity-100',
+              ? 'border-[#30D158] ring-2 ring-[#30D158] shadow-[0_0_24px_rgba(48,209,88,0.35)] scale-[1.015] z-10'
+              : 'border-white/[0.08] hover:border-white/[0.22] hover:-translate-y-0.5 hover:shadow-xl opacity-90 hover:opacity-100',
             colorClassMap[photo.color_label] || '',
           ]"
         >

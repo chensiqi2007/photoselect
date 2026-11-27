@@ -136,84 +136,66 @@ onUnmounted(() => {
 
           <!-- 空状态：专业级暗房工作台直达 (Pro Darkroom Studio Viewfinder) -->
           <div v-else class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">
-            <!-- 核心取景框容器 (Camera Viewfinder Frame) -->
+            <!-- 核心取景框容器 (Apple Sequoia Frosted Studio Card) -->
             <div
-              class="relative z-10 w-full max-w-xl p-8 md:p-10 rounded-2xl transition-all duration-200 border"
+              class="relative z-10 w-full max-w-xl p-8 md:p-10 rounded-3xl transition-all duration-200 border backdrop-blur-2xl"
               :class="[
                 isDragOver
-                  ? 'border-sky-500 bg-sky-500/10 shadow-[0_0_30px_rgba(14,165,233,0.2)] scale-[1.01]'
+                  ? 'border-[#0A84FF] bg-[#0A84FF]/10 shadow-[0_0_40px_rgba(10,132,255,0.22)] scale-[1.01]'
                   : store.theme === 'light'
-                  ? 'border-[#E4E4E7] bg-white shadow-xl'
-                  : 'border-[#26262C] bg-[#151518] shadow-[0_20px_50px_rgba(0,0,0,0.5)]'
+                  ? 'border-black/[0.08] bg-white/90 shadow-[0_24px_60px_rgba(0,0,0,0.08)]'
+                  : 'border-white/[0.1] bg-[#1C1C1E]/85 shadow-[0_24px_64px_rgba(0,0,0,0.55)]'
               ]"
             >
-              <!-- 取景框四角准星刻度 (Viewfinder Reticle Marks) -->
-              <div class="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t border-l border-white/20 pointer-events-none"></div>
-              <div class="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t border-r border-white/20 pointer-events-none"></div>
-              <div class="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b border-l border-white/20 pointer-events-none"></div>
-              <div class="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b border-r border-white/20 pointer-events-none"></div>
-
-              <!-- 顶部精工镜头刻度图形 -->
+              <!-- 顶部 Apple-style 图标与标题 -->
               <div class="flex flex-col items-center mb-6">
                 <div
-                  class="w-14 h-14 rounded-2xl flex items-center justify-center border mb-3.5 transition-transform duration-200"
+                  class="w-16 h-16 rounded-[18px] flex items-center justify-center border mb-4 transition-transform duration-200 shadow-lg"
                   :class="[
                     store.theme === 'light'
-                      ? 'bg-zinc-100 border-zinc-200 text-zinc-700 shadow-sm'
-                      : 'bg-[#1C1C22] border-[#2E2E36] text-[#A1A1AA]'
+                      ? 'bg-gradient-to-b from-white to-zinc-100 border-black/[0.08] text-[#0A84FF]'
+                      : 'bg-gradient-to-b from-[#2C2C2E] to-[#1C1C1E] border-white/[0.12] text-[#0A84FF]'
                   ]"
                 >
-                  <Camera class="w-6 h-6 stroke-[1.75]" />
+                  <Camera class="w-7 h-7 stroke-[1.75]" />
                 </div>
 
                 <div class="flex items-center space-x-2">
                   <h2
-                    class="text-lg font-semibold tracking-tight"
-                    :class="store.theme === 'light' ? 'text-zinc-900' : 'text-zinc-100'"
+                    class="text-xl font-semibold tracking-tight"
+                    :class="store.theme === 'light' ? 'text-[#1C1C1E]' : 'text-[#F5F5F7]'"
                   >
                     PhotoSelect
                   </h2>
                   <span
-                    class="px-1.5 py-0.5 rounded font-mono text-[10px] font-medium border"
+                    class="px-2 py-0.5 rounded-full font-mono text-[10px] font-medium border"
                     :class="[
                       store.theme === 'light'
-                        ? 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                        : 'bg-[#222228] border-white/10 text-zinc-400'
+                        ? 'bg-black/[0.05] border-black/[0.08] text-[#636366]'
+                        : 'bg-white/[0.08] border-white/[0.1] text-[#AEAEB2]'
                     ]"
                   >
-                    v1.1.0
+                    v1.2.0
                   </span>
                 </div>
 
                 <p
-                  class="text-xs mt-1.5 leading-relaxed text-center font-normal"
-                  :class="store.theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'"
+                  class="text-xs mt-2 leading-relaxed text-center font-normal"
+                  :class="store.theme === 'light' ? 'text-[#636366]' : 'text-[#98989D]'"
                 >
                   秒级零导入直读原生 RAW+JPG • 毫秒级连拍聚合与峰值对焦
                 </p>
               </div>
 
-              <!-- 主操作按钮：精工物理质感按键 -->
+              <!-- 主操作按钮：Apple Blue Primary CTA -->
               <div class="flex justify-center mb-5">
                 <button
                   @click="handleSelectFolder"
-                  class="group px-6 py-2.5 rounded-xl font-medium text-xs tracking-wide transition-all duration-150 flex items-center space-x-2.5 cursor-pointer border shadow-sm active:scale-95"
-                  :class="[
-                    store.theme === 'light'
-                      ? 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-900 shadow-zinc-200'
-                      : 'bg-[#222228] hover:bg-[#2C2C34] text-zinc-100 border-[#32323A] hover:border-zinc-500/50'
-                  ]"
+                  class="group px-6 py-2.5 rounded-full font-medium text-xs tracking-wide transition-all duration-150 flex items-center space-x-2.5 cursor-pointer bg-[#0A84FF] hover:bg-[#0077ED] text-white shadow-[0_4px_14px_rgba(10,132,255,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] active:scale-[0.97]"
                 >
-                  <FolderOpen class="w-4 h-4 text-amber-400 group-hover:scale-105 transition-transform" />
+                  <FolderOpen class="w-4 h-4 text-white/95 group-hover:scale-105 transition-transform" />
                   <span>{{ t.topbar.openFolder }}</span>
-                  <kbd
-                    class="px-1.5 py-0.5 rounded text-[10px] font-mono border"
-                    :class="[
-                      store.theme === 'light'
-                        ? 'bg-zinc-800 border-zinc-700 text-zinc-300'
-                        : 'bg-black/40 border-white/10 text-zinc-400'
-                    ]"
-                  >
+                  <kbd class="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/20 text-white/90">
                     Ctrl+O
                   </kbd>
                 </button>

@@ -7,7 +7,7 @@
 
 专为商业摄影师、独立摄影师、生态鸟类摄影师与影像创作者打造的高性能桌面暗房快速初筛与管理工具。
 
-[![Version](https://img.shields.io/badge/version-v1.1.0-38BDF8?style=flat-square&logo=git)](https://github.com/chensiqi2007/photoselect)
+[![Version](https://img.shields.io/badge/version-v1.2.0-38BDF8?style=flat-square&logo=git)](https://github.com/chensiqi2007/photoselect)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-FFC131?style=flat-square&logo=tauri&logoColor=white)](https://v2.tauri.app/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![Rust](https://img.shields.io/badge/Rust-1.78+-DEA584?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
@@ -43,14 +43,19 @@
 ### 🎬 专业相机视频媒体全流程支持 (Pro Camera Video Support)
 - **主流相机视频原片直读**：全面支持各大主流相机（索尼 XAVC-S、佳能 Cinema RAW Light / MP4、松下、尼康、大疆）录制的 `.mp4`、`.mov`、`.m4v`、`.mkv`、`.avi`、`.webm`、`.mts`、`.m2ts` 等视频文件。
 - **HTTP 206 零延迟流式分块传输**：Rust 原生网络层支持 `Range: bytes` 局部内容流式传输与 8MB 高速分块，数 GB 级别的高码率 4K/8K 视频毫秒级即开即播，任意位置拖拽进度条零卡顿。
-- **暗房级专属播放控制台 (Video HUD)**：集成 0.5x - 2.0x 无级倍速播放、循环播放切换、音量持久化记忆、全屏切换，支持 <kbd>Space</kbd> 播放/暂停、<kbd>J</kbd> / <kbd>L</kbd> 或 <kbd>Shift</kbd>+方向键 ±5 秒寻帧。
+- **暗房级专属播放控制台 (Video HUD)**：集成 Apple 风格磨砂控制坞、**可点击/拖拽的蓝光播放进度条（含缓冲条）**、0.5x - 2.0x 无级倍速播放、循环播放切换、音量持久化记忆、全屏切换，支持 <kbd>Space</kbd> 播放/暂停、<kbd>J</kbd> / <kbd>L</kbd> 或 <kbd>Shift</kbd>+方向键 ±5 秒寻帧。
+- **底部胶片栏丝滑横向滚动**：支持鼠标垂直主滚轮（`deltaY`）与拇指侧滚轮 / 触摸板横向手势（`deltaX`）快速穿梭海量底片。
 - **边看边选极致工作流**：在视频播放过程中无缝使用 <kbd>0</kbd>–<kbd>5</kbd> 星级评定与 <kbd>P</kbd> / <kbd>X</kbd> / <kbd>U</kbd> 快速标记，与静态照片资产同屏并列筛选。
 - **智能集合与分目录安全导出**：左侧栏提供专属「视频媒体」分类视图与数量角标，导出时支持独立归类至 `/VIDEO` 子目录。
 
-### 🎨 Studio Darkroom 专业暗房设计美学
+### 🎨 Apple macOS Sequoia 极简暗房美学
+- **Apple Vibrancy 磨砂拟态**：采用 `-apple-system / SF Pro` 排版与高通透毛玻璃材质（`backdrop-blur-2xl`）、macOS 统一分段控制器（Segmented Control）与悬浮胶囊 HUD。
 - **18% 中性灰暗房视口**：严格遵循行业标准 18% 中性灰基准底色，彻底消除环境对比对曝光判断的视觉欺骗。
-- **精致玻璃拟态 (Glassmorphism)**：融合多层景深模糊、电光蓝（Electric Blue）呼吸对焦指示环与高对比度 HUD 参数平视面板。
 - **摄影棚级 2×2 参数矩阵**：直观高对比度呈现光圈、快门、ISO、焦距及色彩空间。
+
+### 👤 本地人物聚类（按人找图）& DirectML GPU / NPU 算力调度
+- **跨照片人物识别聚类**：支持一键扫描目录内人像并生成人物头像列表与照片数量角标，点击头像即可秒级筛选该人物的全部照片（Open-Core 仓库不包含私有模型权重，需本地或发行版内核支持）。
+- **DirectML GPU / NPU / CPU 多后端热切换**：支持在设置中实时切换算力后端，默认自动优先调度高吞吐 DirectML GPU 管线，无重启即时生效。
 
 ### 🔍 High-DPI 多档等比无损缩放 (100% / 125% / 150% / 200%)
 - **高分屏全界面自适应**：专为 2K、4K、5K 监视器及外接专业大屏优化，提供 `100%`、`125%`、`150%`、`200%` 四档等比无损缩放。

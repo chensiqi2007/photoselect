@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, ref, onMounted } from "vue";
+import { computed, watch, ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Camera,
@@ -21,29 +21,11 @@ import {
 } from "lucide-vue-next";
 import { usePhotoStore } from "../../stores/photoStore";
 import { useI18n } from "../../i18n";
-import type { ExifSummary, ComputeBackendMode } from "../../types/photo";
+import type { ExifSummary } from "../../types/photo";
 
 const store = usePhotoStore();
 const { t } = useI18n();
 const photo = computed(() => store.currentPhoto);
-
-onMounted(() => {
-  if (!store.computeCapabilities) {
-    store.loadComputeCapabilities();
-  }
-});
-
-const backendOptions: { id: ComputeBackendMode; label: string; badge: string; desc: string }[] = [
-  { id: "auto", label: "Auto 智能调度", badge: "优先 NPU", desc: "自动探测并优先调用 Intel AI Boost NPU 硬件" },
-  { id: "npu", label: "Intel® NPU 驱动", badge: "W8A8 INT8", desc: "Level Zero 静态图对称 INT8 量化神经加速" },
-  { id: "gpu", label: "GPU 显卡驱动", badge: "DirectML", desc: "DirectX 12 FP16 半精度张量并行管线" },
-  { id: "cpu_ai", label: "CPU 神经网络", badge: "128-D 向量", desc: "Rayon 多核 INT8 语义嵌入与中心焦点锐度网" },
-  { id: "cpu_classic", label: "CPU 传统哈希", badge: "64-bit dHash", desc: "免模型 9x8 灰度差分感知哈希极速模式" },
-];
-
-const handleSelectBackend = async (mode: ComputeBackendMode) => {
-  await store.setComputeBackend(mode);
-};
 
 const newTagInput = ref("");
 const isWritingXmp = ref(false);
@@ -108,6 +90,18 @@ const handleRunSimilarityDetection = async () => {
   }
 };
 
+const handleClusterPersons = async () => {
+  try {
+    const clusters = await store.clusterPersons(0.42);
+    xmpNotice.value = `人物聚类: ${clusters?.length || 0} 位`;
+    setTimeout(() => {
+      xmpNotice.value = "";
+    }, 2500);
+  } catch (err) {
+    xmpNotice.value = `人物识别失败: ${err}`;
+  }
+};
+
 const handlePickBestAndRejectRest = async (gid: string) => {
   try {
     await store.pickBestAndRejectRest(gid);
@@ -163,57 +157,57 @@ const getBadgeLabel = (photo: any): string => {
 
 <template>
   <aside
-    class="w-72 flex-shrink-0 bg-[#16161A] border-l border-[#26262C] flex flex-col justify-between text-xs select-none overflow-hidden transition-colors"
+    class="w-72 flex-shrink-0 bg-[#18181A]/90 backdrop-blur-2xl border-l border-white/[0.08] flex flex-col justify-between text-xs select-none overflow-hidden transition-colors"
   >
     <div class="flex-1 overflow-y-auto p-3.5 space-y-4">
-      <!-- 模块 1: 相机核心曝光四要素矩阵 (Studio Exposure HUD) -->
+      <!-- 模块 1: 相机核心曝光四要素矩阵 (Apple Pro Inspector) -->
       <div>
-        <div class="text-[10px] font-bold text-[#71717A] uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-          <Camera class="w-3.5 h-3.5 text-sky-400" />
+        <div class="text-[11px] font-semibold text-[#8E8E93] mb-2 flex items-center space-x-1.5 px-0.5">
+          <Camera class="w-3.5 h-3.5 text-[#0A84FF]" />
           <span>{{ t.inspector.exifTitle }}</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 bg-[#121214] p-2.5 rounded-xl border border-[#26262C]">
+        <div class="grid grid-cols-2 gap-2 bg-black/25 p-2.5 rounded-2xl border border-white/[0.07]">
           <!-- 光圈 -->
-          <div class="bg-[#18181C] p-2 rounded-lg border border-[#222228] flex flex-col justify-between">
-            <div class="flex items-center space-x-1 text-[#71717A] text-[10px]">
-              <Aperture class="w-3 h-3 text-sky-400" />
+          <div class="bg-white/[0.04] p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+            <div class="flex items-center space-x-1 text-[#8E8E93] text-[10px]">
+              <Aperture class="w-3 h-3 text-[#0A84FF]" />
               <span>{{ t.inspector.aperture }}</span>
             </div>
-            <span class="text-[#F4F4F5] font-bold text-sm font-mono mt-1 tabular-nums">
+            <span class="text-[#F5F5F7] font-semibold text-sm font-mono mt-1 tabular-nums">
               {{ photo?.exif?.aperture || "f/--" }}
             </span>
           </div>
 
           <!-- 快门 -->
-          <div class="bg-[#18181C] p-2 rounded-lg border border-[#222228] flex flex-col justify-between">
-            <div class="flex items-center space-x-1 text-[#71717A] text-[10px]">
-              <Timer class="w-3 h-3 text-amber-400" />
+          <div class="bg-white/[0.04] p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+            <div class="flex items-center space-x-1 text-[#8E8E93] text-[10px]">
+              <Timer class="w-3 h-3 text-[#FF9F0A]" />
               <span>{{ t.inspector.shutter }}</span>
             </div>
-            <span class="text-[#F4F4F5] font-bold text-sm font-mono mt-1 tabular-nums">
+            <span class="text-[#F5F5F7] font-semibold text-sm font-mono mt-1 tabular-nums">
               {{ photo?.exif?.shutter_speed || "1/--s" }}
             </span>
           </div>
 
           <!-- 感光度 ISO -->
-          <div class="bg-[#18181C] p-2 rounded-lg border border-[#222228] flex flex-col justify-between">
-            <div class="flex items-center space-x-1 text-[#71717A] text-[10px]">
-              <Zap class="w-3 h-3 text-emerald-400" />
+          <div class="bg-white/[0.04] p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+            <div class="flex items-center space-x-1 text-[#8E8E93] text-[10px]">
+              <Zap class="w-3 h-3 text-[#30D158]" />
               <span>{{ t.inspector.iso }}</span>
             </div>
-            <span class="text-[#F4F4F5] font-bold text-sm font-mono mt-1 tabular-nums">
+            <span class="text-[#F5F5F7] font-semibold text-sm font-mono mt-1 tabular-nums">
               {{ photo?.exif?.iso || "--" }}
             </span>
           </div>
 
           <!-- 焦距 -->
-          <div class="bg-[#18181C] p-2 rounded-lg border border-[#222228] flex flex-col justify-between">
-            <div class="flex items-center space-x-1 text-[#71717A] text-[10px]">
-              <Layers class="w-3 h-3 text-purple-400" />
+          <div class="bg-white/[0.04] p-2.5 rounded-xl border border-white/[0.06] flex flex-col justify-between">
+            <div class="flex items-center space-x-1 text-[#8E8E93] text-[10px]">
+              <Layers class="w-3 h-3 text-[#BF5AF2]" />
               <span>{{ t.inspector.focal }}</span>
             </div>
-            <span class="text-[#F4F4F5] font-bold text-sm font-mono mt-1 tabular-nums">
+            <span class="text-[#F5F5F7] font-semibold text-sm font-mono mt-1 tabular-nums">
               {{ photo?.exif?.focal_length || "-- mm" }}
             </span>
           </div>
@@ -221,7 +215,7 @@ const getBadgeLabel = (photo: any): string => {
       </div>
 
       <!-- 模块 2: 相机与镜头型号 -->
-      <div class="space-y-1.5 text-[11px] font-mono bg-[#18181C] p-3 rounded-xl border border-[#26262C]">
+      <div class="space-y-1.5 text-[11px] font-mono bg-white/[0.04] p-3 rounded-2xl border border-white/[0.07]">
         <div class="flex justify-between py-1 border-b border-[#222228]">
           <span class="text-[#71717A]">{{ t.inspector.cameraModel }}</span>
           <span class="text-[#F4F4F5] font-medium truncate max-w-[155px]" :title="photo?.exif?.camera_model || '未知机身'">
@@ -267,116 +261,6 @@ const getBadgeLabel = (photo: any): string => {
         </div>
         <div v-if="photo.xmp_sidecar" class="text-emerald-400/90">
           <span class="font-bold text-white">[XMP]</span> {{ photo.xmp_sidecar }}
-        </div>
-      </div>
-
-      <!-- 模块 3.5: 聚合识别与选优神经算力驱动引擎 (NPU / GPU / CPU Compute Selector) -->
-      <div class="bg-[#18181C] p-3 rounded-xl border border-[#26262C] space-y-2.5 shadow-sm">
-        <div class="flex items-center justify-between text-[10px] font-bold text-[#71717A] uppercase tracking-wider">
-          <div class="flex items-center space-x-1">
-            <Cpu class="w-3.5 h-3.5 text-emerald-400" />
-            <span>聚合识别算力驱动</span>
-          </div>
-          <span
-            class="px-1.5 py-0.2 rounded text-[9px] font-mono border"
-            :class="
-              store.computeCapabilities?.npuAvailable
-                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
-                : 'bg-sky-500/15 text-sky-300 border-sky-500/35'
-            "
-          >
-            {{ store.computeCapabilities?.npuAvailable ? '⚡ NPU 已就绪' : '多核加速就绪' }}
-          </span>
-        </div>
-
-        <!-- 当前激活的物理硬件设备名 -->
-        <div class="px-2.5 py-1.5 rounded-lg bg-[#121214] border border-[#24242C] flex items-center justify-between text-[10px] font-mono">
-          <span class="text-[#71717A] shrink-0">当前硬件:</span>
-          <span
-            class="text-[#F4F4F5] font-semibold truncate ml-2"
-            :title="store.computeCapabilities?.activeDeviceName || '正在探测硬件...'"
-          >
-            {{ store.computeCapabilities?.activeDeviceName || 'Intel(R) AI Boost / 硬件探测中' }}
-          </span>
-        </div>
-
-        <!-- 5 档驱动方式自由切换 -->
-        <div class="grid grid-cols-1 gap-1">
-          <button
-            v-for="opt in backendOptions"
-            :key="opt.id"
-            @click="handleSelectBackend(opt.id)"
-            :title="opt.desc"
-            :class="[
-              'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-left transition-all cursor-pointer text-[11px]',
-              store.selectedComputeBackend === opt.id
-                ? 'bg-emerald-500/15 border-emerald-500/45 text-white font-semibold shadow-xs'
-                : 'bg-[#131317] border-[#22222A] text-[#9E9EA8] hover:bg-[#1E1E26] hover:text-[#F4F4F5]',
-            ]"
-          >
-            <div class="flex items-center space-x-1.5 min-w-0">
-              <span
-                class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="store.selectedComputeBackend === opt.id ? 'bg-emerald-400' : 'bg-[#3F3F46]'"
-              ></span>
-              <span class="truncate">{{ opt.label }}</span>
-            </div>
-            <span
-              class="text-[9px] font-mono px-1.5 py-0.2 rounded border shrink-0"
-              :class="
-                store.selectedComputeBackend === opt.id
-                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
-                  : 'bg-[#1C1C22] border-[#2C2C34] text-[#71717A]'
-              "
-            >
-              {{ opt.badge }}
-            </span>
-          </button>
-        </div>
-
-        <!-- 自动打场景标签开关 -->
-        <label class="flex items-center justify-between pt-1 text-[10px] text-[#9E9EA8] cursor-pointer select-none">
-          <span>聚类时自动识别场景写入标签</span>
-          <input
-            type="checkbox"
-            :checked="store.autoTagScene"
-            @change="store.setAutoTagScene(($event.target as HTMLInputElement).checked)"
-            class="accent-emerald-500 rounded cursor-pointer"
-          />
-        </label>
-
-        <!-- 当前选中照片的神经网络焦点与场景评估指标 -->
-        <div
-          v-if="photo?.neural_score != null || photo?.sharpness_score != null || photo?.scene_tag"
-          class="p-2 rounded-lg bg-[#121215] border border-emerald-500/25 space-y-1 text-[10px] font-mono"
-        >
-          <div v-if="photo?.neural_score != null" class="flex items-center justify-between">
-            <span class="text-[#71717A]">神经网络选优总分:</span>
-            <span class="text-emerald-300 font-bold">{{ photo.neural_score }} / 100</span>
-          </div>
-          <div v-if="photo?.sharpness_score != null" class="flex items-center justify-between">
-            <span class="text-[#71717A]">中心主体焦点锐度:</span>
-            <span class="text-sky-300 font-semibold">{{ photo.sharpness_score.toFixed(1) }}</span>
-          </div>
-          <div v-if="photo?.scene_tag" class="flex items-center justify-between">
-            <span class="text-[#71717A]">神经场景分类识别:</span>
-            <span class="text-amber-300">{{ photo.scene_tag }}</span>
-          </div>
-        </div>
-
-        <!-- 最近一次聚合/聚类推理性能遥测 -->
-        <div
-          v-if="store.lastInferenceTelemetry"
-          class="px-2 py-1.5 rounded-lg bg-emerald-950/25 border border-emerald-500/20 text-[9px] font-mono text-emerald-300/90 space-y-0.5"
-        >
-          <div class="flex items-center justify-between">
-            <span class="font-bold">⚡ {{ store.lastInferenceTelemetry.deviceName }}</span>
-            <span>{{ store.lastInferenceTelemetry.totalElapsedMs }} ms</span>
-          </div>
-          <div class="text-[#8E8E98] flex items-center justify-between">
-            <span class="truncate">{{ store.lastInferenceTelemetry.precisionMode }}</span>
-            <span class="shrink-0 ml-1">{{ store.lastInferenceTelemetry.avgMsPerPhoto }} ms/张</span>
-          </div>
         </div>
       </div>
 
@@ -484,6 +368,99 @@ const getBadgeLabel = (photo: any): string => {
         <div v-else class="text-[10px] text-[#55555C] italic">
           {{ store.subjectClusters.length > 0 ? '该照片为独立场景散片' : '点击上方一键聚类识别同场景同主体' }}
         </div>
+
+        <!-- 当前算力驱动状态简报 & 快捷跳转设置 -->
+        <div class="pt-1.5 border-t border-[#24242C] flex items-center justify-between text-[10px] font-mono">
+          <div class="flex items-center space-x-1 text-emerald-400/90 truncate">
+            <Cpu class="w-3 h-3 shrink-0" />
+            <span class="truncate" :title="store.computeCapabilities?.activeDeviceName">
+              {{ store.computeCapabilities?.activeDeviceName || 'NPU / 多核就绪' }}
+            </span>
+          </div>
+          <button
+            @click="store.settingsModalOpen = true"
+            class="text-[#8E8E98] hover:text-white underline shrink-0 ml-2 cursor-pointer"
+          >
+            切换驱动
+          </button>
+        </div>
+
+        <!-- 单张照片神经网络评估结果 & 最近一次推理遥测 -->
+        <div
+          v-if="photo?.neural_score != null || photo?.sharpness_score != null || store.lastInferenceTelemetry"
+          class="p-2 rounded-lg bg-[#121215] border border-emerald-500/20 space-y-1 text-[10px] font-mono"
+        >
+          <div v-if="photo?.neural_score != null" class="flex items-center justify-between">
+            <span class="text-[#71717A]">神经选优分 / 锐度:</span>
+            <span class="text-emerald-300 font-semibold">
+              {{ photo.neural_score }}分 · {{ photo.sharpness_score?.toFixed(1) ?? '--' }}
+            </span>
+          </div>
+          <div v-if="photo?.scene_tag" class="flex items-center justify-between">
+            <span class="text-[#71717A]">神经场景分类:</span>
+            <span class="text-amber-300">{{ photo.scene_tag }}</span>
+          </div>
+          <div v-if="store.lastInferenceTelemetry" class="flex items-center justify-between text-[9px] text-[#8E8E98]">
+            <span>耗时 {{ store.lastInferenceTelemetry.totalElapsedMs }}ms</span>
+            <span>{{ store.lastInferenceTelemetry.avgMsPerPhoto }} ms/张</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块 5.5: 人物识别聚类 (按人找图) -->
+      <div class="bg-white/[0.04] p-3 rounded-2xl border border-white/[0.07] space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between text-[11px] font-semibold text-[#8E8E93]">
+          <div class="flex items-center space-x-1.5">
+            <svg class="w-3.5 h-3.5 text-[#30D158]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>人物聚类 (按人找图)</span>
+          </div>
+          <button
+            @click="handleClusterPersons"
+            :disabled="store.isClusteringPersons || store.groups.length === 0"
+            class="px-2.5 py-0.5 rounded-full bg-[#30D158]/20 text-[#30D158] border border-[#30D158]/30 hover:bg-[#30D158]/30 disabled:opacity-40 transition-all cursor-pointer text-[10px] font-medium"
+          >
+            {{ store.isClusteringPersons ? '识别中...' : '识别人物' }}
+          </button>
+        </div>
+
+        <div v-if="store.personClusters.length > 0" class="space-y-2">
+          <div class="flex items-center justify-between text-[10px] text-[#8E8E98]">
+            <span>共识别 {{ store.personClusters.length }} 位人物</span>
+            <button
+              v-if="store.filter.selected_person_id"
+              @click="store.togglePersonFilter(null)"
+              class="text-emerald-400 hover:text-emerald-300 underline cursor-pointer"
+            >
+              显示全部
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="person in store.personClusters"
+              :key="person.personId"
+              @click="store.togglePersonFilter(person.personId)"
+              :title="`筛选 ${person.personId} (${person.count} 张)`"
+              class="relative group rounded-full p-0.5 transition-all cursor-pointer"
+              :class="store.filter.selected_person_id === person.personId
+                ? 'ring-2 ring-emerald-400 bg-emerald-500/20'
+                : 'ring-1 ring-white/15 hover:ring-emerald-400/60'"
+            >
+              <img
+                :src="person.avatarDataUrl"
+                :alt="person.personId"
+                class="w-9 h-9 rounded-full object-cover"
+              />
+              <span class="absolute -bottom-1 -right-1 px-1 min-w-[16px] h-4 rounded-full bg-[#1C1C22] border border-white/15 text-[9px] font-mono text-[#E5E5EA] flex items-center justify-center">
+                {{ person.count }}
+              </span>
+            </button>
+          </div>
+        </div>
+        <p v-else class="text-[10px] text-[#6E6E78] leading-relaxed">
+          基于 YuNet + SFace 本地提取人脸特征并聚类，点击头像可一键筛选该人物的所有照片。
+        </p>
       </div>
 
       <!-- 模块 6: 生态关键字与 XMP 侧车同步 -->

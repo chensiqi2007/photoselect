@@ -13,12 +13,13 @@ import type {
   BurstCluster,
   SimilarityConfig,
   SubjectCluster,
+  PersonCluster,
   ComputeBackendMode,
   ComputeCapabilities,
   InferenceTelemetry,
 } from "../types/photo";
 import type { DetectedFace, DetectedEye } from "../types/eye";
-import { detectEyesInImage } from "../utils/eyeDetector";
+import { detectEyesInImage, clearEyeDetectionCache } from "../utils/eyeDetector";
 
 export interface AiSelectionSettings {
   enabled: boolean;
@@ -116,6 +117,10 @@ export const usePhotoStore = defineStore("photo", {
     subjectClusters: [] as SubjectCluster[],
     isAnalyzingSimilarity: false as boolean,
 
+    // 人物识别聚类状态 (YuNet + SFace)
+    personClusters: [] as PersonCluster[],
+    isClusteringPersons: false as boolean,
+
     // NPU / GPU / CPU 神经算力驱动状态与性能遥测
     computeCapabilities: null as ComputeCapabilities | null,
     selectedComputeBackend: ((typeof localStorage !== "undefined" && localStorage.getItem("photoselect_compute_backend")) || "auto") as ComputeBackendMode,
@@ -155,6 +160,14 @@ export const usePhotoStore = defineStore("photo", {
         }
         if (state.filter.photo_only && g.video_file) {
           return false;
+        }
+
+        // 4.5 人物聚类筛选
+        if (state.filter.selected_person_id) {
+          const personIds = g.person_group_ids || [];
+          if (!personIds.includes(state.filter.selected_person_id)) {
+            return false;
+          }
         }
 
         // 5. 智能分类视图快速筛选
@@ -886,10 +899,13 @@ export const usePhotoStore = defineStore("photo", {
           if (requestId !== detectRequestId || !this.eyeAfEnabled) return;
 
           const sig = `${photo.folder_path}/${photo.base_name}`;
+          const rawFilePath = photo.std_image || photo.raw_image;
           const result = await detectEyesInImage(
             img,
             sig,
             () => requestId === detectRequestId && this.eyeAfEnabled && this.currentPhoto?.id === photo.id,
+            this.selectedComputeBackend,
+            rawFilePath,
           );
 
           // 竞态锁：确保当前仍停留在同一张照片
@@ -929,6 +945,7 @@ export const usePhotoStore = defineStore("photo", {
     /// 切换聚合识别与选优模型的硬件驱动方式 ("auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic")
     async setComputeBackend(backend: ComputeBackendMode) {
       this.selectedComputeBackend = backend;
+      clearEyeDetectionCache();
       try {
         localStorage.setItem("photoselect_compute_backend", backend);
       } catch {}
@@ -937,6 +954,9 @@ export const usePhotoStore = defineStore("photo", {
         this.computeCapabilities = caps;
       } catch (err) {
         console.warn("保存算力驱动设置失败:", err);
+      }
+      if (this.eyeAfEnabled && this.currentPhoto) {
+        this.detectEyesForPhoto(this.currentPhoto);
       }
     },
 
@@ -1101,6 +1121,42 @@ export const usePhotoStore = defineStore("photo", {
         throw err;
       } finally {
         this.isAnalyzingSimilarity = false;
+      }
+    },
+
+    /// 基于商业合规 YuNet + SFace (Apache 2.0) 进行本地人脸检测与跨照片人物聚类
+    async clusterPersons(threshold = 0.42) {
+      if (this.groups.length === 0) return [];
+      this.isClusteringPersons = true;
+      try {
+        const [updatedPhotos, clusters, telemetry] = await invoke<
+          [PhotoGroup[], PersonCluster[], InferenceTelemetry]
+        >("cluster_faces_by_person", {
+          photos: this.groups,
+          threshold,
+          computeBackend: this.selectedComputeBackend,
+        });
+        this.groups = updatedPhotos;
+        this.personClusters = clusters;
+        this.filter.selected_person_id = null;
+        if (telemetry) {
+          this.lastInferenceTelemetry = telemetry;
+        }
+        return clusters;
+      } catch (err) {
+        console.error("人物识别聚类失败:", err);
+        throw err;
+      } finally {
+        this.isClusteringPersons = false;
+      }
+    },
+
+    /// 切换按人物过滤视图（再次点击同一人物取消筛选）
+    togglePersonFilter(personId: string | null) {
+      if (personId === null || this.filter.selected_person_id === personId) {
+        this.filter.selected_person_id = null;
+      } else {
+        this.filter.selected_person_id = personId;
       }
     },
 

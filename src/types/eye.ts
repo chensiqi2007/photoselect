@@ -13,6 +13,8 @@ export interface DetectedEye {
   // 焦点清晰度得分 (0 ~ 100)
   sharpness: number;
   sharpnessLabel: "sharp" | "good" | "soft";
+  // NPU / 神经网络眼部对焦诊断评语
+  focusDiagnosis?: string;
   // 睁眼/眨眼检测
   isOpen: boolean;
   opennessRatio: number; // 0.0 ~ 1.0
@@ -47,4 +49,6 @@ export interface EyeDetectionResult {
   photoPath: string;
   faces: DetectedFace[];
   detectionTimeMs: number;
+  computeDevice?: string;
+  precisionMode?: string;
 }

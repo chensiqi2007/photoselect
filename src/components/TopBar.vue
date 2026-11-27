@@ -44,21 +44,21 @@ const toggleFlagFilter = (flag: FlagStatus) => {
 
 <template>
   <header
-    class="h-10 px-3 flex items-center justify-between border-b border-[#26262C] bg-[#16161A]/95 backdrop-blur-md text-xs select-none z-30 transition-colors"
+    class="h-11 px-3.5 flex items-center justify-between border-b border-white/[0.08] bg-[#1C1C1E]/85 backdrop-blur-2xl backdrop-saturate-150 text-xs select-none z-30 transition-colors"
   >
     <!-- 左区: 文件夹入口与路径 -->
     <div class="flex items-center space-x-2 min-w-0 max-w-[34%]">
       <button
         @click="handleOpenFolder"
-        class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-[#222228] hover:bg-[#2C2C34] text-[#F4F4F5] transition-all font-medium border border-[#2E2E38] hover:border-sky-500/40 text-[11px] shadow-sm active:scale-95 cursor-pointer flex-shrink-0"
+        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.13] text-[#F5F5F7] transition-all font-medium border border-white/[0.08] text-[11px] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] active:scale-[0.97] cursor-pointer flex-shrink-0"
         :title="t.topbar.openFolder"
       >
-        <FolderOpen class="w-3.5 h-3.5 text-amber-400" />
+        <FolderOpen class="w-3.5 h-3.5 text-[#0A84FF]" />
         <span>{{ t.topbar.openFolder }}</span>
       </button>
 
       <div
-        class="truncate px-2.5 py-0.5 rounded-md bg-[#1B1B20] border border-[#26262E] text-[#9E9EA8] font-mono text-[11px]"
+        class="truncate px-2.5 py-1 rounded-lg bg-black/25 border border-white/[0.06] text-[#98989D] font-mono text-[11px]"
         :title="store.currentFolderPath"
       >
         {{ store.currentFolderPath || t.topbar.noFolder }}
@@ -66,22 +66,22 @@ const toggleFlagFilter = (flag: FlagStatus) => {
 
       <span
         v-if="store.isScanning"
-        class="inline-flex items-center space-x-1 text-[10px] text-amber-300 font-medium bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full animate-pulse flex-shrink-0"
+        class="inline-flex items-center space-x-1 text-[10px] text-[#FF9F0A] font-medium bg-[#FF9F0A]/15 border border-[#FF9F0A]/25 px-2.5 py-0.5 rounded-full animate-pulse flex-shrink-0"
       >
         <span>⚡</span>
         <span>{{ t.topbar.scanning }}</span>
       </span>
     </div>
 
-    <!-- 中区: 视图模式切换 (Loupe [E] / Grid [G] / Compare [C] / Group Folded) -->
-    <div class="flex items-center bg-[#121214] p-0.5 rounded-lg border border-[#26262C] shadow-inner">
+    <!-- 中区: Apple Segmented Control 视图切换 -->
+    <div class="flex items-center bg-black/35 p-0.5 rounded-[10px] border border-white/[0.06] shadow-inner">
       <button
         @click="store.viewMode = 'loupe'"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1.5 px-3 py-1 rounded-[8px] text-[11px] font-medium transition-all duration-150 cursor-pointer',
           store.viewMode === 'loupe'
-            ? 'bg-[#24242B] text-white shadow-sm font-semibold'
-            : 'text-[#8E8E98] hover:text-[#E4E4E8] hover:bg-white/5',
+            ? 'bg-[#3A3A3C]/90 text-white shadow-[0_1px_3px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] font-semibold'
+            : 'text-[#8E8E93] hover:text-[#F5F5F7]',
         ]"
         :title="t.topbar.loupe"
       >
@@ -91,10 +91,10 @@ const toggleFlagFilter = (flag: FlagStatus) => {
       <button
         @click="store.viewMode = 'grid'"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1.5 px-3 py-1 rounded-[8px] text-[11px] font-medium transition-all duration-150 cursor-pointer',
           store.viewMode === 'grid'
-            ? 'bg-[#24242B] text-white shadow-sm font-semibold'
-            : 'text-[#8E8E98] hover:text-[#E4E4E8] hover:bg-white/5',
+            ? 'bg-[#3A3A3C]/90 text-white shadow-[0_1px_3px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] font-semibold'
+            : 'text-[#8E8E93] hover:text-[#F5F5F7]',
         ]"
         :title="t.topbar.grid"
       >
@@ -104,10 +104,10 @@ const toggleFlagFilter = (flag: FlagStatus) => {
       <button
         @click="store.viewMode = 'compare'"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1.5 px-3 py-1 rounded-[8px] text-[11px] font-medium transition-all duration-150 cursor-pointer',
           store.viewMode === 'compare'
-            ? 'bg-[#24242B] text-white shadow-sm font-semibold'
-            : 'text-[#8E8E98] hover:text-[#E4E4E8] hover:bg-white/5',
+            ? 'bg-[#3A3A3C]/90 text-white shadow-[0_1px_3px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] font-semibold'
+            : 'text-[#8E8E93] hover:text-[#F5F5F7]',
         ]"
         :title="t.topbar.compare"
       >
@@ -115,16 +115,16 @@ const toggleFlagFilter = (flag: FlagStatus) => {
         <span>{{ t.topbar.compare }}</span>
       </button>
 
-      <div class="h-3 w-[1px] bg-[#2A2A30] mx-0.5"></div>
+      <div class="h-3.5 w-[1px] bg-white/[0.08] mx-1"></div>
 
       <!-- 分组折叠选片视图切换 -->
       <button
         @click="store.toggleGroupFoldedMode()"
         :class="[
-          'flex items-center space-x-1 px-2 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1 px-2.5 py-1 rounded-[8px] text-[11px] font-medium transition-all duration-150 cursor-pointer',
           store.isGroupFoldedMode
-            ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40 shadow-sm'
-            : 'text-[#8E8E98] hover:text-[#E4E4E8] hover:bg-white/5',
+            ? 'bg-[#BF5AF2]/25 text-[#DA8FFF] shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] font-semibold'
+            : 'text-[#8E8E93] hover:text-[#F5F5F7]',
         ]"
         :title="store.isGroupFoldedMode ? '已开启分组折叠 (同组仅显示最佳帧，点击平铺全部)' : '开启分组折叠选片 (同主体/连拍叠放)'"
       >
@@ -244,36 +244,36 @@ const toggleFlagFilter = (flag: FlagStatus) => {
 
       <div class="h-4 w-[1px] bg-[#26262C]"></div>
 
-      <!-- 快捷导出面板触发器 (Professional Action Button) -->
+      <!-- 快捷导出面板触发器 (Apple Blue Primary Action) -->
       <button
         @click="store.exportDrawerOpen = !store.exportDrawerOpen"
-        class="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs shadow-sm border border-sky-400/30 active:scale-95 transition-all cursor-pointer"
+        class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#0A84FF] hover:bg-[#0077ED] text-white font-medium text-[11px] shadow-[0_1px_2px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] active:scale-[0.97] transition-all cursor-pointer"
         :title="t.topbar.export"
       >
         <Download class="w-3.5 h-3.5" />
         <span>{{ t.topbar.export }}</span>
-        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">
+        <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono tabular-nums">
           {{ store.exportCounts.picked || store.filteredGroups.length }}
         </span>
       </button>
 
-      <div class="h-4 w-[1px] bg-[#26262C]"></div>
+      <div class="h-4 w-[1px] bg-white/[0.08]"></div>
 
-      <!-- 页面与字体缩放：紧凑级循环切换 (100% -> 125% -> 150% -> 200%) -->
+      <!-- 页面与字体缩放 -->
       <button
         @click="store.zoomInUiScale()"
         @contextmenu.prevent="store.resetUiScale()"
-        class="flex items-center space-x-1 px-2 py-1 rounded-lg bg-[#18181C] hover:bg-[#222228] border border-[#26262C] text-[11px] font-mono text-zinc-300 hover:text-white transition-all cursor-pointer shadow-sm flex-shrink-0"
+        class="flex items-center space-x-1 px-2 py-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.11] border border-white/[0.08] text-[11px] font-mono text-[#E5E5EA] hover:text-white transition-all cursor-pointer flex-shrink-0"
         :title="`${t.settings.uiScale}: ${store.uiScale}% (点击步进放大 / 右键复位 100% / 快捷键 Ctrl + = / -)`"
       >
-        <ZoomIn class="w-3 h-3 text-zinc-400" />
+        <ZoomIn class="w-3 h-3 text-[#8E8E93]" />
         <span>{{ store.uiScale }}%</span>
       </button>
 
       <!-- 系统设置对话框触发器 -->
       <button
         @click="store.settingsModalOpen = true"
-        class="p-1.5 rounded-lg bg-[#202026] hover:bg-[#2A2A32] text-[#8E8E98] hover:text-white transition-all border border-[#2E2E38] hover:border-[#3E3E48] cursor-pointer hover:rotate-45 duration-200"
+        class="p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-[#8E8E93] hover:text-white transition-all border border-white/[0.08] cursor-pointer hover:rotate-45 duration-200"
         :title="t.topbar.settings"
       >
         <Settings class="w-3.5 h-3.5" />

@@ -662,7 +662,7 @@ onUnmounted(() => {
           left: `${eye.x}px`,
           top: `${eye.y}px`,
         }"
-        :title="`${t.eyeAf.lockOnTip} (${eye.sharpness}%)`"
+        :title="`${t.eyeAf.lockOnTip} (${eye.sharpness}%${eye.eye.focusDiagnosis ? ' · ' + eye.eye.focusDiagnosis : ''})`"
       >
         <div
           :class="[
@@ -696,47 +696,47 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- 左上角悬浮 HUD: 文件名 + RAW+JPG 徽章 + 缩放百分比 -->
+    <!-- 左上角悬浮 HUD: Apple Photos 磨砂胶囊 -->
     <div
       v-if="store.currentPhoto"
-      class="absolute top-4 left-4 z-20 flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 shadow-2xl"
+      class="absolute top-4 left-4 z-20 flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-[#1C1C1E]/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
     >
-      <span class="font-mono font-bold text-xs text-[#F4F4F5]">
+      <span class="font-mono font-semibold text-xs text-[#F5F5F7]">
         {{ store.currentPhoto.base_name }}
       </span>
       <span
         :class="[
-          'text-[10px] font-mono font-bold px-1.5 py-0.2 rounded shadow-sm',
+          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full',
           store.currentPhoto.std_image && store.currentPhoto.raw_image
-            ? 'bg-blue-600 text-white'
+            ? 'bg-[#0A84FF] text-white'
             : store.currentPhoto.raw_image
-            ? 'bg-amber-600 text-white'
-            : 'bg-zinc-700 text-zinc-200',
+            ? 'bg-[#FF9F0A] text-black'
+            : 'bg-white/[0.14] text-[#F5F5F7]',
         ]"
       >
         {{ getBadgeLabel(store.currentPhoto) }}
       </span>
-      <span class="text-[10px] font-mono text-[#A1A1AA] tabular-nums">
+      <span class="text-[10px] font-mono text-[#98989D] tabular-nums">
         {{ Math.round(scale * 100) }}%
       </span>
     </div>
 
-    <!-- 右上角悬浮辅助工具条 (人眼对焦 / 峰值对焦 / 过曝警示 / 100% 切换) -->
+    <!-- 右上角悬浮辅助工具条 (Apple Photos Floating Pill) -->
     <div
-      class="absolute top-4 right-4 z-20 flex items-center space-x-1 p-1 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 shadow-2xl text-xs"
+      class="absolute top-4 right-4 z-20 flex items-center space-x-1 p-1 rounded-full bg-[#1C1C1E]/75 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] shadow-[0_8px_24px_rgba(0,0,0,0.4)] text-xs"
     >
       <!-- AI 人眼识别对焦追踪开关 -->
       <button
         @click="store.toggleEyeAf"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer',
           store.eyeAfEnabled
-            ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 shadow-sm'
-            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
+            ? 'bg-[#0A84FF]/25 text-[#64D2FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+            : 'text-[#AEAEB2] hover:text-white hover:bg-white/[0.08]',
         ]"
         :title="t.eyeAf.toggleOverlay"
       >
-        <Eye class="w-3 h-3 text-sky-400" />
+        <Eye class="w-3 h-3 text-[#64D2FF]" />
         <span>{{ t.eyeAf.toggleOverlay }}</span>
       </button>
 
@@ -744,14 +744,14 @@ onUnmounted(() => {
       <button
         @click="store.focusPeaking = !store.focusPeaking"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer',
           store.focusPeaking
-            ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-sm'
-            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
+            ? 'bg-[#FF453A]/25 text-[#FF6961] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+            : 'text-[#AEAEB2] hover:text-white hover:bg-white/[0.08]',
         ]"
         :title="t.loupe.peaking"
       >
-        <Sparkles class="w-3 h-3 text-rose-400" />
+        <Sparkles class="w-3 h-3 text-[#FF6961]" />
         <span>{{ t.loupe.peaking }}</span>
       </button>
 
@@ -759,14 +759,14 @@ onUnmounted(() => {
       <button
         @click="showClippingWarning = !showClippingWarning"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer',
           showClippingWarning
-            ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm'
-            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
+            ? 'bg-[#FF9F0A]/25 text-[#FFD60A] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+            : 'text-[#AEAEB2] hover:text-white hover:bg-white/[0.08]',
         ]"
         :title="t.loupe.clipping"
       >
-        <AlertTriangle class="w-3 h-3 text-amber-400" />
+        <AlertTriangle class="w-3 h-3 text-[#FFD60A]" />
         <span>{{ t.loupe.clipping }}</span>
       </button>
 
@@ -774,10 +774,10 @@ onUnmounted(() => {
       <button
         @click="toggle100Percent"
         :class="[
-          'flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer',
+          'flex items-center space-x-1 px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer',
           is100Percent
-            ? 'bg-blue-500/25 text-blue-300 border border-blue-500/40 shadow-sm'
-            : 'text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-white/5 border border-transparent',
+            ? 'bg-[#0A84FF]/25 text-[#64D2FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+            : 'text-[#AEAEB2] hover:text-white hover:bg-white/[0.08]',
         ]"
         :title="is100Percent ? t.loupe.fitScreen : t.loupe.sharpness100"
       >
@@ -789,19 +789,19 @@ onUnmounted(() => {
     <!-- Narrative Select 风格人眼特写检视浮动面板 -->
     <EyeInspectionPanel v-if="store.eyeAfEnabled && store.currentPhoto" />
 
-    <!-- 底部中央悬浮打标条 -->
+    <!-- 底部中央悬浮打标条 (Apple Photos Floating Pill) -->
     <div
       v-if="store.currentPhoto"
-      class="absolute bottom-4 z-20 flex items-center space-x-3 px-4 py-2 rounded-2xl bg-black/80 backdrop-blur-md border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6)]"
+      class="absolute bottom-5 z-20 flex items-center space-x-3 px-4 py-2 rounded-full bg-[#1C1C1E]/80 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
     >
       <div class="flex items-center space-x-1.5">
         <button
           @click="store.setFlag(1 as FlagStatus)"
           :class="[
-            'flex items-center space-x-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
+            'flex items-center space-x-1 px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95',
             store.currentPhoto.flag === 1
-              ? 'bg-emerald-500 text-white shadow-emerald-500/40'
-              : 'bg-[#222228] text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-[#2C2C34]',
+              ? 'bg-[#30D158] text-black shadow-[0_4px_14px_rgba(48,209,88,0.4)]'
+              : 'bg-white/[0.08] text-[#AEAEB2] hover:text-white hover:bg-white/[0.14]',
           ]"
           :title="t.loupe.pickKey"
         >
@@ -811,10 +811,10 @@ onUnmounted(() => {
         <button
           @click="store.setFlag(-1 as FlagStatus)"
           :class="[
-            'flex items-center space-x-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95',
+            'flex items-center space-x-1 px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95',
             store.currentPhoto.flag === -1
-              ? 'bg-rose-500 text-white shadow-rose-500/40'
-              : 'bg-[#222228] text-[#8E8E98] hover:text-[#F4F4F5] hover:bg-[#2C2C34]',
+              ? 'bg-[#FF453A] text-white shadow-[0_4px_14px_rgba(255,69,58,0.4)]'
+              : 'bg-white/[0.08] text-[#AEAEB2] hover:text-white hover:bg-white/[0.14]',
           ]"
           :title="t.loupe.rejectKey"
         >

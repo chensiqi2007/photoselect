@@ -104,6 +104,9 @@ pub struct PhotoGroup {
     /// 神经网络自动识别的拍摄场景/主体类别标签
     #[serde(default)]
     pub scene_tag: Option<String>,
+    /// 画面中检出的人物聚类 ID 列表 (如 ["person_001", "person_002"])
+    #[serde(default)]
+    pub person_group_ids: Vec<String>,
     /// 主文件字节数 (用于统计与安全校验)
     pub file_size_bytes: u64,
     /// 拍摄时间戳 ISO 8601
@@ -137,6 +140,7 @@ impl PhotoGroup {
             neural_score: None,
             sharpness_score: None,
             scene_tag: None,
+            person_group_ids: Vec::new(),
             file_size_bytes: 0,
             capture_time: None,
             exif: None,
@@ -467,6 +471,16 @@ pub struct SubjectCluster {
     pub start_time: Option<String>,
     pub end_time: Option<String>,
     pub time_span_secs: u64,
+}
+
+/// 按人物身份聚类结果实体 (YuNet + SFace Apache-2.0)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PersonCluster {
+    pub person_id: String,
+    pub avatar_data_url: String,
+    pub photo_ids: Vec<String>,
+    pub count: usize,
 }
 
 #[cfg(test)]

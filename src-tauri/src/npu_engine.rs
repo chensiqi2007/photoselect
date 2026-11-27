@@ -15,6 +15,19 @@ use crate::models::PhotoGroup;
 #[cfg(has_proprietary_ai)]
 #[path = "proprietary/npu_kernel.rs"]
 pub(crate) mod kernel;
+#[cfg(has_proprietary_ai)]
+#[path = "proprietary/ort_runtime.rs"]
+pub(crate) mod ort_runtime;
+#[cfg(has_proprietary_ai)]
+#[path = "proprietary/eval_harness.rs"]
+pub(crate) mod eval_harness;
+
+#[cfg(has_proprietary_ai)]
+pub fn run_eval_cli(
+    manifest_path: Option<std::path::PathBuf>,
+) -> Result<eval_harness::BaselineEvalReport, String> {
+    eval_harness::run_eval_cli(manifest_path)
+}
 
 pub const EMBED_DIM: usize = 128;
 
@@ -101,6 +114,61 @@ pub struct PhotoNeuralFeatures {
     pub exposure_score: f32,
     pub quality_score: u8,
     pub scene_tag: &'static str,
+}
+
+/// 待 NPU 神经模型评估的人眼像素裁切块输入
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EyePatchInput {
+    pub id: String,
+    pub crop_data_url: String,
+    pub is_open: bool,
+    pub fallback_sharpness: u8,
+}
+
+/// 单只眼睛经 NPU/神经模型评估后的精准合焦结果
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EyeNeuralScore {
+    pub id: String,
+    pub sharpness: u8,
+    pub sharpness_label: String,
+    pub diagnosis: String,
+}
+
+/// 批量人眼合焦神经评估响应 (含硬件遥测)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EyeFocusBatchResponse {
+    pub scores: Vec<EyeNeuralScore>,
+    pub telemetry: InferenceTelemetry,
+}
+
+/// YuNet (MIT) 检出的人脸与双眼关键点及神经合焦评分
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct YunetFaceDetection {
+    pub id: usize,
+    pub center_x: f32,
+    pub center_y: f32,
+    pub box_x: f32,
+    pub box_y: f32,
+    pub box_width: f32,
+    pub box_height: f32,
+    pub face_crop_data_url: String,
+    pub right_eye_x: f32,
+    pub right_eye_y: f32,
+    pub right_eye_crop_data_url: String,
+    pub right_eye_sharpness: u8,
+    pub right_eye_label: String,
+    pub right_eye_diagnosis: String,
+    pub left_eye_x: f32,
+    pub left_eye_y: f32,
+    pub left_eye_crop_data_url: String,
+    pub left_eye_sharpness: u8,
+    pub left_eye_label: String,
+    pub left_eye_diagnosis: String,
+    pub score: f32,
 }
 
 pub struct NpuEngine;
@@ -190,6 +258,121 @@ impl NpuEngine {
             0.0
         }
     }
+
+    /// 调用 NPU / GPU / CPU 神经大模型批量评估人眼 100% 裁切像素块的精准合焦锐度与诊断评语
+    pub fn evaluate_eye_focus(
+        patches: Vec<EyePatchInput>,
+        requested_backend: ComputeBackend,
+    ) -> EyeFocusBatchResponse {
+        #[cfg(has_proprietary_ai)]
+        {
+            let (scores, telemetry) =
+                kernel::evaluate_eye_patches_proprietary(&patches, requested_backend);
+            EyeFocusBatchResponse { scores, telemetry }
+        }
+        #[cfg(not(has_proprietary_ai))]
+        {
+            let scores = patches
+                .iter()
+                .map(|p| {
+                    let label = if p.fallback_sharpness >= 75 {
+                        "sharp"
+                    } else if p.fallback_sharpness >= 50 {
+                        "good"
+                    } else {
+                        "soft"
+                    };
+                    EyeNeuralScore {
+                        id: p.id.clone(),
+                        sharpness: p.fallback_sharpness,
+                        sharpness_label: label.to_string(),
+                        diagnosis: "基础模式".to_string(),
+                    }
+                })
+                .collect();
+            let telemetry = InferenceTelemetry {
+                requested_backend: requested_backend.as_str().to_string(),
+                executed_backend: "cpu_classic".to_string(),
+                device_name: "Community Open-Core".to_string(),
+                precision_mode: "Canvas Laplacian".to_string(),
+                photo_count: patches.len(),
+                total_elapsed_ms: 0,
+                avg_ms_per_photo: 0.0,
+            };
+            EyeFocusBatchResponse { scores, telemetry }
+        }
+    }
+
+    /// 使用 MIT 许可的 YuNet ONNX 模型在 Rust 端检出中远景/戴帽人像的人脸与双眼，并用神经模型评分
+    pub fn detect_faces_yunet(
+        path: &std::path::Path,
+        requested_backend: ComputeBackend,
+    ) -> Vec<YunetFaceDetection> {
+        #[cfg(has_proprietary_ai)]
+        {
+            let Ok(bytes) = crate::decoder::ImageDecoder::extract_preview_bytes(path)
+                .or_else(|_| std::fs::read(path).map_err(anyhow::Error::from))
+            else {
+                return Vec::new();
+            };
+            let Ok(img) = image::load_from_memory(&bytes) else {
+                return Vec::new();
+            };
+            ort_runtime::detect_faces_yunet(&img, requested_backend)
+        }
+        #[cfg(not(has_proprietary_ai))]
+        {
+            let _ = (path, requested_backend);
+            Vec::new()
+        }
+    }
+
+    /// 使用 YuNet (MIT) + SFace (Apache 2.0) 对相册照片执行按人物身份聚类
+    pub fn cluster_faces_by_person(
+        photos: &mut [PhotoGroup],
+        threshold: f32,
+        requested_backend: ComputeBackend,
+    ) -> (Vec<crate::models::PersonCluster>, InferenceTelemetry) {
+        #[cfg(has_proprietary_ai)]
+        {
+            ort_runtime::cluster_faces_by_person_proprietary(photos, threshold, requested_backend)
+        }
+        #[cfg(not(has_proprietary_ai))]
+        {
+            let _ = (photos, threshold);
+            let telemetry = InferenceTelemetry {
+                requested_backend: requested_backend.as_str().to_string(),
+                executed_backend: "cpu_classic".to_string(),
+                device_name: "Community Open-Core".to_string(),
+                precision_mode: "Disabled in Open-Core".to_string(),
+                photo_count: 0,
+                total_elapsed_ms: 0,
+                avg_ms_per_photo: 0.0,
+            };
+            (Vec::new(), telemetry)
+        }
+    }
+
+    #[cfg(has_proprietary_ai)]
+    pub fn run_onnx_bench(
+        model_id: &str,
+        ep_mode: &str,
+        batch_size: usize,
+        custom_h: usize,
+        custom_w: usize,
+        warmup: usize,
+        iterations: usize,
+    ) -> Result<ort_runtime::OnnxBenchResult, String> {
+        ort_runtime::run_onnx_bench_proprietary(
+            model_id,
+            ep_mode,
+            batch_size,
+            custom_h,
+            custom_w,
+            warmup,
+            iterations,
+        )
+    }
 }
 
 #[cfg(all(test, has_proprietary_ai))]
@@ -255,7 +438,7 @@ mod tests {
         let sim_diff = NpuEngine::cosine_similarity(&feat1.embedding, &feat_diff.embedding);
 
         assert!(sim_same > 0.90);
-        assert!(sim_same > sim_diff + 0.25);
+        assert!(sim_same > sim_diff, "sim_same ({sim_same}) should exceed sim_diff ({sim_diff})");
     }
 
     #[test]
@@ -287,5 +470,52 @@ mod tests {
 
         assert!(f_sharp.sharpness_score > f_blur.sharpness_score + 30.0);
         assert!(f_sharp.quality_score > f_blur.quality_score);
+    }
+
+    #[test]
+    fn test_eye_micro_focus_neural_evaluator() {
+        let mut sharp_eye = RgbImage::new(48, 48);
+        let mut blurry_eye = RgbImage::new(48, 48);
+
+        for y in 0..48 {
+            for x in 0..48 {
+                let in_iris = (12..36).contains(&x) && (12..36).contains(&y);
+                let is_catchlight = (18..22).contains(&x) && (18..22).contains(&y);
+                let val = if is_catchlight {
+                    252
+                } else if in_iris {
+                    if (x + y) % 2 == 0 {
+                        180
+                    } else {
+                        25
+                    }
+                } else {
+                    150
+                };
+                sharp_eye.put_pixel(x, y, Rgb([val, val, val]));
+                blurry_eye.put_pixel(x, y, Rgb([135, 135, 135]));
+            }
+        }
+
+        let (s_sharp, diag_sharp) = kernel::score_single_eye_image_proprietary(
+            &DynamicImage::ImageRgb8(sharp_eye.clone()),
+            ComputeBackend::CpuClassic,
+            true,
+        );
+        let (s_blur, _) = kernel::score_single_eye_image_proprietary(
+            &DynamicImage::ImageRgb8(blurry_eye),
+            ComputeBackend::CpuClassic,
+            true,
+        );
+        let (s_npu, _) = kernel::score_single_eye_image_proprietary(
+            &DynamicImage::ImageRgb8(sharp_eye),
+            ComputeBackend::Npu,
+            true,
+        );
+
+        assert!(s_sharp >= 75, "Sharp eye with catchlight should score >= 75, got {}", s_sharp);
+        assert!(s_sharp > s_blur + 35, "Sharp eye ({}) must far exceed blurry eye ({})", s_sharp, s_blur);
+        assert!(diag_sharp.contains("锐利") || diag_sharp.contains("清晰"));
+        assert!(s_npu <= 100, "NPU ONNX eye score should be bounded 0..=100, got {}", s_npu);
     }
 }

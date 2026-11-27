@@ -180,6 +180,8 @@ src-tauri/src/proprietary/
 **/*_proprietary.rs
 **/*.npu.blob
 **/*.onnx
+ml_pipeline/
+datasets/
 temp/
 比赛/
 harmony/.clang-tidy

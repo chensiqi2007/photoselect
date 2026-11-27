@@ -1,6 +1,7 @@
 [package]
 name = "photoselect-desktop"
-version = "1.1.0"
+version = "1.2.0"
+default-run = "photoselect-desktop"
 description = "极速摄影选片与管理桌面应用 - Zero-Import, Millisecond RAW+JPG Culling Platform"
 authors = ["URL Time"]
 edition = "2021"
@@ -40,6 +41,8 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
 keyring = "3.6"
 base64 = "0.23"
+ndarray = "0.17"
+ort = { version = "2.0.0-rc.15", default-features = false, features = ["std", "ndarray", "load-dynamic", "api-17", "directml", "openvino"] }
 
 [profile.release]
 opt-level = 3

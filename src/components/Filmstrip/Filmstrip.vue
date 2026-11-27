@@ -7,6 +7,16 @@ import type { PhotoGroup } from "../../types/photo";
 const store = usePhotoStore();
 const filmstripContainer = ref<HTMLElement | null>(null);
 
+// 底部胶片栏支持鼠标主滚轮 (deltaY) 与侧滚轮/触摸板横向手势 (deltaX)
+const handleFilmstripWheel = (e: WheelEvent) => {
+  const el = filmstripContainer.value;
+  if (!el) return;
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if (delta !== 0) {
+    el.scrollLeft += delta;
+  }
+};
+
 // 监听当前选中的照片索引，自动平移居中当前胶片
 watch(
   () => store.selectedIndex,
@@ -55,11 +65,11 @@ const colorClassMap: Record<string, string> = {
 
 <template>
   <div
-    class="h-[132px] flex-shrink-0 bg-[#16161A] border-t border-[#26262C] flex flex-col select-none overflow-hidden transition-colors"
+    class="h-[132px] flex-shrink-0 bg-[#18181A]/90 backdrop-blur-2xl border-t border-white/[0.08] flex flex-col select-none overflow-hidden transition-colors"
   >
     <!-- 胶片栏顶部微信息条 -->
     <div
-      class="h-6 px-3.5 bg-[#131316] border-b border-[#222228] flex items-center justify-between text-[11px] text-[#8E8E98] font-mono transition-colors"
+      class="h-6 px-3.5 bg-black/20 border-b border-white/[0.06] flex items-center justify-between text-[11px] text-[#98989D] font-mono transition-colors"
     >
       <div class="flex items-center space-x-2.5">
         <span class="text-[#71717A]">序列:</span>
@@ -82,24 +92,25 @@ const colorClassMap: Record<string, string> = {
       </div>
     </div>
 
-    <!-- 横向胶片卡片流 -->
+    <!-- 横向胶片卡片流 (支持垂直滚轮与侧滚轮横向滑动) -->
     <div
       ref="filmstripContainer"
-      class="flex-1 flex items-center overflow-x-auto px-2.5 py-1.5 space-x-2 scroll-smooth"
+      @wheel.prevent="handleFilmstripWheel"
+      class="flex-1 flex items-center overflow-x-auto px-2.5 py-1.5 space-x-2"
     >
       <div
         v-for="(photo, index) in store.filteredGroups"
         :key="photo.id"
         @click="(e) => store.selectIndex(index, e.ctrlKey || e.metaKey)"
         :class="[
-          'relative h-[94px] w-[94px] flex-shrink-0 rounded-lg bg-[#1A1A20] border cursor-pointer overflow-hidden transition-all duration-150 ease-out flex flex-col justify-between shadow-sm',
+          'relative h-[94px] w-[94px] flex-shrink-0 rounded-xl bg-[#2C2C2E]/60 border cursor-pointer overflow-hidden transition-all duration-150 ease-out flex flex-col justify-between shadow-sm',
           index === store.selectedIndex
             ? (store.viewMode === 'compare' || store.compareIndex !== null)
-              ? 'ring-2 ring-blue-500 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(59,130,246,0.35)] z-10'
-              : 'ring-2 ring-sky-400 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(56,189,248,0.35)] z-10'
+              ? 'ring-2 ring-[#0A84FF] border-transparent scale-[1.03] shadow-[0_0_18px_rgba(10,132,255,0.4)] z-10'
+              : 'ring-2 ring-[#0A84FF] border-transparent scale-[1.03] shadow-[0_0_18px_rgba(10,132,255,0.4)] z-10'
             : index === store.compareIndex
-            ? 'ring-2 ring-emerald-400 border-transparent scale-[1.03] shadow-[0_0_16px_rgba(52,211,153,0.35)] z-10'
-            : 'border-[#2A2A34] hover:border-[#4A4A58] opacity-80 hover:opacity-100 hover:scale-[1.01]',
+            ? 'ring-2 ring-[#30D158] border-transparent scale-[1.03] shadow-[0_0_18px_rgba(48,209,88,0.35)] z-10'
+            : 'border-white/[0.08] hover:border-white/[0.22] opacity-85 hover:opacity-100 hover:scale-[1.01]',
           colorClassMap[photo.color_label] || '',
         ]"
       >

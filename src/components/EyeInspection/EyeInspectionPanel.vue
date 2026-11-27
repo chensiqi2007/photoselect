@@ -36,24 +36,24 @@ const handleLockOn = (eye: DetectedEye | null) => {
     <button
       v-if="!store.eyePanelOpen"
       @click="store.toggleEyePanel"
-      class="pointer-events-auto flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#141418]/90 hover:bg-[#18181E] backdrop-blur-xl border border-white/10 hover:border-sky-500/30 shadow-2xl text-xs text-[#E5E5E5] transition-all cursor-pointer hover:scale-105 active:scale-95 group"
+      class="pointer-events-auto flex items-center space-x-2 px-3.5 py-2 rounded-full bg-[#1C1C1E]/80 hover:bg-[#2C2C2E]/90 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] hover:border-[#0A84FF]/40 shadow-[0_12px_32px_rgba(0,0,0,0.45)] text-xs text-[#F5F5F7] transition-all cursor-pointer hover:scale-[1.03] active:scale-95 group"
       :title="t.eyeAf.togglePanel"
     >
-      <Eye class="w-4 h-4 text-sky-400 group-hover:scale-110 transition-transform" />
+      <Eye class="w-4 h-4 text-[#0A84FF] group-hover:scale-110 transition-transform" />
       <span class="font-medium text-[11px] tracking-wide">{{ t.eyeAf.title }}</span>
       <span
         v-if="faces.length > 0"
-        class="ml-0.5 px-1.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-300 font-mono text-[10px] font-bold"
+        class="ml-0.5 px-1.5 py-0.5 rounded-full bg-[#0A84FF]/20 text-[#64D2FF] font-mono text-[10px] font-bold"
       >
         {{ faces.length }}
       </span>
-      <ChevronLeft class="w-3.5 h-3.5 text-[#71717A] group-hover:text-white transition-colors" />
+      <ChevronLeft class="w-3.5 h-3.5 text-[#8E8E93] group-hover:text-white transition-colors" />
     </button>
 
     <!-- 展开状态的主面板 -->
     <div
       v-else
-      class="pointer-events-auto w-80 max-h-[72vh] flex flex-col rounded-2xl bg-[#141418]/92 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden transition-all duration-150"
+      class="pointer-events-auto w-80 max-h-[72vh] flex flex-col rounded-2xl bg-[#1C1C1E]/85 backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.12] shadow-[0_24px_60px_rgba(0,0,0,0.6)] overflow-hidden transition-all duration-150"
     >
       <!-- 面板顶部标头 -->
       <div class="h-10 px-3.5 flex items-center justify-between border-b border-white/10 bg-white/5">
