@@ -172,3 +172,16 @@ $RECYCLE.BIN/
 *~
 .fuse_hidden*
 .directory
+
+# ------------------------------------------------------------------------------
+# 11. 闭源商业 AI / NPU 算力内核与本地私有模块 (Closed-Source Proprietary AI Engine)
+# ------------------------------------------------------------------------------
+src-tauri/src/proprietary/
+**/*_proprietary.rs
+**/*.npu.blob
+**/*.onnx
+temp/
+比赛/
+harmony/.clang-tidy
+harmony/.clangd
+

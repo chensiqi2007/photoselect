@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from "vue";
-import { Check, X, Star } from "lucide-vue-next";
+import { Check, X, Star, Play } from "lucide-vue-next";
 import { usePhotoStore } from "../../stores/photoStore";
 import type { PhotoGroup } from "../../types/photo";
 
@@ -25,9 +25,14 @@ watch(
 );
 
 const getBadgeLabel = (photo: PhotoGroup): string => {
+  if (photo.video_file) return "VIDEO";
   if (photo.std_image && photo.raw_image) return "RAW+JPG";
   if (photo.raw_image) return "RAW";
   return "JPG";
+};
+
+const isVideo = (photo: PhotoGroup): boolean => {
+  return !!photo.video_file;
 };
 
 const isRawPlusJpg = (photo: PhotoGroup): boolean => {
@@ -106,14 +111,30 @@ const colorClassMap: Record<string, string> = {
           <X class="w-8 h-8 text-rose-500/90 stroke-[2.5]" />
         </div>
 
-        <!-- 缩略图主体 (极速 20KB 缩略图流，避免 45MP 解压内存爆炸) -->
+        <!-- 缩略图主体: 视频优先展示首帧，照片展示原生轻量缩略图流 -->
+        <video
+          v-if="photo.video_file"
+          :src="store.getPreviewUrl(photo) + '#t=0.01'"
+          preload="metadata"
+          muted
+          playsinline
+          class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+        ></video>
         <img
+          v-else
           :src="store.getThumbnailUrl(photo)"
           loading="lazy"
           decoding="async"
           alt=""
           class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
         />
+
+        <!-- 视频胶片中央播放图标 -->
+        <div v-if="photo.video_file" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div class="w-6 h-6 rounded-full bg-black/60 backdrop-blur-xs flex items-center justify-center text-white/90 shadow">
+            <Play class="w-3 h-3 ml-0.5 fill-white/90" />
+          </div>
+        </div>
 
         <!-- 卡片左上角序号与对比角色徽章 -->
         <div class="relative z-20 p-1 flex items-start justify-between">
@@ -167,6 +188,8 @@ const colorClassMap: Record<string, string> = {
                 ? 'bg-blue-600/90 text-white'
                 : isRawOnly(photo)
                 ? 'bg-amber-600/90 text-white'
+                : isVideo(photo)
+                ? 'bg-purple-600/90 text-white'
                 : 'bg-zinc-700/90 text-zinc-200',
             ]"
           >

@@ -13,6 +13,9 @@ import type {
   BurstCluster,
   SimilarityConfig,
   SubjectCluster,
+  ComputeBackendMode,
+  ComputeCapabilities,
+  InferenceTelemetry,
 } from "../types/photo";
 import type { DetectedFace, DetectedEye } from "../types/eye";
 import { detectEyesInImage } from "../utils/eyeDetector";
@@ -113,6 +116,12 @@ export const usePhotoStore = defineStore("photo", {
     subjectClusters: [] as SubjectCluster[],
     isAnalyzingSimilarity: false as boolean,
 
+    // NPU / GPU / CPU 神经算力驱动状态与性能遥测
+    computeCapabilities: null as ComputeCapabilities | null,
+    selectedComputeBackend: ((typeof localStorage !== "undefined" && localStorage.getItem("photoselect_compute_backend")) || "auto") as ComputeBackendMode,
+    lastInferenceTelemetry: null as InferenceTelemetry | null,
+    autoTagScene: (typeof localStorage !== "undefined" && localStorage.getItem("photoselect_auto_tag_scene") === "true") as boolean,
+
     // 分组折叠选片视图 (Group Stacking / Folding View)
     isGroupFoldedMode: (typeof localStorage !== "undefined" && localStorage.getItem("photoselect_group_folded") === "true") as boolean,
     expandedGroupIds: [] as string[],
@@ -140,6 +149,14 @@ export const usePhotoStore = defineStore("photo", {
           return false;
         }
 
+        // 4.1 仅看视频 / 仅看照片
+        if (state.filter.video_only && !g.video_file) {
+          return false;
+        }
+        if (state.filter.photo_only && g.video_file) {
+          return false;
+        }
+
         // 5. 智能分类视图快速筛选
         switch (state.filter.smart_collection) {
           case "picked":
@@ -150,6 +167,8 @@ export const usePhotoStore = defineStore("photo", {
             return g.flag === 0;
           case "five_star":
             return g.rating === 5;
+          case "videos":
+            return !!g.video_file;
           default:
             return true;
         }
@@ -241,13 +260,15 @@ export const usePhotoStore = defineStore("photo", {
     },
 
     /// 智能分类数量徽章统计 (供左侧栏实时显示)
-    smartCounts(state): { all: number; picked: number; rejected: number; unflagged: number; five_star: number } {
+    smartCounts(state): { all: number; picked: number; rejected: number; unflagged: number; five_star: number; videos: number } {
       let picked = 0;
       let rejected = 0;
       let unflagged = 0;
       let five_star = 0;
+      let videos = 0;
 
       for (const g of state.groups) {
+        if (g.video_file) videos++;
         if (g.flag === 1) picked++;
         else if (g.flag === -1) rejected++;
         else unflagged++;
@@ -261,6 +282,7 @@ export const usePhotoStore = defineStore("photo", {
         rejected,
         unflagged,
         five_star,
+        videos,
       };
     },
 
@@ -488,11 +510,64 @@ export const usePhotoStore = defineStore("photo", {
       }
     },
 
+    /// 检查并校正选中索引 (防止过滤或折叠后索引越界)
+    ensureValidSelection() {
+      const len = this.filteredGroups.length;
+      if (len === 0) {
+        this.selectedIndex = 0;
+        this.compareIndex = null;
+        return;
+      }
+      if (this.selectedIndex >= len) {
+        this.selectedIndex = len - 1;
+      } else if (this.selectedIndex < 0) {
+        this.selectedIndex = 0;
+      }
+      if (this.compareIndex !== null) {
+        if (this.compareIndex >= len || this.compareIndex === this.selectedIndex) {
+          this.compareIndex = null;
+        }
+      }
+    },
+
+    setSmartCollection(type: "all" | "picked" | "rejected" | "unflagged" | "five_star" | "videos") {
+      this.filter.smart_collection = type;
+      this.ensureValidSelection();
+    },
+
+    toggleFlagFilter(flag: FlagStatus) {
+      const idx = this.filter.flags.indexOf(flag);
+      if (idx >= 0) {
+        this.filter.flags.splice(idx, 1);
+      } else {
+        this.filter.flags.push(flag);
+      }
+      this.ensureValidSelection();
+    },
+
+    toggleColorFilter(color: ColorLabel) {
+      const idx = this.filter.colors.indexOf(color);
+      if (idx >= 0) {
+        this.filter.colors.splice(idx, 1);
+      } else {
+        this.filter.colors.push(color);
+      }
+      this.ensureValidSelection();
+    },
+
     /// 设置当前照片星级评分 (0-5)
     async setRating(rating: number) {
-      await this.setRatingForPhoto(this.currentPhoto, rating);
+      const current = this.currentPhoto;
+      if (!current) return;
+      const currentId = current.id;
+      await this.setRatingForPhoto(current, rating);
       if (this.autoAdvance && this.viewMode === "loupe") {
-        this.nextPhoto();
+        const stillInList = this.filteredGroups.some((p) => p.id === currentId);
+        if (stillInList) {
+          this.nextPhoto();
+        } else {
+          this.ensureValidSelection();
+        }
       }
     },
 
@@ -517,9 +592,17 @@ export const usePhotoStore = defineStore("photo", {
 
     /// 设置当前照片旗标状态
     async setFlag(flag: FlagStatus) {
-      await this.setFlagForPhoto(this.currentPhoto, flag);
+      const current = this.currentPhoto;
+      if (!current) return;
+      const currentId = current.id;
+      await this.setFlagForPhoto(current, flag);
       if (this.autoAdvance && this.viewMode === "loupe") {
-        this.nextPhoto();
+        const stillInList = this.filteredGroups.some((p) => p.id === currentId);
+        if (stillInList) {
+          this.nextPhoto();
+        } else {
+          this.ensureValidSelection();
+        }
       }
     },
 
@@ -565,10 +648,10 @@ export const usePhotoStore = defineStore("photo", {
       }
     },
 
-    /// 生成 photoselect:// 零拷贝原生二进制图片流 URL
+    /// 生成 photoselect:// 零拷贝原生二进制图片/视频流 URL
     getPreviewUrl(photo: PhotoGroup | null): string {
       if (!photo) return "";
-      const path = (this.rawPreviewMode && photo.raw_image) || photo.std_image || photo.raw_image;
+      const path = photo.video_file || ((this.rawPreviewMode && photo.raw_image) || photo.std_image || photo.raw_image);
       if (!path) return "";
       try {
         if (typeof window !== "undefined" && (window as any).__TAURI_INTERNALS__?.convertFileSrc) {
@@ -597,7 +680,7 @@ export const usePhotoStore = defineStore("photo", {
     /// 生成轻量级高速缩略图 URL (胶片条与网格卡片专用，避免解压 30MB 原图导致卡顿)
     getThumbnailUrl(photo: PhotoGroup | null): string {
       if (!photo) return "";
-      const path = photo.std_image || photo.raw_image;
+      const path = photo.video_file || photo.std_image || photo.raw_image;
       if (!path) return "";
       try {
         if (typeof window !== "undefined" && (window as any).__TAURI_INTERNALS__?.convertFileSrc) {
@@ -612,6 +695,11 @@ export const usePhotoStore = defineStore("photo", {
       return isWindows
         ? `http://photoselect.localhost/${encoded}?type=thumb`
         : `photoselect://localhost/${encoded}?type=thumb`;
+    },
+
+    /// 判断是否为视频文件
+    isVideo(photo: PhotoGroup | null): boolean {
+      return !!photo?.video_file;
     },
 
     /// 切换系统主题 (dark / light) 并持久化
@@ -825,20 +913,64 @@ export const usePhotoStore = defineStore("photo", {
       this.targetLockOnEye = { x: eye.x, y: eye.y };
     },
 
-    /// 触发高速连拍动作聚合识别 (毫秒级与文件名序列混合判定，标定 Best Shot)
+    /// 探测本机 Intel NPU / DirectML GPU / 多核 CPU 算力驱动支持情况
+    async loadComputeCapabilities() {
+      try {
+        const caps = await invoke<ComputeCapabilities>("get_compute_capabilities");
+        this.computeCapabilities = caps;
+        if (caps.selectedBackend) {
+          this.selectedComputeBackend = caps.selectedBackend;
+        }
+      } catch (err) {
+        console.warn("加载算力驱动设备信息失败:", err);
+      }
+    },
+
+    /// 切换聚合识别与选优模型的硬件驱动方式 ("auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic")
+    async setComputeBackend(backend: ComputeBackendMode) {
+      this.selectedComputeBackend = backend;
+      try {
+        localStorage.setItem("photoselect_compute_backend", backend);
+      } catch {}
+      try {
+        const caps = await invoke<ComputeCapabilities>("set_compute_backend", { backend });
+        this.computeCapabilities = caps;
+      } catch (err) {
+        console.warn("保存算力驱动设置失败:", err);
+      }
+    },
+
+    /// 切换聚类时是否自动写入神经网络识别的场景分类标签
+    setAutoTagScene(enabled: boolean) {
+      this.autoTagScene = enabled;
+      try {
+        localStorage.setItem("photoselect_auto_tag_scene", enabled ? "true" : "false");
+      } catch {}
+    },
+
+    /// 触发高速连拍动作聚合识别 (支持 NPU/GPU/CPU 驱动焦点锐度选优并标定 Best Shot)
     async clusterBursts(config?: BurstConfig) {
       if (!this.groups.length) return [];
       this.isBurstClustering = true;
       try {
-        const [updatedPhotos, clusters] = await invoke<[PhotoGroup[], BurstCluster[]]>(
-          "cluster_burst_photos",
-          {
-            photos: this.groups,
-            config: config || { threshold_ms: 500, min_burst_count: 2, auto_flag_best: false },
-          }
-        );
+        const mergedConfig: BurstConfig = {
+          threshold_ms: 500,
+          min_burst_count: 2,
+          auto_flag_best: false,
+          ...config,
+          compute_backend: config?.compute_backend || this.selectedComputeBackend,
+        };
+        const [updatedPhotos, clusters, telemetry] = await invoke<
+          [PhotoGroup[], BurstCluster[], InferenceTelemetry]
+        >("cluster_burst_photos", {
+          photos: this.groups,
+          config: mergedConfig,
+        });
         this.groups = updatedPhotos;
         this.burstClusters = clusters;
+        if (telemetry) {
+          this.lastInferenceTelemetry = telemetry;
+        }
         return clusters;
       } catch (err) {
         console.error("连拍聚合识别失败:", err);
@@ -907,6 +1039,7 @@ export const usePhotoStore = defineStore("photo", {
       try {
         localStorage.setItem("photoselect_group_folded", target ? "true" : "false");
       } catch {}
+      this.ensureValidSelection();
     },
 
     /// 展开或折叠单个连拍/同主体动作组
@@ -917,6 +1050,7 @@ export const usePhotoStore = defineStore("photo", {
       } else {
         this.expandedGroupIds.push(groupId);
       }
+      this.ensureValidSelection();
     },
 
     /// 展开全部组
@@ -934,27 +1068,33 @@ export const usePhotoStore = defineStore("photo", {
       this.expandedGroupIds = [];
     },
 
-    /// 触发严格去重与同主体视觉聚类分析 (基于 dHash 算法与滑动时序窗口)
+    /// 触发严格去重与同主体视觉聚类分析 (支持 NPU/GPU/CPU 驱动 128-D 语义嵌入与 dHash 混合聚类)
     async detectSimilarityAndDuplicates(config?: SimilarityConfig) {
       if (!this.groups.length) return [];
       this.isAnalyzingSimilarity = true;
       try {
-        const [updatedPhotos, clusters] = await invoke<[PhotoGroup[], SubjectCluster[]]>(
-          "detect_similarity_and_duplicates",
-          {
-            photos: this.groups,
-            config: config || {
-              dedup_threshold: 3,
-              subject_threshold: 12,
-              time_window_secs: 60,
-              min_group_count: 2,
-              auto_reject_duplicates: false,
-              auto_flag_best: false,
-            },
-          }
-        );
+        const mergedConfig: SimilarityConfig = {
+          dedup_threshold: 3,
+          subject_threshold: 12,
+          time_window_secs: 60,
+          min_group_count: 2,
+          auto_reject_duplicates: false,
+          auto_flag_best: false,
+          ...config,
+          compute_backend: config?.compute_backend || this.selectedComputeBackend,
+          auto_tag_scene: config?.auto_tag_scene ?? this.autoTagScene,
+        };
+        const [updatedPhotos, clusters, telemetry] = await invoke<
+          [PhotoGroup[], SubjectCluster[], InferenceTelemetry]
+        >("detect_similarity_and_duplicates", {
+          photos: this.groups,
+          config: mergedConfig,
+        });
         this.groups = updatedPhotos;
         this.subjectClusters = clusters;
+        if (telemetry) {
+          this.lastInferenceTelemetry = telemetry;
+        }
         return clusters;
       } catch (err) {
         console.error("相似度分析与去重失败:", err);

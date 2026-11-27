@@ -8,6 +8,7 @@
   <meta name="keywords" content="PhotoSelect, 摄影选片软件, RAW选片, 连拍筛选, 峰值对焦, 人眼焦点检测, 商业摄影, 鸟类摄影, Lightroom替代, 选片神器">
   <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/docs.css">
 </head>
 <body>
 
@@ -28,11 +29,20 @@
         <li><a href="#compare" class="nav-link">软件横评</a></li>
         <li><a href="#cameras" class="nav-link">相机兼容</a></li>
         <li><a href="#simulator" class="nav-link">快捷键模拟</a></li>
+        <li><a href="docs.html" class="nav-link" style="color: #38bdf8; font-weight: 600;">📖 文档指南</a></li>
         <li><a href="#download" class="nav-link">软件下载</a></li>
         <li><a href="#faq" class="nav-link">常见问题</a></li>
       </ul>
 
       <div class="nav-actions">
+        <!-- Language Switcher: CN (Current) -> EN -->
+        <a href="en.html" class="lang-switcher" title="Switch to International English Website">
+          <span>🌐 English</span>
+        </a>
+
+        <!-- URL Time SSO Integration Container -->
+        <div id="urltime-sso-widget" class="urltime-sso-widget"></div>
+
         <a href="#download" class="btn-header-cta">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>免费下载</span>
@@ -74,7 +84,7 @@
 
         <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="btn-ghost">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          <span>GitHub 开源 (AGPL v3)</span>
+          <span>GitHub 仓库</span>
         </a>
       </div>
 
@@ -93,12 +103,12 @@
         </div>
         <div class="trust-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>完全免费无隐藏收费</span>
+          <span>核心功能免费体验</span>
         </div>
       </div>
 
       <!-- Hero Interactive Showcase Mockup -->
-      <div class="hero-mockup-wrapper">
+      <div class="hero-mockup-wrapper" id="darkroom">
         <div class="mockup-header-switcher">
           <button class="mockup-tab-btn active" data-view="darkroom">🖥️ 暗房全景工作台</button>
           <button class="mockup-tab-btn" data-view="burst">⚡ 连拍聚合 & Best Shot</button>
@@ -453,7 +463,7 @@
             </tr>
             <tr>
               <td><strong>定价策略</strong></td>
-              <td class="highlight-col"><span class="compare-badge-winner">🎉 完全免费 / 终身开源承诺</span></td>
+              <td class="highlight-col"><span class="compare-badge-winner">🎉 社区版免费 / Pro 商业版交付</span></td>
               <td>¥888+/年 (昂贵订阅制)</td>
               <td>$249+ (高昂买断制)</td>
               <td>$180+/年 (昂贵订阅制)</td>
@@ -552,7 +562,7 @@
       <div class="section-head">
         <span class="section-tag">DOWNLOAD NOW</span>
         <h2 class="section-title">下载 PhotoSelect Desktop</h2>
-        <p class="section-desc">为专业摄影师量身定制。纯净、无任何捆绑、零数据收集，终身开源免费。</p>
+        <p class="section-desc">为专业摄影师量身定制。纯净、无任何捆绑、零数据收集，提供免费社区版与专业商业交付。</p>
       </div>
 
       <div class="download-cards-grid">
@@ -713,11 +723,11 @@
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>软件完全免费吗？未来会像某些竞品一样转为收费订阅制吗？</span>
+            <span>软件的收费模式是怎样的？未来会有商业版吗？</span>
             <span class="faq-toggle-icon">+</span>
           </button>
           <div class="faq-answer">
-            PhotoSelect 基于 GNU AGPL v3 自由开源协议发布。核心桌面端完全免费，不限功能、不限照片数量，且永久向全球摄影师社群承诺开源，绝无月费与隐藏订阅陷阱。
+            PhotoSelect 采用「基础功能免费 + 商业专业版生态」的发展模式。核心桌面端离线选片、峰值对焦与人眼检测等基础功能完全免费使用；针对商业摄影机构、团队协作、批量交付与客户在线选片画廊等高阶场景，我们将提供更具保障的 PhotoSelect Pro 商业授权与技术支持服务。
           </div>
         </div>
       </div>
@@ -751,6 +761,17 @@
         </div>
 
         <div class="footer-col">
+          <h5>开发与文档</h5>
+          <ul>
+            <li><a href="docs.html" style="color: #38bdf8; font-weight: 600;">官方文档中心</a></li>
+            <li><a href="docs.html#sso-overview">URL Time SSO 接入</a></li>
+            <li><a href="docs.html#shortcuts">暗房盲操快捷键</a></li>
+            <li><a href="docs.html#architecture">源码编译与架构</a></li>
+            <li><a href="privacy.html">隐私权保护政策</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
           <h5>软件下载</h5>
           <ul>
             <li><a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" download>Windows 安装版 (.exe)</a></li>
@@ -772,7 +793,7 @@
 
       <div class="footer-bottom">
         <div>
-          © 2026 URL Time LLC. 基于 GNU AGPL v3 协议开源发布.
+          © 2026 URL Time LLC. 保留所有权利 (All Rights Reserved).
         </div>
         <div class="social-links">
           <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="social-link" title="GitHub">GitHub</a>
@@ -783,6 +804,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/sso.js"></script>
   <script src="assets/js/main.js"></script>
 </body>
 </html>

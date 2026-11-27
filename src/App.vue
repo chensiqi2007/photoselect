@@ -20,6 +20,7 @@ import Filmstrip from "./components/Filmstrip/Filmstrip.vue";
 import GridView from "./components/Grid/GridView.vue";
 import InspectorPanel from "./components/Inspector/InspectorPanel.vue";
 import ViewportWebGL from "./components/ViewportWebGL/ViewportWebGL.vue";
+import VideoPlayer from "./components/VideoPlayer/VideoPlayer.vue";
 import CompareView from "./components/Compare/CompareView.vue";
 import ExportDrawer from "./components/ExportDrawer/ExportDrawer.vue";
 import SettingsModal from "./components/Settings/SettingsModal.vue";
@@ -54,6 +55,7 @@ onMounted(async () => {
   // 初始化系统 UI 页面与字体缩放 (100% / 125% / 150% / 200%)
   store.initUiScale();
   try {
+    await store.loadComputeCapabilities();
     await store.loadAiSettings();
     unlistenAiProgress = await listen("ai-selection-progress", (event) => {
       store.consumeAiProgress(event.payload as any);
@@ -72,7 +74,28 @@ onMounted(async () => {
         isDragOver.value = false;
         const paths = event.payload.paths;
         if (paths && paths.length > 0) {
-          store.loadFolder(paths[0]);
+          const droppedPath = paths[0];
+          // 如果拖入的是具体图片/RAW/视频文件，自动提取其父级目录加载并选中该图
+          const isFile = /\.(jpe?g|png|webp|arw|cr2|cr3|nef|nrw|raf|rw2|orf|pef|dng|3fr|iiq|xmp|mp4|mov|m4v|mkv|avi|webm|mts|m2ts)$/i.test(droppedPath);
+          if (isFile) {
+            const parentDir = droppedPath.replace(/[/\\][^/\\]+$/, "");
+            if (parentDir) {
+              store.loadFolder(parentDir).then(() => {
+                const normDropped = droppedPath.replace(/\\/g, "/").toUpperCase();
+                const targetIdx = store.filteredGroups.findIndex((g) => {
+                  const stdNorm = g.std_image ? g.std_image.replace(/\\/g, "/").toUpperCase() : "";
+                  const rawNorm = g.raw_image ? g.raw_image.replace(/\\/g, "/").toUpperCase() : "";
+                  const vidNorm = g.video_file ? g.video_file.replace(/\\/g, "/").toUpperCase() : "";
+                  return stdNorm === normDropped || rawNorm === normDropped || vidNorm === normDropped;
+                });
+                if (targetIdx >= 0) {
+                  store.selectIndex(targetIdx);
+                }
+              }).catch((e) => console.error("加载父目录失败:", e));
+            }
+          } else {
+            store.loadFolder(droppedPath);
+          }
         }
       } else {
         isDragOver.value = false;
@@ -106,9 +129,10 @@ onUnmounted(() => {
         class="flex-1 relative flex flex-col items-center justify-center overflow-hidden transition-colors"
         :style="{ backgroundColor: store.viewportBg }"
       >
-        <!-- 单图 Loupe 模式 (WebGL 2.0 硬件渲染加速 + 峰值对焦) -->
+        <!-- 单图 Loupe 模式 (视频播放器 / WebGL 2.0 硬件渲染加速 + 峰值对焦) -->
         <template v-if="store.viewMode === 'loupe'">
-          <ViewportWebGL v-if="store.currentPhoto" />
+          <VideoPlayer v-if="store.currentPhoto?.video_file" />
+          <ViewportWebGL v-else-if="store.currentPhoto" />
 
           <!-- 空状态：专业级暗房工作台直达 (Pro Darkroom Studio Viewfinder) -->
           <div v-else class="relative w-full h-full flex items-center justify-center p-6 overflow-hidden">

@@ -10,12 +10,23 @@ export function useHotkeys() {
   const store = usePhotoStore();
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    // 若焦点位于文本输入框内，暂停全局选片快捷键
+    // 弹窗状态下响应 Escape 退出，屏蔽其他全局照片快捷键
+    if (store.settingsModalOpen || store.exportDrawerOpen) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        store.settingsModalOpen = false;
+        store.exportDrawerOpen = false;
+      }
+      return;
+    }
+
+    // 若焦点位于文本输入框或下拉选框内，暂停全局选片快捷键
     const activeEl = document.activeElement;
     if (
       activeEl &&
       (activeEl.tagName === "INPUT" ||
         activeEl.tagName === "TEXTAREA" ||
+        activeEl.tagName === "SELECT" ||
         (activeEl as HTMLElement).isContentEditable)
     ) {
       return;
@@ -49,8 +60,8 @@ export function useHotkeys() {
       }
     }
 
-    // 2. 翻页导航: 方向键 ← / → 或 A / D (在对比模式下切换候选图 B)
-    if (e.key === "ArrowRight" || key === "d") {
+    // 2. 翻页导航: 方向键 ← / → 或 A / D (在对比模式下切换候选图 B; Shift+方向键保留给视频微调)
+    if (!e.shiftKey && (e.key === "ArrowRight" || key === "d")) {
       e.preventDefault();
       if (store.viewMode === "compare") {
         store.nextCompareCandidate();
@@ -59,7 +70,7 @@ export function useHotkeys() {
       }
       return;
     }
-    if (e.key === "ArrowLeft" || key === "a") {
+    if (!e.shiftKey && (e.key === "ArrowLeft" || key === "a")) {
       e.preventDefault();
       if (store.viewMode === "compare") {
         store.prevCompareCandidate();

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoSelect Desktop 官方用户与开发者文档指南 | URL Time</title>
+  <meta name="description" content="PhotoSelect Desktop 完整官方文档与开发者指南。零导入即开即看、RAW+JPG智能绑定、WebGL 2.0峰值对焦、468点人眼特写检视、XMP侧车同步、URL Time SSO 统一身份认证接入与全键盘快捷键盲操。">
+  <meta name="keywords" content="PhotoSelect 文档, 摄影选片指南, RAW高速选片, WebGL峰值对焦, 人眼检视, XMP侧车, URL Time SSO, Tauri 2.0, Lightroom替代">
+  <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/docs.css">
+</head>
+<body class="docs-page">
+
+  <!-- ==================== Header ==================== -->
+  <header class="docs-header">
+    <div class="docs-header-inner">
+      <div class="docs-brand-group">
+        <button id="docsMobileToggle" class="docs-mobile-drawer-toggle" aria-label="切换文档导航">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <a href="index.html" class="brand" title="返回官网首页">
+          <img src="assets/images/app-icon.svg" alt="PhotoSelect Logo" class="brand-icon">
+          <div class="brand-title">
+            <span>PhotoSelect</span>
+            <span class="version-tag">v1.1.0</span>
+          </div>
+        </a>
+        <span class="docs-badge">文档中心</span>
+      </div>
+
+      <div class="docs-search-bar">
+        <svg class="docs-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="docsSearchInput" class="docs-search-input" placeholder="搜索文档、功能、快捷键..." autocomplete="off">
+        <span class="docs-search-kbd">Ctrl K</span>
+      </div>
+
+      <div class="docs-header-actions">
+        <a href="index.html" class="nav-link" style="font-size: 0.85rem;">官网首页</a>
+        <a href="docs-en.html" class="docs-lang-btn" title="Switch to English Documentation">
+          <span>🇬🇧 English</span>
+        </a>
+        <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="btn-ghost" style="padding: 6px 12px; font-size: 0.82rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+
+        <!-- URL Time SSO Integration Container -->
+        <div id="urltime-sso-widget" class="urltime-sso-widget"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== Main Container ==================== -->
+  <div class="docs-main-wrapper">
+
+    <!-- Left Sidebar: Documentation Navigation -->
+    <aside id="docsSidebarLeft" class="docs-sidebar-left">
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>快速入门</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item active"><a href="#overview">项目概述与理念</a></li>
+          <li class="docs-nav-item"><a href="#installation">安装与环境部署</a></li>
+          <li class="docs-nav-item"><a href="#quickstart">3分钟快速上手</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>核心暗房工作流</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#zero-import">零导入直连架构</a></li>
+          <li class="docs-nav-item"><a href="#raw-jpg-pairing">RAW+JPG 智能同名绑定</a></li>
+          <li class="docs-nav-item"><a href="#burst-clustering">连拍聚合与 Best Shot <span class="docs-pill-sm docs-pill-pro">Pro</span></a></li>
+          <li class="docs-nav-item"><a href="#dual-compare">双图联动同屏比对</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>专业画质与合焦检视</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#webgl-peaking">WebGL 2.0 硬件峰值对焦</a></li>
+          <li class="docs-nav-item"><a href="#eye-detection">468点人脸/人眼 100% 检视 <span class="docs-pill-sm docs-pill-new">AI</span></a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>相机视频全流程</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#video-workflow">HTTP 206 流式原片播放与 HUD</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <span>后期生态与侧车</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#xmp-sync">Lightroom XMP 侧车互通</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>账号中心与专业生态</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#account-cloud">URL Time 账号服务</a></li>
+          <li class="docs-nav-item"><a href="#pro-commercial">商业版功能与增值特权 <span class="docs-pill-sm docs-pill-pro">Pro</span></a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span>参考与支持</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#shortcuts">暗房盲操快捷键速查</a></li>
+          <li class="docs-nav-item"><a href="#camera-support">相机 RAW 支持清单</a></li>
+          <li class="docs-nav-item"><a href="#architecture">架构与本地编译构建</a></li>
+          <li class="docs-nav-item"><a href="#faq">常见问题与排错 (FAQ)</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Center: Main Article Content -->
+    <main class="docs-content">
+      <div class="docs-breadcrumb">
+        <a href="index.html">首页</a>
+        <span>/</span>
+        <a href="#overview">文档指南</a>
+        <span>/</span>
+        <span style="color: #cbd5e1;">官方技术与使用手册</span>
+      </div>
+
+      <h1 class="docs-title-h1">PhotoSelect Desktop 官方用户与开发文档</h1>
+
+      <div class="docs-meta-bar">
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>版本: v1.1.0 (2026 最新发行版)</span>
+        </div>
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>阅读时间: 15 分钟</span>
+        </div>
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>URL Time 官方安全认证</span>
+        </div>
+        <div class="docs-meta-item">
+          <span style="color: #38bdf8;">● 社区版与商业专业版体系</span>
+        </div>
+      </div>
+
+      <!-- ==================== 1. 项目概述 ==================== -->
+      <section id="overview" class="docs-section">
+        <h2>1. 项目概述与设计理念</h2>
+        <p>
+          <strong>PhotoSelect Desktop</strong> 是由 URL Time 团队联合开源社区针对商业摄影师、独立摄影师、婚礼跟拍、体育赛事及生态鸟类摄影师打造的<strong>新一代极速摄影选片与数字资产管理平台</strong>。
+        </p>
+        <p>
+          在现代高像素（4500万至6100万像素）与高速连拍（20fps至120fps）普及的今天，摄影师单场拍摄动辄产出数千至上万张 RAW 文件。传统软件（如 Lightroom Classic 建立预览、Photo Mechanic 界面割裂、商业云端选片工具收费高昂且有隐私外泄隐患）已难以满足当下严苛的选片交付时效。
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>核心研发宗旨：</strong>
+            零导入即开即看、毫秒级 RAW+JPG 联动、WebGL 2.0 硬件着色器峰值对焦、纯离线人脸人眼 100% 特写、双图同屏裁决与 XMP 工业级侧车同步。100% 运行于本地，绝不上云！
+          </div>
+        </div>
+
+        <h3>与主流选片工具横向对比</h3>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>评测维度</th>
+                <th>PhotoSelect Desktop</th>
+                <th>Lightroom Classic</th>
+                <th>Photo Mechanic</th>
+                <th>Narrative Select</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>首屏载入延迟</strong></td>
+                <td><span style="color: #10b981;">⚡ 零导入 0.05 秒即开</span></td>
+                <td>🐢 漫长导入创建 Catalog</td>
+                <td>💨 快速缓存读取</td>
+                <td>⏳ 上传云端/本地索引</td>
+              </tr>
+              <tr>
+                <td><strong>人眼焦点检测</strong></td>
+                <td><span style="color: #10b981;">468点网格 本地 100% 特写</span></td>
+                <td>❌ 无原生检测</td>
+                <td>❌ 无原生检测</td>
+                <td>需联网/高昂年费</td>
+              </tr>
+              <tr>
+                <td><strong>硬件峰值对焦</strong></td>
+                <td><span style="color: #10b981;">WebGL 2.0 原生 Shader</span></td>
+                <td>❌ 无</td>
+                <td>❌ 无</td>
+                <td>❌ 无</td>
+              </tr>
+              <tr>
+                <td><strong>视频原片联动</strong></td>
+                <td><span style="color: #10b981;">HTTP 206 流式 + 暗房 HUD</span></td>
+                <td>播放笨重、卡顿</td>
+                <td>仅基础播放</td>
+                <td>❌ 不支持视频筛选</td>
+              </tr>
+              <tr>
+                <td><strong>数据与隐私</strong></td>
+                <td><span style="color: #10b981;">100% 离线隐私绝不上云</span></td>
+                <td>本地运行</td>
+                <td>本地运行</td>
+                <td>部分模型需联网校验</td>
+              </tr>
+              <tr>
+                <td><strong>版本与服务</strong></td>
+                <td><span style="color: #10b981;">基础版免费体验 / Pro 版商业交付</span></td>
+                <td>单一高昂订阅制</td>
+                <td>高价买断无云端</td>
+                <td>昂贵年费云端绑定</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 2. 安装与环境部署 ==================== -->
+      <section id="installation" class="docs-section">
+        <h2>2. 安装与环境部署</h2>
+        <h3>系统硬件要求</h3>
+        <ul>
+          <li><strong>操作系统：</strong> Windows 10 (1809 及以上) / Windows 11 (64-bit)；Linux (Ubuntu 22.04+, Fedora 38+, Arch Linux)。</li>
+          <li><strong>处理器 (CPU)：</strong> 建议 4 核及以上，支持 AVX2 指令集（Intel 4代酷睿及以上 / AMD Ryzen 全系列）。</li>
+          <li><strong>内存 (RAM)：</strong> 最低 4GB，推荐 8GB–16GB 或以上。面对万张连拍，虚拟滚动与 LRU 机制保证内存恒定。</li>
+          <li><strong>图形处理 (GPU)：</strong> 支持 WebGL 2.0 / DirectX 11+ / Vulkan 的现代核显或独立显卡（用于峰值对焦着色器实时计算）。</li>
+        </ul>
+
+        <h3>安装渠道</h3>
+        <p>你可以通过以下多种方式获取并安装 PhotoSelect Desktop：</p>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>分发包类型</th>
+                <th>适用平台</th>
+                <th>特点与说明</th>
+                <th>获取方式</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Windows 安装版 (.exe)</strong></td>
+                <td>Windows 10 / 11 64位</td>
+                <td>集成 NSIS 安装向导，自动配置开机托盘、右键打开方式与关联图标。</td>
+                <td><a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" style="color: #38bdf8;">立即下载 Setup.exe</a></td>
+              </tr>
+              <tr>
+                <td><strong>Microsoft Store 商店版</strong></td>
+                <td>Windows 10 / 11</td>
+                <td>微软官方沙盒安全认证，后台自动静默差量更新，零权限污染。</td>
+                <td><a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener" style="color: #38bdf8;">Microsoft Store 安装</a></td>
+              </tr>
+              <tr>
+                <td><strong>便携绿色版 (.exe)</strong></td>
+                <td>Windows 64位</td>
+                <td>无需安装，直接放置在移动硬盘或 U 盘即插即用。</td>
+                <td>GitHub Releases 资产列表</td>
+              </tr>
+              <tr>
+                <td><strong>Linux 安装包 (.deb / .rpm)</strong></td>
+                <td>主流 Linux 发行版</td>
+                <td>原生 WebKitGTK 硬件加速支持，兼容 GNOME / KDE 桌面。</td>
+                <td>GitHub Releases</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 3. 快速上手 ==================== -->
+      <section id="quickstart" class="docs-section">
+        <h2>3. 3分钟极速上手暗房工作流</h2>
+        <p>启动 PhotoSelect Desktop 后，只需三步即可完成专业初筛：</p>
+        <ol>
+          <li>
+            <strong>打开存储介质：</strong> 点击左上角「打开文件夹」或直接将 SD 卡卷 / 硬盘文件夹拖入窗口中央。
+          </li>
+          <li>
+            <strong>双星联动与全盲操浏览：</strong> 右侧照片网格即刻毫秒流式渲染。使用键盘方向键 <kbd>→</kbd> / <kbd>←</kbd> 极速切片，按 <kbd>1</kbd>–<kbd>5</kbd> 打分，按 <kbd>P</kbd> 留用，按 <kbd>X</kbd> 淘汰。
+          </li>
+          <li>
+            <strong>一键同步与导出：</strong> 选片完成直接导出包含过滤评级的 <code>.xmp</code> 侧车文件，或直接在 Lightroom Classic 中打开该目录，所有打分标记 100% 完美复现。
+          </li>
+        </ol>
+      </section>
+
+      <!-- ==================== 4. 零导入架构 ==================== -->
+      <section id="zero-import" class="docs-section">
+        <h2>4. 零导入 (Zero-Import) 直连架构</h2>
+        <p>
+          传统软件如 Adobe Lightroom Classic，在摄影师插入存储卡后必须经历“选择导入”、“建立目录 Catalog”、“渲染 1:1 预览”等繁冗流程，面对上千张 RAW 文件往往需要干等半小时甚至更久。
+        </p>
+        <p>
+          PhotoSelect 彻底颠覆了此传统范式：
+        </p>
+        <ul>
+          <li><strong>直连硬件文件系统：</strong> 核心层由 Rust 直接调用 OS 原生 I/O API，以异步并发线程池直读 SD 卡或 SSD 分区。</li>
+          <li><strong>双级 LRU 虚拟滚动机制：</strong> 界面仅渲染当前可见视口及上下预加载的卡片，无论加载 50 张还是 50,000 张巨幅照片，系统内存始终恒定在 150MB–350MB 之间。</li>
+          <li><strong>零持久化索引负担：</strong> 不在摄影师磁盘中生成数以 GB 计的臃肿数据库缓存，随时拔卡即走，洁净高效。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 5. RAW+JPG 智能同名绑定 ==================== -->
+      <section id="raw-jpg-pairing" class="docs-section">
+        <h2>5. RAW + JPG 智能同名绑定 (Smart Pairing)</h2>
+        <p>
+          在专业商业跟拍中，双卡槽或机内“RAW+JPG”双格式记录是行业标配。传统选片软件往往将同名照片并列为两张，迫使摄影师重复筛选两次或手动编写过滤脚本。
+        </p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>双星合一机制：</strong>
+            PhotoSelect 在扫描目录时，自动提取主文件名（如 <code>_DSC1024.ARW</code> 与 <code>_DSC1024.JPG</code>），并将其聚合为单一资产卡片。
+          </div>
+        </div>
+        <ul>
+          <li><strong>前台毫秒渲染：</strong> 优先利用相机内嵌的高品质全画幅 JPG 预览图进行丝滑 60fps 浏览与变换缩放。</li>
+          <li><strong>后台联动生命周期：</strong> 当你对卡片评级、标留、淘汰或重命名时，绑定的 RAW 原文件与 JPG 同步更新；生成 XMP 时同时注入原片关联。</li>
+        </ul>
+
+        <h3 id="rating-marking">五星评级与旗标管理</h3>
+        <p>
+          PhotoSelect 严格遵循国际影像行业评级规范。支持全盲操键盘快捷设定：按 <kbd>0</kbd>–<kbd>5</kbd> 瞬时赋予星级，按 <kbd>P</kbd> 标记为留用 (Pick)，按 <kbd>X</kbd> 标记为淘汰 (Reject)，按 <kbd>U</kbd> 撤销所有标记。所有状态均与底层的 RAW+JPG 实体保持毫秒级原子同步。
+        </p>
+      </section>
+
+      <!-- ==================== 6. 连拍聚合与 Best Shot ==================== -->
+      <section id="burst-clustering" class="docs-section">
+        <h2>6. 连拍聚合与 Best Shot 推荐选帧</h2>
+        <p>
+          在体育竞技、鸟类生态与人像连拍中，单次快门触发往往产生 10–50 张微小姿态差异的照片。一张张翻看不仅极度损耗精力，更极易产生审美疲劳导致误删最佳瞬间。
+        </p>
+        <h3>SubSecTime 毫秒级快门时序分组</h3>
+        <p>
+          PhotoSelect 深度解析照片 EXIF 中的 <code>SubSecTimeOriginal</code> 高精度时序标签。若相邻照片拍摄时间差在摄影师设定的阈值（默认 0.8 秒）之内，系统自动将其折叠聚合为<strong>连拍序列堆栈 (Burst Group)</strong>。
+        </p>
+        <h3>Best Shot AI 综合打分推荐</h3>
+        <p>
+          在展开连拍组时，系统运用本地轻量算法综合评估画面：
+        </p>
+        <ul>
+          <li><strong>眼部锐度与焦点清晰度评分：</strong> 锁定主体眼睛对焦是否扎实。</li>
+          <li><strong>闭眼检测反向扣分：</strong> 识别人物眨眼、半闭眼瞬态并降低权重。</li>
+          <li><strong>构图与主体居中度：</strong> 组内最高分照片将被自动标配金色 <span style="color: #facc15;">★ Best Shot</span> 徽章，辅助摄影师 1 秒决断。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 7. 双图联动同屏比对 ==================== -->
+      <section id="dual-compare" class="docs-section">
+        <h2>7. 双图联动同屏比对 (Dual Comparison)</h2>
+        <p>
+          当摄影师在两到三张极其接近的肖像或动作中犹豫不决时，快捷键 <kbd>S</kbd> 可快速将当前照片设为<strong>标杆基准图 (Lock Benchmark)</strong> 并开启双图同屏比对视图：
+        </p>
+        <ul>
+          <li><strong>左侧标杆，右侧候选：</strong> 切换方向键时，标杆图保持静止，右侧依次轮播候选图。</li>
+          <li><strong>视角与缩放联动：</strong> 在任意一侧拖拽放大 100% 检视睫毛或羽毛细节时，另一侧视图自动等比、同轴同步平移，毫发之差立判高下。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 8. WebGL 硬件峰值对焦 ==================== -->
+      <section id="webgl-peaking" class="docs-section">
+        <h2>8. WebGL 2.0 硬件着色器峰值对焦 (Focus Peaking)</h2>
+        <p>
+          为了在不放大到 100% 的前提下迅速确认微单相机的焦点落点（是大光圈景深内主体对齐，还是不慎跑焦到了背景杂物），PhotoSelect 内置了工业级 <strong>WebGL 2.0 GPU 峰值着色器</strong>。
+        </p>
+        <p>
+          按下键盘快捷键 <kbd>F</kbd>，视口即刻无缝叠加高频边缘检测图层：
+        </p>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">GLSL Fragment Shader (Sobel Operator Edge Detection)</span>
+            <button class="code-copy-btn">复制代码</button>
+          </div>
+          <pre class="code-content"><code>// WebGL 2.0 Focus Peaking Kernel Fragment Shader (Simplified)
+#version 300 es
+precision highp float;
+in vec2 vTexCoord;
+out vec4 fragColor;
+uniform sampler2D uTexture;
+uniform vec2 uTexelSize;
+uniform vec3 uPeakingColor; // Electric Blue / Emerald Green / Red
+
+void main() {
+    float gx = -texture(uTexture, vTexCoord + vec2(-uTexelSize.x, -uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x, -uTexelSize.y)).r
+               - 2.0 * texture(uTexture, vTexCoord + vec2(-uTexelSize.x, 0.0)).r
+               + 2.0 * texture(uTexture, vTexCoord + vec2( uTexelSize.x, 0.0)).r
+               - texture(uTexture, vTexCoord + vec2(-uTexelSize.x,  uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x,  uTexelSize.y)).r;
+    float gy = -texture(uTexture, vTexCoord + vec2(-uTexelSize.x, -uTexelSize.y)).r
+               - 2.0 * texture(uTexture, vTexCoord + vec2(0.0, -uTexelSize.y)).r
+               - texture(uTexture, vTexCoord + vec2( uTexelSize.x, -uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2(-uTexelSize.x,  uTexelSize.y)).r
+               + 2.0 * texture(uTexture, vTexCoord + vec2(0.0,  uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x,  uTexelSize.y)).r;
+    float edge = sqrt(gx * gx + gy * gy);
+    vec4 baseColor = texture(uTexture, vTexCoord);
+    if (edge > 0.35) {
+        fragColor = vec4(mix(baseColor.rgb, uPeakingColor, 0.85), 1.0);
+    } else {
+        fragColor = baseColor;
+    }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 9. 468点人脸与人眼特写检视 ==================== -->
+      <section id="eye-detection" class="docs-section">
+        <h2>9. 468 点人脸人眼 100% 特写检视 (Eye Focus Inspection)</h2>
+        <p>
+          在婚纱人像、毕业大合影或多人商业广告拍摄中，摄影师最怕的事情莫过于在后期放大时才发现画面中心人物“闭眼”或“眼部脱焦跑焦”。
+        </p>
+        <p>
+          PhotoSelect 采用类似 Narrative Select 的直观检视方案，但实现了<strong>完全本地纯离线推理</strong>：
+        </p>
+        <ul>
+          <li><strong>内置 MediaPipe Face Mesh WASM 引擎：</strong> 零联网、零外部 API 请求，在本地 CPU / WebAssembly 环境中毫秒级解算人脸 468 个三维标志点。</li>
+          <li><strong>智能裁剪与锐度评分：</strong> 自动识别画面中所有人物面孔，并在画面右侧浮窗平铺展开每张面孔的<strong>左眼与右眼 100% 原始像素裁切框</strong>。</li>
+          <li><strong>开闭眼警告指示：</strong> 实时标示睁眼百分比与眼球反光点锐度，合影中有人眨眼一览无余，彻底杜绝翻车。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 10. 相机视频全流程支持 ==================== -->
+      <section id="video-workflow" class="docs-section">
+        <h2>10. 专业相机视频全流程支持 (Pro Camera Video Workflow)</h2>
+        <p>
+          随着索尼 FX3/A7S III、佳能 R5 II、松下 S5 II 等微单“照片+视频双修”成为主流工作模式，摄影师的存储卡内往往交织着高码率 4K/8K 视频文件（如 <code>.MP4</code>、<code>.MOV</code>、<code>.M4V</code>、<code>.MTS</code> 等）。
+        </p>
+        <h3>HTTP 206 局部内容分块传输</h3>
+        <p>
+          PhotoSelect 桌面底层的 Rust 本地协议层内建了轻量级流媒体服务器，全面支持 <code>Range: bytes</code> 分块请求与 8MB 高速分块预读。对于数十 GB 的 All-I 4:2:2 10bit 视频原片，拖动时间轴进度条即可实现<strong>毫秒级即拖即播，零卡顿等待</strong>。
+        </p>
+        <h3>暗房级 Video HUD 控制台</h3>
+        <ul>
+          <li><strong>无级倍速快进：</strong> 支持 0.5x、1.0x、1.5x、2.0x 无级倍速播放。</li>
+          <li><strong>快捷寻帧：</strong> 支持 <kbd>Space</kbd> 播放/暂停、<kbd>J</kbd> / <kbd>L</kbd> 或 <kbd>Shift</kbd>+方向键 ±5 秒精准倒退与前进。</li>
+          <li><strong>边播边选同态打标：</strong> 播放视频时可随时按下 <kbd>0</kbd>–<kbd>5</kbd> 星级或 <kbd>P</kbd>/<kbd>X</kbd> 旗标，导出时自动归集于独立 <code>/VIDEO</code> 目录。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 11. XMP 侧车与后期衔接 ==================== -->
+      <section id="xmp-sync" class="docs-section">
+        <h2>11. XMP 侧车生态与 Adobe Lightroom Classic 衔接</h2>
+        <p>
+          PhotoSelect 坚持“不绑架用户工作流”的开放生态理念。选片所有的星级评定、色标标记与留用淘汰状态，全部遵循行业标准的 <strong>Adobe XMP (Extensible Metadata Platform) 侧车规范</strong>。
+        </p>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">标准 .xmp 侧车文件片段样例 (_DSC0896.xmp)</span>
+            <button class="code-copy-btn">复制代码</button>
+          </div>
+          <pre class="code-content"><code>&lt;x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="PhotoSelect Desktop v1.1.0"&gt;
+ &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"&gt;
+  &lt;rdf:Description rdf:about=""
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+    xmlns:xmpLabel="http://ns.adobe.com/xap/1.0/label/"
+    xmp:Rating="5"
+    xmp:Label="Pick"
+    photoshop:Urgency="1"&gt;
+   &lt;xmp:CreateDate&gt;2026-11-11T16:20:00+08:00&lt;/xmp:CreateDate&gt;
+  &lt;/rdf:Description&gt;
+ &lt;/rdf:RDF&gt;
+&lt;/x:xmpmeta&gt;</code></pre>
+        </div>
+        <p>
+          <strong>后期衔接只需一步：</strong> 后续在 Adobe Lightroom Classic 中选择「导入」该照片文件夹或右键点击「从元数据读取」，所有评级、旗标与标签瞬间同步就绪，零工作流阻滞！
+        </p>
+      </section>
+
+      <!-- ==================== 12. 账号体系与商业化生态 ==================== -->
+      <section id="account-cloud" class="docs-section">
+        <h2>12. URL Time 账号体系与商业专业版生态</h2>
+        <p>
+          PhotoSelect Desktop 深度接入 <strong>URL Time 统一账号中心</strong>。摄影师与工作室通过右上角「URL Time SSO」完成安全登录后，可无缝激活个人云端特权，实现跨设备选片偏好同步与云端资产协同。
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>账号中心与安全保障：</strong><br>
+            • <strong>单点登录支持：</strong> 统一通过 <code>login.urltime.cn</code> 进行加密鉴权，无需额外注册繁复密码。<br>
+            • <strong>隐私安全隔离：</strong> 照片的本地初筛与人眼检测始终在摄影师本机处理，云端账号仅同步授权状态与用户配置。<br>
+            • <strong>多端漫游：</strong> 支持多台修图工作站（工作室台式机、移动笔记本）共用同一专业版账号。
+          </div>
+        </div>
+
+        <h3 id="pro-commercial">商业版 (Pro) 与未来增值服务展望</h3>
+        <p>
+          为了长期支持高性能桌面暗房算法的研发并为高标准商业机构提供更有保障的交付体验，PhotoSelect 采用<strong>「基础功能免费 + 商业专业版订阅/买断」</strong>的发展模式：
+        </p>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>功能与服务项目</th>
+                <th>基础社区版 (Free)</th>
+                <th>商业专业版 (PhotoSelect Pro)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>零导入即开即看与 RAW+JPG 联动</strong></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+              </tr>
+              <tr>
+                <td><strong>WebGL 2.0 原生峰值对焦</strong></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+              </tr>
+              <tr>
+                <td><strong>468点离线人眼特写检视</strong></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+                <td><span style="color: #10b981;">✓ 极致高并发加速</span></td>
+              </tr>
+              <tr>
+                <td><strong>XMP 侧车文件双向同步导出</strong></td>
+                <td><span style="color: #10b981;">✓ 完整支持</span></td>
+                <td><span style="color: #10b981;">✓ 批量多目录规则导出</span></td>
+              </tr>
+              <tr>
+                <td><strong>客户在线选片画廊 (Client Proofing)</strong></td>
+                <td>❌ 不包含</td>
+                <td><span style="color: #38bdf8;">★ 即将推出 (云端免下原图直选)</span></td>
+              </tr>
+              <tr>
+                <td><strong>团队多机位实时协同选片</strong></td>
+                <td>❌ 不包含</td>
+                <td><span style="color: #38bdf8;">★ 专业团队版专属</span></td>
+              </tr>
+              <tr>
+                <td><strong>企业级专属技术支持与商用许可</strong></td>
+                <td>社区支持</td>
+                <td><span style="color: #38bdf8;">★ 7x12h 官方专家响应 & 商用授权凭据</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 13. 全键盘暗房盲操指南 ==================== -->
+      <section id="shortcuts" class="docs-section">
+        <h2>13. 全键盘暗房盲操指南 (Keyboard Shortcuts)</h2>
+        <p>
+          在暗房中，双手无需离开键盘或仅用左手即可完成 95% 以上的评选操作：
+        </p>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>按键</th>
+                <th>功能说明</th>
+                <th>暗房盲操技巧</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><kbd>→</kbd> / <kbd>←</kbd></td>
+                <td>切换到下一张 / 上一张相片</td>
+                <td>按住连续滚动，支持 60fps 极速换帧。</td>
+              </tr>
+              <tr>
+                <td><kbd>0</kbd> – <kbd>5</kbd></td>
+                <td>评定 0 至 5 星级</td>
+                <td>与 Adobe Lightroom / Capture One 星级完全双向映射。</td>
+              </tr>
+              <tr>
+                <td><kbd>P</kbd></td>
+                <td>标为「留用」 (Pick Flag)</td>
+                <td>卡片绿色高亮，生成 <code>xmpLabel:Pick</code>。</td>
+              </tr>
+              <tr>
+                <td><kbd>X</kbd></td>
+                <td>标为「淘汰废片」 (Reject Flag)</td>
+                <td>卡片红色变灰，导出时支持自动物理隔离。</td>
+              </tr>
+              <tr>
+                <td><kbd>U</kbd></td>
+                <td>清除所有标记 (Unflag)</td>
+                <td>重置当前照片所有旗标状态。</td>
+              </tr>
+              <tr>
+                <td><kbd>Space</kbd> (空格)</td>
+                <td>100% 原始像素缩放 / 还原</td>
+                <td>瞬间放大到对焦点或鼠标悬停区域，再次按下复位。</td>
+              </tr>
+              <tr>
+                <td><kbd>F</kbd></td>
+                <td>开启 / 关闭 WebGL 峰值对焦</td>
+                <td>实时切换 GPU 边缘高频合焦着色器。</td>
+              </tr>
+              <tr>
+                <td><kbd>S</kbd></td>
+                <td>开启标杆对比 / 锁定双图</td>
+                <td>固定当前照片为基准，右侧继续浏览比对。</td>
+              </tr>
+              <tr>
+                <td><kbd>J</kbd> / <kbd>L</kbd></td>
+                <td>视频快退 / 快进 5 秒</td>
+                <td>视频暗房专属快捷键。</td>
+              </tr>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>=</kbd> / <kbd>-</kbd></td>
+                <td>视口 High-DPI 缩放 100%-200%</td>
+                <td>适应 4K / 5K 高清修图监视器。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 14. 相机与 RAW 兼容支持 ==================== -->
+      <section id="camera-support" class="docs-section">
+        <h2>14. 相机与 RAW 格式兼容性列表</h2>
+        <p>
+          PhotoSelect Desktop 采用多线程 LibRaw 与 Rust 原生高性能解码管道，全面兼容主流摄影厂商机型：
+        </p>
+        <ul>
+          <li><strong>索尼 (Sony)：</strong> <code>.ARW</code> (A1, A9 III 全域快门, A7R V, A7 IV, A7C II, FX3, ZV-E1 等全系列无损压缩/未压缩)。</li>
+          <li><strong>佳能 (Canon)：</strong> <code>.CR3</code> / <code>.CR2</code> (EOS R5 II, R3, R6 II, R8, 1D X Mark III 及经典 EF 机型)。</li>
+          <li><strong>尼康 (Nikon)：</strong> <code>.NEF</code> (Z9, Z8, Z6 III, Zf, D850 高效压缩与无损压缩)。</li>
+          <li><strong>富士 (Fujifilm)：</strong> <code>.RAF</code> (X-T5, X-H2S, X100VI, GFX100 II 中画幅 X-Trans 与 Bayer 传感器)。</li>
+          <li><strong>其他主流格式：</strong> 徕卡 <code>.DNG</code>、松下 <code>.RW2</code>、奥林巴斯/奥之心 <code>.ORF</code>、大疆无人机/哈苏 <code>.DNG</code> / <code>.3FR</code>。</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 15. 技术架构与二次开发 ==================== -->
+      <section id="architecture" class="docs-section">
+        <h2>15. 技术架构与本地编译构建</h2>
+        <p>
+          PhotoSelect Desktop 基于现代混合桌面架构打造：
+        </p>
+        <ul>
+          <li><strong>系统底层：</strong> Rust 1.78+ & Tauri 2.0（跨平台原生窗口、异步多线程文件系统与低开销 HTTP 206 服务端）。</li>
+          <li><strong>前端框架：</strong> Vue 3.5 (Composition API) + TypeScript 5.6 + Tailwind CSS 3.4。</li>
+          <li><strong>视口渲染：</strong> WebGL 2.0 原生 Shader 着色器（极速峰值对焦与色彩校正）。</li>
+          <li><strong>本地 AI 推理：</strong> Google MediaPipe Face Landmarker WebAssembly 本地推理模型。</li>
+        </ul>
+
+        <h3>从源码快速编译构建</h3>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">Bash / PowerShell 编译命令</span>
+            <button class="code-copy-btn">复制代码</button>
+          </div>
+          <pre class="code-content"><code># 1. 克隆代码仓库
+git clone https://github.com/chensiqi2007/photoselect.git
+cd photoselect
+
+# 2. 安装前端依赖
+npm install
+
+# 3. 启动本地开发热重载模式
+npm run tauri dev
+
+# 4. 构建生产环境独立安装包 (.exe / .deb)
+npm run tauri build</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 16. 常见问题 FAQ ==================== -->
+      <section id="faq" class="docs-section">
+        <h2>16. 常见问题与排错指南 (FAQ)</h2>
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>问：为什么我的某些最新相机 RAW 格式加载很慢？</strong><br>
+            答：为了达到极致速度，PhotoSelect 默认优先提取原厂 RAW 内嵌的高清全尺寸预览流（毫秒级）。如果相机存储卡写入时关闭了内嵌预览，则会触发 LibRaw 全像素解码。建议在相机设置中开启高质量机内预览。
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>问：URL Time 账号登录后能获得哪些权益？</strong><br>
+            答：登录 URL Time 统一账号后可自动关联个人修图偏好设置与快捷键方案，后续开放的团队云端协同工程与商业客户在线画廊免下载直选功能将向认证用户优先开放内测体验。
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right Sidebar: On This Page / Table of Contents -->
+    <aside class="docs-sidebar-right">
+      <div class="toc-title">本页目录</div>
+      <ul class="toc-items">
+        <li class="toc-item active"><a href="#overview">1. 项目概述与理念</a></li>
+        <li class="toc-item"><a href="#installation">2. 安装与环境部署</a></li>
+        <li class="toc-item"><a href="#quickstart">3. 3分钟极速上手</a></li>
+        <li class="toc-item"><a href="#zero-import">4. 零导入直连架构</a></li>
+        <li class="toc-item"><a href="#raw-jpg-pairing">5. RAW+JPG 智能绑定</a></li>
+        <li class="toc-item"><a href="#burst-clustering">6. 连拍聚合与 Best Shot</a></li>
+        <li class="toc-item"><a href="#dual-compare">7. 双图同屏比对</a></li>
+        <li class="toc-item"><a href="#webgl-peaking">8. WebGL 硬件峰值对焦</a></li>
+        <li class="toc-item"><a href="#eye-detection">9. 468点人脸/人眼检视</a></li>
+        <li class="toc-item"><a href="#video-workflow">10. 相机视频全流程支持</a></li>
+        <li class="toc-item"><a href="#xmp-sync">11. XMP 侧车与后期衔接</a></li>
+        <li class="toc-item"><a href="#account-cloud">12. URL Time 账号中心</a></li>
+        <li class="toc-item toc-sub-item"><a href="#pro-commercial">└ 商业版与增值服务</a></li>
+        <li class="toc-item"><a href="#shortcuts">13. 全键盘暗房盲操指南</a></li>
+        <li class="toc-item"><a href="#camera-support">14. 相机与 RAW 兼容支持</a></li>
+        <li class="toc-item"><a href="#architecture">15. 技术架构与源码编译</a></li>
+        <li class="toc-item"><a href="#faq">16. 常见问题与排错 FAQ</a></li>
+      </ul>
+    </aside>
+
+  </div>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="site-footer" style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <div class="container">
+      <div class="footer-bottom" style="padding: 24px 0;">
+        <div>
+          © 2026 URL Time LLC. 保留所有权利 (All Rights Reserved).
+        </div>
+        <div class="social-links">
+          <a href="index.html" class="social-link">官网主页</a>
+          <a href="docs-en.html" class="social-link">English Docs</a>
+          <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="social-link">GitHub</a>
+          <a href="privacy.html" class="social-link">隐私政策</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/sso.js"></script>
+  <script src="assets/js/docs.js"></script>
+</body>
+</html>
+

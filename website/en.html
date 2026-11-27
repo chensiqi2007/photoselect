@@ -8,6 +8,7 @@
   <meta name="keywords" content="PhotoSelect, RAW photo culling, fast photo culler, photography workflow, focus peaking, eye focus inspection, burst grouping, Lightroom alternative, Photo Mechanic alternative, open source photography software">
   <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/docs.css">
 </head>
 <body>
 
@@ -28,6 +29,7 @@
         <li><a href="#compare" class="nav-link">Comparison</a></li>
         <li><a href="#cameras" class="nav-link">Cameras & RAW</a></li>
         <li><a href="#simulator" class="nav-link">Key Simulator</a></li>
+        <li><a href="docs-en.html" class="nav-link" style="color: #38bdf8; font-weight: 600;">📖 Docs</a></li>
         <li><a href="#download" class="nav-link">Download</a></li>
         <li><a href="#faq" class="nav-link">FAQ</a></li>
       </ul>
@@ -37,6 +39,9 @@
         <a href="index.html" class="lang-switcher" title="切换至中国版中文官网">
           <span>🇨🇳 中国版 (中文)</span>
         </a>
+
+        <!-- URL Time SSO Integration Container -->
+        <div id="urltime-sso-widget" class="urltime-sso-widget"></div>
 
         <a href="#download" class="btn-header-cta">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -79,7 +84,7 @@
 
         <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="btn-ghost">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          <span>Star on GitHub (AGPL v3)</span>
+          <span>Star on GitHub</span>
         </a>
       </div>
 
@@ -98,12 +103,12 @@
         </div>
         <div class="trust-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Free &amp; Open Source Forever</span>
+          <span>Free Community Tier &amp; Pro Services</span>
         </div>
       </div>
 
       <!-- Hero Interactive Showcase Mockup -->
-      <div class="hero-mockup-wrapper">
+      <div class="hero-mockup-wrapper" id="darkroom">
         <div class="mockup-header-switcher">
           <button class="mockup-tab-btn active" data-view="darkroom">🖥️ Studio Darkroom</button>
           <button class="mockup-tab-btn" data-view="burst">⚡ Burst Grouping &amp; Best Shot</button>
@@ -458,7 +463,7 @@
             </tr>
             <tr>
               <td><strong>Pricing Model</strong></td>
-              <td class="highlight-col"><span class="compare-badge-winner">🎉 100% Free &amp; Open Source</span></td>
+              <td class="highlight-col"><span class="compare-badge-winner">🎉 Free Community / Commercial Pro</span></td>
               <td>$119+/year (Subscription)</td>
               <td>$249+ (Perpetual License)</td>
               <td>$180+/year (Subscription)</td>
@@ -557,7 +562,7 @@
       <div class="section-head">
         <span class="section-tag">GET PHOTOSELECT</span>
         <h2 class="section-title">Download PhotoSelect Desktop</h2>
-        <p class="section-desc">Tailored for photography professionals. Clean, bloatware-free, zero tracking, and open source forever.</p>
+        <p class="section-desc">Tailored for photography professionals. Clean, bloatware-free, zero tracking, with flexible Free Community and Pro Commercial tiers.</p>
       </div>
 
       <div class="download-cards-grid">
@@ -718,11 +723,11 @@
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>Is PhotoSelect truly free, and will it turn into a subscription later?</span>
+            <span>What is the pricing model, and will PhotoSelect offer commercial plans?</span>
             <span class="faq-toggle-icon">+</span>
           </button>
           <div class="faq-answer">
-            PhotoSelect is licensed under the GNU AGPL v3 open-source license. The core desktop app is completely free with no limits on photo volume or feature gates, and remains committed to the open-source community forever.
+            PhotoSelect follows a "Free Community Tier + Commercial Pro Services" model. Core desktop capabilities—zero-import browsing, WebGL focus peaking, and offline eye sharpness inspection—are freely accessible. For studio teams needing cloud proofing galleries, multi-seat project sync, and guaranteed SLA enterprise support, we offer commercial PhotoSelect Pro licenses.
           </div>
         </div>
       </div>
@@ -756,6 +761,17 @@
         </div>
 
         <div class="footer-col">
+          <h5>Documentation</h5>
+          <ul>
+            <li><a href="docs-en.html" style="color: #38bdf8; font-weight: 600;">Official Documentation</a></li>
+            <li><a href="docs-en.html#sso-overview">URL Time SSO Integration</a></li>
+            <li><a href="docs-en.html#shortcuts">Darkroom Shortcuts</a></li>
+            <li><a href="docs-en.html#architecture">Architecture &amp; Build</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
           <h5>Downloads</h5>
           <ul>
             <li><a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" download>Windows Installer (.exe)</a></li>
@@ -777,7 +793,7 @@
 
       <div class="footer-bottom">
         <div>
-          © 2026 URL Time LLC. Licensed under GNU AGPL v3.
+          © 2026 URL Time LLC. All Rights Reserved.
         </div>
         <div class="social-links">
           <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="social-link" title="GitHub">GitHub</a>
@@ -788,6 +804,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/sso.js"></script>
   <script src="assets/js/main.js"></script>
 </body>
 </html>

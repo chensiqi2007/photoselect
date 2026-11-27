@@ -369,4 +369,50 @@ impl Database {
         }
         Ok(map)
     }
+
+    /// 查询指定目录及其所有子目录下已保存的照片状态 (支持递归扫描)
+    pub fn get_metadata_for_folder_tree(
+        &self,
+        folder_path: &str,
+    ) -> Result<HashMap<String, PhotoMetadataRecord>> {
+        let norm_folder = folder_path.replace('\\', "/").trim_end_matches('/').to_string();
+        let norm_prefix = format!("{}/%", norm_folder);
+        let alt_folder = folder_path.replace('/', "\\").trim_end_matches('\\').to_string();
+        let alt_prefix = format!("{}\\%", alt_folder);
+
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            r#"
+            SELECT file_signature, base_name, folder_path, rating, flag, color_label, updated_at, tags
+            FROM photo_metadata
+            WHERE folder_path = ?1 OR folder_path = ?2 OR folder_path LIKE ?3 OR folder_path LIKE ?4
+            "#,
+        )?;
+
+        let rows = stmt.query_map(params![norm_folder, alt_folder, norm_prefix, alt_prefix], |row| {
+            let tags_str: Option<String> = row.get(7).ok();
+            let tags: Vec<String> = tags_str
+                .filter(|s| !s.trim().is_empty())
+                .and_then(|s| serde_json::from_str(&s).ok())
+                .unwrap_or_default();
+
+            Ok(PhotoMetadataRecord {
+                file_signature: row.get(0)?,
+                base_name: row.get(1)?,
+                folder_path: row.get(2)?,
+                rating: row.get(3)?,
+                flag: row.get(4)?,
+                color_label: row.get(5)?,
+                tags,
+                updated_at: row.get(6)?,
+            })
+        })?;
+
+        let mut map = HashMap::new();
+        for r in rows {
+            let record = r?;
+            map.insert(record.file_signature.clone(), record);
+        }
+        Ok(map)
+    }
 }

@@ -163,8 +163,24 @@ impl Exporter {
             }
         }
 
+        // 若包含视频文件，加入待传输队列 (若开启分目录则放入 /VIDEO 目录)
+        if let Some(ref vid_path) = item.video_file {
+            let ext = vid_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("mp4");
+            let target_sub_dir = if config.split_folders {
+                raw_target_dir.parent().unwrap_or(raw_target_dir).join("VIDEO")
+            } else {
+                raw_target_dir.to_path_buf()
+            };
+            let _ = fs::create_dir_all(&target_sub_dir);
+            let dst = target_sub_dir.join(format!("{}.{}", target_base_name, ext));
+            targets_to_transfer.push((vid_path, dst));
+        }
+
         if targets_to_transfer.is_empty() {
-            bail!("无可导出的目标文件 (既无 RAW 也无 JPG)");
+            bail!("无可导出的目标文件 (既无 RAW/JPG 图像也无视频文件)");
         }
 
         // 执行安全传输 (Copy 或 Move)
@@ -197,6 +213,18 @@ impl Exporter {
     /// 安全文件流转机制 (防丢片设计)
     /// 在 Move 模式下，必须确认目标文件写入成功、字节大小一致并 sync_all 刷入物理介质后，才允许删除源文件
     fn transfer_file_safe(src: &Path, dst: &Path, op: ExportOp) -> Result<()> {
+        // 防止源文件与目标文件相同导致覆盖或在 Move 模式下误删原片
+        if src == dst || src.to_string_lossy().eq_ignore_ascii_case(&dst.to_string_lossy()) {
+            return Ok(());
+        }
+        if dst.exists() {
+            if let (Ok(c_src), Ok(c_dst)) = (fs::canonicalize(src), fs::canonicalize(dst)) {
+                if c_src == c_dst {
+                    return Ok(());
+                }
+            }
+        }
+
         let src_len = fs::metadata(src)
             .with_context(|| format!("Source file not found: {:?}", src))?
             .len();

@@ -4,6 +4,7 @@ pub mod burst;
 pub mod decoder;
 pub mod exporter;
 pub mod models;
+pub mod npu_engine;
 pub mod protocol;
 pub mod scanner;
 pub mod similarity;
@@ -83,8 +84,14 @@ async fn scan_directory(
         // 1. 记录工作区至 SQLite
         let _ = db.record_workspace(&path, None);
 
-        // 2. 从 SQLite 读取该目录下所有已保存的评级/旗标数据并进行签名对齐
-        if let Ok(saved_meta) = db.get_metadata_for_folder(&path) {
+        // 2. 从 SQLite 读取该目录下所有已保存的评级/旗标数据并进行签名对齐 (支持递归子目录)
+        let metadata_res = if is_recursive {
+            db.get_metadata_for_folder_tree(&path)
+        } else {
+            db.get_metadata_for_folder(&path)
+        };
+
+        if let Ok(saved_meta) = metadata_res {
             for group in &mut summary.groups {
                 let sig = group.signature();
                 if let Some(record) = saved_meta.get(&sig) {
@@ -270,15 +277,63 @@ async fn update_photo_tags(
     .map_err(|e| e.to_string())?
 }
 
-/// 执行毫秒级高速连拍聚合算法 (根据时间戳与文件名序列精准分组并标定 Best Shot)
+/// 获取本机 NPU / GPU / CPU 算力硬件驱动能力列表与当前激活驱动
 #[tauri::command]
-fn cluster_burst_photos(
+fn get_compute_capabilities(
+    state: State<'_, AppState>,
+) -> Result<npu_engine::ComputeCapabilities, String> {
+    let saved = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
+    Ok(npu_engine::NpuEngine::probe_capabilities(saved.as_deref()))
+}
+
+/// 切换并持久化用户选择的算力驱动方式 ("auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic")
+#[tauri::command]
+fn set_compute_backend(
+    backend: String,
+    state: State<'_, AppState>,
+) -> Result<npu_engine::ComputeCapabilities, String> {
+    let norm = npu_engine::ComputeBackend::from_str_opt(Some(&backend));
+    state
+        .db
+        .set_app_settings(&[("compute_backend", norm.as_str())])
+        .map_err(|e| format!("保存驱动设置失败: {e}"))?;
+    Ok(npu_engine::NpuEngine::probe_capabilities(Some(norm.as_str())))
+}
+
+/// 执行毫秒级高速连拍聚合算法 (支持 NPU/GPU/CPU 驱动焦点锐度选优并标定 Best Shot)
+#[tauri::command]
+async fn cluster_burst_photos(
     mut photos: Vec<crate::models::PhotoGroup>,
     config: Option<crate::models::BurstConfig>,
-) -> Result<(Vec<crate::models::PhotoGroup>, Vec<crate::models::BurstCluster>), String> {
-    let cfg = config.unwrap_or_default();
-    let clusters = crate::burst::BurstDetector::cluster_photos(&mut photos, &cfg);
-    Ok((photos, clusters))
+    state: State<'_, AppState>,
+) -> Result<
+    (
+        Vec<crate::models::PhotoGroup>,
+        Vec<crate::models::BurstCluster>,
+        npu_engine::InferenceTelemetry,
+    ),
+    String,
+> {
+    let saved_backend = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
+    tokio::task::spawn_blocking(move || {
+        let mut cfg = config.unwrap_or_default();
+        if cfg.compute_backend.is_none() {
+            cfg.compute_backend = saved_backend;
+        }
+        let (clusters, telemetry) =
+            crate::burst::BurstDetector::cluster_with_telemetry(&mut photos, &cfg);
+        Ok((photos, clusters, telemetry))
+    })
+    .await
+    .map_err(|e| format!("连拍聚合任务执行异常: {}", e))?
 }
 
 /// 为指定单张照片在其同目录下写入/更新行业标准 XMP 侧车文件 (支持生态层级与平铺关键字)
@@ -296,16 +351,33 @@ async fn write_photo_xmp(
     .map_err(|e| format!("XMP 写入任务异常: {}", e))?
 }
 
-/// 执行严格去重与同主体视觉聚类分析 (基于 64-bit dHash 与时序滑动窗口)
+/// 执行严格去重与同主体视觉聚类分析 (支持 NPU/GPU/CPU 驱动 128-D 语义嵌入与 64-bit dHash 混合聚类)
 #[tauri::command]
 async fn detect_similarity_and_duplicates(
     mut photos: Vec<crate::models::PhotoGroup>,
     config: Option<crate::models::SimilarityConfig>,
-) -> Result<(Vec<crate::models::PhotoGroup>, Vec<crate::models::SubjectCluster>), String> {
+    state: State<'_, AppState>,
+) -> Result<
+    (
+        Vec<crate::models::PhotoGroup>,
+        Vec<crate::models::SubjectCluster>,
+        npu_engine::InferenceTelemetry,
+    ),
+    String,
+> {
+    let saved_backend = state
+        .db
+        .get_app_setting("compute_backend")
+        .ok()
+        .flatten();
     tokio::task::spawn_blocking(move || {
-        let cfg = config.unwrap_or_default();
-        let clusters = crate::similarity::SimilarityDetector::detect_duplicates_and_subjects(&mut photos, &cfg);
-        Ok((photos, clusters))
+        let mut cfg = config.unwrap_or_default();
+        if cfg.compute_backend.is_none() {
+            cfg.compute_backend = saved_backend;
+        }
+        let (clusters, telemetry) =
+            crate::similarity::SimilarityDetector::detect_with_telemetry(&mut photos, &cfg);
+        Ok((photos, clusters, telemetry))
     })
     .await
     .map_err(|e| format!("去重与相似度分析任务异常: {}", e))?
@@ -347,6 +419,8 @@ pub fn run() {
             execute_export,
             cluster_burst_photos,
             detect_similarity_and_duplicates,
+            get_compute_capabilities,
+            set_compute_backend,
             write_photo_xmp,
             get_ai_selection_settings,
             save_ai_selection_settings,

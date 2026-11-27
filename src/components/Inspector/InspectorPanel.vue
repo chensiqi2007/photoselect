@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, ref } from "vue";
+import { computed, watch, ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Camera,
@@ -17,14 +17,33 @@ import {
   Sparkles,
   Copy,
   AlertTriangle,
+  Cpu,
 } from "lucide-vue-next";
 import { usePhotoStore } from "../../stores/photoStore";
 import { useI18n } from "../../i18n";
-import type { ExifSummary } from "../../types/photo";
+import type { ExifSummary, ComputeBackendMode } from "../../types/photo";
 
 const store = usePhotoStore();
 const { t } = useI18n();
 const photo = computed(() => store.currentPhoto);
+
+onMounted(() => {
+  if (!store.computeCapabilities) {
+    store.loadComputeCapabilities();
+  }
+});
+
+const backendOptions: { id: ComputeBackendMode; label: string; badge: string; desc: string }[] = [
+  { id: "auto", label: "Auto 智能调度", badge: "优先 NPU", desc: "自动探测并优先调用 Intel AI Boost NPU 硬件" },
+  { id: "npu", label: "Intel® NPU 驱动", badge: "W8A8 INT8", desc: "Level Zero 静态图对称 INT8 量化神经加速" },
+  { id: "gpu", label: "GPU 显卡驱动", badge: "DirectML", desc: "DirectX 12 FP16 半精度张量并行管线" },
+  { id: "cpu_ai", label: "CPU 神经网络", badge: "128-D 向量", desc: "Rayon 多核 INT8 语义嵌入与中心焦点锐度网" },
+  { id: "cpu_classic", label: "CPU 传统哈希", badge: "64-bit dHash", desc: "免模型 9x8 灰度差分感知哈希极速模式" },
+];
+
+const handleSelectBackend = async (mode: ComputeBackendMode) => {
+  await store.setComputeBackend(mode);
+};
 
 const newTagInput = ref("");
 const isWritingXmp = ref(false);
@@ -135,6 +154,7 @@ const formatFileSize = (bytes: number) => {
 
 const getBadgeLabel = (photo: any): string => {
   if (!photo) return "";
+  if (photo.video_file) return "视频媒体 (Video)";
   if (photo.std_image && photo.raw_image) return t.value.inspector.rawPlusJpgBinding;
   if (photo.raw_image) return t.value.inspector.rawOnly;
   return t.value.inspector.stdOnly;
@@ -236,6 +256,9 @@ const getBadgeLabel = (photo: any): string => {
 
       <!-- 模块 3: 文件系统物理路径详情 -->
       <div v-if="photo" class="space-y-1 bg-[#121214] p-2.5 rounded-xl border border-[#26262C] text-[10px] font-mono break-all text-[#8E8E98]">
+        <div v-if="photo.video_file" class="text-purple-400/90">
+          <span class="font-bold text-white">[VIDEO]</span> {{ photo.video_file }}
+        </div>
         <div v-if="photo.raw_image" class="text-amber-400/90">
           <span class="font-bold text-white">[RAW]</span> {{ photo.raw_image }}
         </div>
@@ -244,6 +267,116 @@ const getBadgeLabel = (photo: any): string => {
         </div>
         <div v-if="photo.xmp_sidecar" class="text-emerald-400/90">
           <span class="font-bold text-white">[XMP]</span> {{ photo.xmp_sidecar }}
+        </div>
+      </div>
+
+      <!-- 模块 3.5: 聚合识别与选优神经算力驱动引擎 (NPU / GPU / CPU Compute Selector) -->
+      <div class="bg-[#18181C] p-3 rounded-xl border border-[#26262C] space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between text-[10px] font-bold text-[#71717A] uppercase tracking-wider">
+          <div class="flex items-center space-x-1">
+            <Cpu class="w-3.5 h-3.5 text-emerald-400" />
+            <span>聚合识别算力驱动</span>
+          </div>
+          <span
+            class="px-1.5 py-0.2 rounded text-[9px] font-mono border"
+            :class="
+              store.computeCapabilities?.npuAvailable
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
+                : 'bg-sky-500/15 text-sky-300 border-sky-500/35'
+            "
+          >
+            {{ store.computeCapabilities?.npuAvailable ? '⚡ NPU 已就绪' : '多核加速就绪' }}
+          </span>
+        </div>
+
+        <!-- 当前激活的物理硬件设备名 -->
+        <div class="px-2.5 py-1.5 rounded-lg bg-[#121214] border border-[#24242C] flex items-center justify-between text-[10px] font-mono">
+          <span class="text-[#71717A] shrink-0">当前硬件:</span>
+          <span
+            class="text-[#F4F4F5] font-semibold truncate ml-2"
+            :title="store.computeCapabilities?.activeDeviceName || '正在探测硬件...'"
+          >
+            {{ store.computeCapabilities?.activeDeviceName || 'Intel(R) AI Boost / 硬件探测中' }}
+          </span>
+        </div>
+
+        <!-- 5 档驱动方式自由切换 -->
+        <div class="grid grid-cols-1 gap-1">
+          <button
+            v-for="opt in backendOptions"
+            :key="opt.id"
+            @click="handleSelectBackend(opt.id)"
+            :title="opt.desc"
+            :class="[
+              'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-left transition-all cursor-pointer text-[11px]',
+              store.selectedComputeBackend === opt.id
+                ? 'bg-emerald-500/15 border-emerald-500/45 text-white font-semibold shadow-xs'
+                : 'bg-[#131317] border-[#22222A] text-[#9E9EA8] hover:bg-[#1E1E26] hover:text-[#F4F4F5]',
+            ]"
+          >
+            <div class="flex items-center space-x-1.5 min-w-0">
+              <span
+                class="w-1.5 h-1.5 rounded-full shrink-0"
+                :class="store.selectedComputeBackend === opt.id ? 'bg-emerald-400' : 'bg-[#3F3F46]'"
+              ></span>
+              <span class="truncate">{{ opt.label }}</span>
+            </div>
+            <span
+              class="text-[9px] font-mono px-1.5 py-0.2 rounded border shrink-0"
+              :class="
+                store.selectedComputeBackend === opt.id
+                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                  : 'bg-[#1C1C22] border-[#2C2C34] text-[#71717A]'
+              "
+            >
+              {{ opt.badge }}
+            </span>
+          </button>
+        </div>
+
+        <!-- 自动打场景标签开关 -->
+        <label class="flex items-center justify-between pt-1 text-[10px] text-[#9E9EA8] cursor-pointer select-none">
+          <span>聚类时自动识别场景写入标签</span>
+          <input
+            type="checkbox"
+            :checked="store.autoTagScene"
+            @change="store.setAutoTagScene(($event.target as HTMLInputElement).checked)"
+            class="accent-emerald-500 rounded cursor-pointer"
+          />
+        </label>
+
+        <!-- 当前选中照片的神经网络焦点与场景评估指标 -->
+        <div
+          v-if="photo?.neural_score != null || photo?.sharpness_score != null || photo?.scene_tag"
+          class="p-2 rounded-lg bg-[#121215] border border-emerald-500/25 space-y-1 text-[10px] font-mono"
+        >
+          <div v-if="photo?.neural_score != null" class="flex items-center justify-between">
+            <span class="text-[#71717A]">神经网络选优总分:</span>
+            <span class="text-emerald-300 font-bold">{{ photo.neural_score }} / 100</span>
+          </div>
+          <div v-if="photo?.sharpness_score != null" class="flex items-center justify-between">
+            <span class="text-[#71717A]">中心主体焦点锐度:</span>
+            <span class="text-sky-300 font-semibold">{{ photo.sharpness_score.toFixed(1) }}</span>
+          </div>
+          <div v-if="photo?.scene_tag" class="flex items-center justify-between">
+            <span class="text-[#71717A]">神经场景分类识别:</span>
+            <span class="text-amber-300">{{ photo.scene_tag }}</span>
+          </div>
+        </div>
+
+        <!-- 最近一次聚合/聚类推理性能遥测 -->
+        <div
+          v-if="store.lastInferenceTelemetry"
+          class="px-2 py-1.5 rounded-lg bg-emerald-950/25 border border-emerald-500/20 text-[9px] font-mono text-emerald-300/90 space-y-0.5"
+        >
+          <div class="flex items-center justify-between">
+            <span class="font-bold">⚡ {{ store.lastInferenceTelemetry.deviceName }}</span>
+            <span>{{ store.lastInferenceTelemetry.totalElapsedMs }} ms</span>
+          </div>
+          <div class="text-[#8E8E98] flex items-center justify-between">
+            <span class="truncate">{{ store.lastInferenceTelemetry.precisionMode }}</span>
+            <span class="shrink-0 ml-1">{{ store.lastInferenceTelemetry.avgMsPerPhoto }} ms/张</span>
+          </div>
         </div>
       </div>
 

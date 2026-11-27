@@ -13,6 +13,7 @@ import {
   Settings,
   Layers,
   ZoomIn,
+  Video,
 } from "lucide-vue-next";
 import { usePhotoStore } from "../stores/photoStore";
 import { useI18n } from "../i18n";
@@ -37,12 +38,7 @@ const handleOpenFolder = async () => {
 };
 
 const toggleFlagFilter = (flag: FlagStatus) => {
-  const idx = store.filter.flags.indexOf(flag);
-  if (idx >= 0) {
-    store.filter.flags.splice(idx, 1);
-  } else {
-    store.filter.flags.push(flag);
-  }
+  store.toggleFlagFilter(flag);
 };
 </script>
 
@@ -212,6 +208,23 @@ const toggleFlagFilter = (flag: FlagStatus) => {
         :title="t.topbar.rawPlusJpg"
       >
         RAW+JPG
+      </button>
+
+      <!-- 仅视频文件过滤切换 -->
+      <button
+        v-if="store.smartCounts.videos > 0"
+        @click="store.filter.video_only = !store.filter.video_only"
+        :class="[
+          'px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border transition-all cursor-pointer flex items-center space-x-1',
+          store.filter.video_only
+            ? 'bg-purple-500/20 border-purple-500/40 text-purple-400 shadow-sm'
+            : 'border-[#26262C] text-[#8E8E98] hover:text-[#E4E4E8]',
+        ]"
+        title="仅查看视频媒体文件"
+      >
+        <Video class="w-3 h-3" />
+        <span>VIDEO</span>
+        <span class="text-[9px] opacity-75">({{ store.smartCounts.videos }})</span>
       </button>
 
       <button

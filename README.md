@@ -40,6 +40,13 @@
 - **双星合一无缝汇聚**：自动将拍摄时产生的同名标准预览图（JPG/PNG）与原厂 RAW（如 `.ARW`、`.CR3`、`.NEF`、`.RAF`、`.DNG` 等）智能聚合为单一资产卡片。
 - **杜绝二次重复筛选**：界面以 JPG 流畅极速呈现，后台实时联动 RAW 原片，在评级、标记或导出时实现同生共死。
 
+### 🎬 专业相机视频媒体全流程支持 (Pro Camera Video Support)
+- **主流相机视频原片直读**：全面支持各大主流相机（索尼 XAVC-S、佳能 Cinema RAW Light / MP4、松下、尼康、大疆）录制的 `.mp4`、`.mov`、`.m4v`、`.mkv`、`.avi`、`.webm`、`.mts`、`.m2ts` 等视频文件。
+- **HTTP 206 零延迟流式分块传输**：Rust 原生网络层支持 `Range: bytes` 局部内容流式传输与 8MB 高速分块，数 GB 级别的高码率 4K/8K 视频毫秒级即开即播，任意位置拖拽进度条零卡顿。
+- **暗房级专属播放控制台 (Video HUD)**：集成 0.5x - 2.0x 无级倍速播放、循环播放切换、音量持久化记忆、全屏切换，支持 <kbd>Space</kbd> 播放/暂停、<kbd>J</kbd> / <kbd>L</kbd> 或 <kbd>Shift</kbd>+方向键 ±5 秒寻帧。
+- **边看边选极致工作流**：在视频播放过程中无缝使用 <kbd>0</kbd>–<kbd>5</kbd> 星级评定与 <kbd>P</kbd> / <kbd>X</kbd> / <kbd>U</kbd> 快速标记，与静态照片资产同屏并列筛选。
+- **智能集合与分目录安全导出**：左侧栏提供专属「视频媒体」分类视图与数量角标，导出时支持独立归类至 `/VIDEO` 子目录。
+
 ### 🎨 Studio Darkroom 专业暗房设计美学
 - **18% 中性灰暗房视口**：严格遵循行业标准 18% 中性灰基准底色，彻底消除环境对比对曝光判断的视觉欺骗。
 - **精致玻璃拟态 (Glassmorphism)**：融合多层景深模糊、电光蓝（Electric Blue）呼吸对焦指示环与高对比度 HUD 参数平视面板。
@@ -148,6 +155,7 @@
 | **Panasonic (松下)** | `.RW2` | S5 II, S1H, GH6, G9 II 等 |
 | **Olympus/OM (奥之心)**| `.ORF` | OM-1 Mark II, E-M1X 等 |
 | **标准位图格式** | `.JPG`, `.JPEG`, `.PNG`, `.WebP` | 所有主流数码影像输出格式 |
+| **相机视频媒体** | `.MP4`, `.MOV`, `.M4V`, `.MKV`, `.AVI`, `.WebM`, `.MTS`, `.M2TS` | 索尼 XAVC-S、佳能 MP4/MOV、大疆、松下等视频原片 |
 
 ---
 
@@ -216,7 +224,7 @@ npm run build
 # 编译 Microsoft Store 认证的 MSIX 应用包
 npm run build:msix
 
-# 编译 Linux 发行版安装包 (原生 Debian .deb / RPM via WSL)
+# 编译 Linux 发行版安装包 (Debian .deb / RPM via WSL)
 npm run build:linux
 ```
 

@@ -8,6 +8,7 @@ import {
   ZoomOut,
   RotateCcw,
   Layers,
+  Play,
 } from "lucide-vue-next";
 import { usePhotoStore } from "../../stores/photoStore";
 import { useI18n } from "../../i18n";
@@ -41,6 +42,7 @@ onUnmounted(() => {
 });
 
 const getBadgeLabel = (photo: PhotoGroup): string => {
+  if (photo.video_file) return "VIDEO";
   if (photo.std_image && photo.raw_image) return "RAW+JPG";
   if (photo.raw_image) return "RAW";
   return "JPG";
@@ -130,14 +132,30 @@ const getGroupSummary = (photo: PhotoGroup) => {
             </div>
           </div>
 
-          <!-- 缩略图图片 (极速 20KB 原生轻量流) -->
+          <!-- 视频优先展示首帧，照片展示轻量缩略图流 -->
+          <video
+            v-if="photo.video_file"
+            :src="store.getPreviewUrl(photo) + '#t=0.01'"
+            preload="metadata"
+            muted
+            playsinline
+            class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none transition-transform duration-200 group-hover:scale-[1.02]"
+          ></video>
           <img
+            v-else
             :src="store.getThumbnailUrl(photo)"
             loading="lazy"
             decoding="async"
             alt=""
             class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none transition-transform duration-200 group-hover:scale-[1.02]"
           />
+
+          <!-- 视频文件中央播放器微标 -->
+          <div v-if="photo.video_file" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div class="w-10 h-10 rounded-full bg-black/60 backdrop-blur-xs border border-white/20 flex items-center justify-center text-white/90 shadow-lg group-hover:scale-110 group-hover:bg-purple-600/80 transition-all">
+              <Play class="w-5 h-5 ml-0.5 fill-white/90" />
+            </div>
+          </div>
 
           <!-- 卡片顶部悬浮条: 编号 + 留用徽章 + 对比身份徽章 + 叠放操作 -->
           <div class="relative z-20 p-2 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent">
@@ -231,7 +249,14 @@ const getGroupSummary = (photo: PhotoGroup) => {
             </div>
 
             <div class="flex items-center space-x-1.5">
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-black/60 text-white/90 border border-white/10">
+              <span
+                :class="[
+                  'text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border',
+                  photo.video_file
+                    ? 'bg-purple-600/90 text-white border-purple-400/40'
+                    : 'bg-black/60 text-white/90 border-white/10'
+                ]"
+              >
                 {{ getBadgeLabel(photo) }}
               </span>
               <div v-if="photo.rating > 0" class="flex items-center space-x-0.5">

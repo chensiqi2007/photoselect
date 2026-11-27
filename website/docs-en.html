@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoSelect Desktop - Official Documentation & Developer Guide | URL Time</title>
+  <meta name="description" content="Comprehensive official documentation and developer guide for PhotoSelect Desktop. Zero-Import architecture, Smart RAW+JPG pairing, WebGL 2.0 focus peaking, 468-point eye focus inspection, XMP sidecar sync, and URL Time SSO integration.">
+  <meta name="keywords" content="PhotoSelect docs, photo culling guide, fast RAW culling, WebGL focus peaking, eye focus inspection, XMP sidecar, URL Time SSO, Tauri 2.0, Lightroom alternative">
+  <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/docs.css">
+</head>
+<body class="docs-page">
+
+  <!-- ==================== Header ==================== -->
+  <header class="docs-header">
+    <div class="docs-header-inner">
+      <div class="docs-brand-group">
+        <button id="docsMobileToggle" class="docs-mobile-drawer-toggle" aria-label="Toggle navigation drawer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <a href="en.html" class="brand" title="Back to Homepage">
+          <img src="assets/images/app-icon.svg" alt="PhotoSelect Logo" class="brand-icon">
+          <div class="brand-title">
+            <span>PhotoSelect</span>
+            <span class="version-tag">v1.1.0</span>
+          </div>
+        </a>
+        <span class="docs-badge">Documentation</span>
+      </div>
+
+      <div class="docs-search-bar">
+        <svg class="docs-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="docsSearchInput" class="docs-search-input" placeholder="Search documentation, features, shortcuts..." autocomplete="off">
+        <span class="docs-search-kbd">Ctrl K</span>
+      </div>
+
+      <div class="docs-header-actions">
+        <a href="en.html" class="nav-link" style="font-size: 0.85rem;">Home</a>
+        <a href="docs.html" class="docs-lang-btn" title="切换至中文官方文档">
+          <span>🇨🇳 中文版</span>
+        </a>
+        <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="btn-ghost" style="padding: 6px 12px; font-size: 0.82rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+
+        <!-- URL Time SSO Integration Container -->
+        <div id="urltime-sso-widget" class="urltime-sso-widget"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== Main Container ==================== -->
+  <div class="docs-main-wrapper">
+
+    <!-- Left Sidebar: Documentation Navigation -->
+    <aside id="docsSidebarLeft" class="docs-sidebar-left">
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>Getting Started</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item active"><a href="#overview">Overview & Philosophy</a></li>
+          <li class="docs-nav-item"><a href="#installation">Installation & Setup</a></li>
+          <li class="docs-nav-item"><a href="#quickstart">3-Minute Quick Start</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Core Workflow</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#zero-import">Zero-Import Architecture</a></li>
+          <li class="docs-nav-item"><a href="#raw-jpg-pairing">Smart RAW+JPG Pairing</a></li>
+          <li class="docs-nav-item"><a href="#burst-clustering">Burst Clustering & Best Shot <span class="docs-pill-sm docs-pill-pro">Pro</span></a></li>
+          <li class="docs-nav-item"><a href="#dual-compare">Side-by-Side Dual Comparison</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Focus & Quality Analysis</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#webgl-peaking">WebGL 2.0 Focus Peaking</a></li>
+          <li class="docs-nav-item"><a href="#eye-detection">468-Point Eye Focus Check <span class="docs-pill-sm docs-pill-new">AI</span></a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>Video Workflow</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#video-workflow">HTTP 206 Streaming Playback & HUD</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <span>Ecosystem & Post-Production</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#xmp-sync">Lightroom XMP Sidecar Sync</a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Account & Pro Ecosystem</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#account-cloud">URL Time Account Services</a></li>
+          <li class="docs-nav-item"><a href="#pro-commercial">Commercial Pro Tier <span class="docs-pill-sm docs-pill-pro">Pro</span></a></li>
+        </ul>
+      </div>
+
+      <div class="docs-nav-group">
+        <div class="docs-nav-group-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span>Reference & Support</span>
+        </div>
+        <ul class="docs-nav-items">
+          <li class="docs-nav-item"><a href="#shortcuts">Keyboard Shortcuts Cheatsheet</a></li>
+          <li class="docs-nav-item"><a href="#camera-support">Camera & RAW Formats</a></li>
+          <li class="docs-nav-item"><a href="#architecture">Architecture & Source Build</a></li>
+          <li class="docs-nav-item"><a href="#faq">Frequently Asked Questions</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Center: Main Content -->
+    <main class="docs-content">
+      <div class="docs-breadcrumb">
+        <a href="en.html">Home</a>
+        <span>/</span>
+        <a href="#overview">Documentation</a>
+        <span>/</span>
+        <span style="color: #cbd5e1;">Official User & Developer Guide</span>
+      </div>
+
+      <h1 class="docs-title-h1">PhotoSelect Desktop Documentation & Guide</h1>
+
+      <div class="docs-meta-bar">
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Release: v1.1.0 (2026 Production)</span>
+        </div>
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Read Time: 15 min</span>
+        </div>
+        <div class="docs-meta-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>URL Time Official Security Verification</span>
+        </div>
+        <div class="docs-meta-item">
+          <span style="color: #38bdf8;">● Community & Commercial Pro Ecosystem</span>
+        </div>
+      </div>
+
+      <!-- ==================== 1. Overview ==================== -->
+      <section id="overview" class="docs-section">
+        <h2>1. Project Overview & Philosophy</h2>
+        <p>
+          <strong>PhotoSelect Desktop</strong> is an advanced, ultra-responsive RAW photo culling and digital asset management platform engineered by the URL Time team and open source contributors for commercial photographers, wedding shooters, sports action specialists, and wildlife birders.
+        </p>
+        <p>
+          With modern cameras outputting 45MP–61MP high-resolution imagery at rapid continuous burst speeds up to 120fps, photographers routinely capture thousands of photos during a single shoot. Traditional tools like Lightroom Classic suffer from painful catalog import bottlenecks, while legacy culling utilities lack hardware-accelerated focus verification, local eye-focus analysis, or modern video screening.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>Core Pillars:</strong>
+            Zero-Import instant loading, millisecond RAW+JPG synchronized pairing, WebGL 2.0 GPU focus peaking, 100% offline 468-point eye focus inspection, and bidirectional Adobe Lightroom XMP sidecar sync. 100% local processing with complete privacy.
+          </div>
+        </div>
+
+        <h3>Competitive Comparison Matrix</h3>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>Evaluation Metric</th>
+                <th>PhotoSelect Desktop</th>
+                <th>Lightroom Classic</th>
+                <th>Photo Mechanic</th>
+                <th>Narrative Select</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Initial Load Latency</strong></td>
+                <td><span style="color: #10b981;">⚡ Zero-Import (0.05s instant)</span></td>
+                <td>🐢 Painful Catalog Import</td>
+                <td>💨 Fast thumbnail scan</td>
+                <td>⏳ Cloud/local indexing wait</td>
+              </tr>
+              <tr>
+                <td><strong>Eye Focus Inspection</strong></td>
+                <td><span style="color: #10b981;">468-pt Mesh 100% Offline Crop</span></td>
+                <td>❌ None</td>
+                <td>❌ None</td>
+                <td>Expensive cloud/subscription</td>
+              </tr>
+              <tr>
+                <td><strong>Hardware Focus Peaking</strong></td>
+                <td><span style="color: #10b981;">WebGL 2.0 Native Shader</span></td>
+                <td>❌ None</td>
+                <td>❌ None</td>
+                <td>❌ None</td>
+              </tr>
+              <tr>
+                <td><strong>Pro Video Culling</strong></td>
+                <td><span style="color: #10b981;">HTTP 206 Streaming + Video HUD</span></td>
+                <td>Sluggish playback</td>
+                <td>Basic playback only</td>
+                <td>❌ Unsupported</td>
+              </tr>
+              <tr>
+                <td><strong>Privacy & Security</strong></td>
+                <td><span style="color: #10b981;">100% Offline Local Sandboxing</span></td>
+                <td>Local</td>
+                <td>Local</td>
+                <td>Partial cloud verification</td>
+              </tr>
+              <tr>
+                <td><strong>Licensing & Price</strong></td>
+                <td><span style="color: #10b981;">Free Community Tier / Commercial Pro</span></td>
+                <td>$119+/year subscription</td>
+                <td>$249+ perpetual</td>
+                <td>$180+/year subscription</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 2. Installation ==================== -->
+      <section id="installation" class="docs-section">
+        <h2>2. Installation & System Requirements</h2>
+        <h3>Recommended Hardware Specifications</h3>
+        <ul>
+          <li><strong>Operating System:</strong> Windows 10 (Build 1809+) / Windows 11 (64-bit); Linux (Ubuntu 22.04+, Fedora 38+, Arch Linux).</li>
+          <li><strong>CPU:</strong> Quad-core or higher with AVX2 instruction set support (Intel 4th Gen Core+ / AMD Ryzen series).</li>
+          <li><strong>RAM:</strong> 4GB minimum, 8GB–16GB recommended. Virtualized viewports keep memory footprint strictly constant regardless of shoot size.</li>
+          <li><strong>GPU:</strong> Modern integrated or discrete graphics with WebGL 2.0 / DirectX 11+ / Vulkan support (for real-time shader peaking).</li>
+        </ul>
+
+        <h3>Distribution Channels</h3>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>Package Type</th>
+                <th>Target Platform</th>
+                <th>Details</th>
+                <th>Download Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Windows Setup (.exe)</strong></td>
+                <td>Windows 10 / 11 64-bit</td>
+                <td>Includes NSIS installer, start menu shortcuts, and explorer file association.</td>
+                <td><a href="https://github.com/chensiqi2007/photoselect/releases/download/v1.1.0/PhotoSelect-Desktop-v1.1.0-Setup.exe" style="color: #38bdf8;">Download Setup.exe</a></td>
+              </tr>
+              <tr>
+                <td><strong>Microsoft Store Edition</strong></td>
+                <td>Windows 10 / 11</td>
+                <td>Officially sandboxed, automatic background delta updates, zero system clutter.</td>
+                <td><a href="https://apps.microsoft.com/detail/9mwnhgc08xkm?hl=bs-Latn-BA&gl=BA" target="_blank" rel="noopener" style="color: #38bdf8;">Get from Microsoft Store</a></td>
+              </tr>
+              <tr>
+                <td><strong>Portable Windows (.exe)</strong></td>
+                <td>Windows 64-bit</td>
+                <td>Zero installation required; runs directly from external SSDs or flash drives.</td>
+                <td>GitHub Releases Assets</td>
+              </tr>
+              <tr>
+                <td><strong>Linux (.deb / .rpm)</strong></td>
+                <td>Modern Linux Distros</td>
+                <td>Hardware accelerated WebKitGTK packaging with native GNOME/KDE integration.</td>
+                <td>GitHub Releases</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 3. Quick Start ==================== -->
+      <section id="quickstart" class="docs-section">
+        <h2>3. 3-Minute Quick Start Guide</h2>
+        <ol>
+          <li>
+            <strong>Open Media Folder:</strong> Click "Open Folder" or drag and drop your SD card volume or local directory directly into the application window.
+          </li>
+          <li>
+            <strong>Blind Keyboard Culling:</strong> Thumbnails and preview viewports stream instantaneously. Use arrow keys <kbd>→</kbd> / <kbd>←</kbd> to traverse, press <kbd>1</kbd>–<kbd>5</kbd> to rate, press <kbd>P</kbd> to flag pick, or press <kbd>X</kbd> to mark reject.
+          </li>
+          <li>
+            <strong>Seamless Lightroom Export:</strong> When culling is complete, export ratings as <code>.xmp</code> sidecar files or simply open the folder in Lightroom Classic — your star ratings and flags appear immediately.
+          </li>
+        </ol>
+      </section>
+
+      <!-- ==================== 4. Zero-Import ==================== -->
+      <section id="zero-import" class="docs-section">
+        <h2>4. Zero-Import Architecture</h2>
+        <p>
+          Unlike legacy catalog-based systems that force photographers to wait through tedious copying, indexing, and thumbnail rendering stages, PhotoSelect eliminates ingestion latency:
+        </p>
+        <ul>
+          <li><strong>Direct OS I/O Streaming:</strong> The Rust backend interfaces directly with low-level OS file handles, reading SD cards and NVMe drives concurrently.</li>
+          <li><strong>Two-Level LRU Cache & Virtualized Viewports:</strong> Only images within the active viewport and pre-fetch margins occupy memory, guaranteeing rock-solid stability between 150MB and 350MB of RAM.</li>
+          <li><strong>No Persistent Database Bloat:</strong> Zero multi-gigabyte cache databases left on your computer. Disconnect your storage card anytime with clean peace of mind.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 5. Smart Pairing ==================== -->
+      <section id="raw-jpg-pairing" class="docs-section">
+        <h2>5. Smart RAW+JPG Pairing</h2>
+        <p>
+          Shooting dual RAW+JPG is standard practice in wedding, event, and sports photography. Standard viewers display duplicates, requiring double the time to cull.
+        </p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>Unified Asset Cards:</strong>
+            PhotoSelect detects matching base filenames (such as <code>_DSC1024.ARW</code> and <code>_DSC1024.JPG</code>) and pairs them into a single coherent entity.
+          </div>
+        </div>
+        <ul>
+          <li><strong>60fps Smooth Playback:</strong> High-resolution embedded JPG previews provide butter-smooth navigation and zoom.</li>
+          <li><strong>Synchronized Asset Lifecycle:</strong> Ratings, flags, color tags, and deletions synchronize automatically between the paired RAW and JPG files.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 6. Burst Clustering ==================== -->
+      <section id="burst-clustering" class="docs-section">
+        <h2>6. Burst Clustering & Best Shot Recommendation</h2>
+        <p>
+          Action bursts can yield dozens of near-identical frames. PhotoSelect uses millisecond-accurate EXIF temporal analysis to automatically aggregate burst sequences.
+        </p>
+        <h3>SubSecTime Temporal Grouping</h3>
+        <p>
+          By inspecting <code>SubSecTimeOriginal</code> timestamps, frames captured within an adjustable threshold (default 0.8s) are collapsed into an interactive burst stack.
+        </p>
+        <h3>Best Shot AI Scoring</h3>
+        <p>
+          When inspecting a burst sequence, our local algorithm analyzes:
+        </p>
+        <ul>
+          <li><strong>Eye Sharpness & Focus Accuracy:</strong> Verifies that critical facial landmarks are tack sharp.</li>
+          <li><strong>Blink Detection Penalty:</strong> Identifies closed eyes or mid-blink expressions and docks score.</li>
+          <li><strong>Subject Framing:</strong> The top-scoring frame receives the golden <span style="color: #facc15;">★ Best Shot</span> badge for split-second decisions.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 7. Dual Comparison ==================== -->
+      <section id="dual-compare" class="docs-section">
+        <h2>7. Side-by-Side Dual Comparison</h2>
+        <p>
+          When choosing between closely matched expressions, press <kbd>S</kbd> to lock the current frame as the <strong>Benchmark Master</strong>:
+        </p>
+        <ul>
+          <li><strong>Master vs Candidate:</strong> The benchmark remains static on the left while arrow keys navigate alternative candidate shots on the right.</li>
+          <li><strong>Synchronized Pan & Zoom:</strong> Zooming in to 100% on one viewport synchronizes the coordinates and magnification on the other side simultaneously.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 8. WebGL Focus Peaking ==================== -->
+      <section id="webgl-peaking" class="docs-section">
+        <h2>8. WebGL 2.0 Hardware Focus Peaking</h2>
+        <p>
+          Confirming critical depth-of-field focus without zooming to 100% is made possible via real-time <strong>WebGL 2.0 Sobel Edge Detection Shaders</strong>.
+        </p>
+        <p>
+          Press <kbd>F</kbd> anytime to overlay high-frequency edge highlights in Electric Blue, Emerald Green, or Ruby Red:
+        </p>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">GLSL Focus Peaking Shader Implementation</span>
+            <button class="code-copy-btn">Copy Code</button>
+          </div>
+          <pre class="code-content"><code>// WebGL 2.0 Focus Peaking Kernel Fragment Shader (Simplified)
+#version 300 es
+precision highp float;
+in vec2 vTexCoord;
+out vec4 fragColor;
+uniform sampler2D uTexture;
+uniform vec2 uTexelSize;
+uniform vec3 uPeakingColor; // Electric Blue / Emerald Green / Red
+
+void main() {
+    float gx = -texture(uTexture, vTexCoord + vec2(-uTexelSize.x, -uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x, -uTexelSize.y)).r
+               - 2.0 * texture(uTexture, vTexCoord + vec2(-uTexelSize.x, 0.0)).r
+               + 2.0 * texture(uTexture, vTexCoord + vec2( uTexelSize.x, 0.0)).r
+               - texture(uTexture, vTexCoord + vec2(-uTexelSize.x,  uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x,  uTexelSize.y)).r;
+    float gy = -texture(uTexture, vTexCoord + vec2(-uTexelSize.x, -uTexelSize.y)).r
+               - 2.0 * texture(uTexture, vTexCoord + vec2(0.0, -uTexelSize.y)).r
+               - texture(uTexture, vTexCoord + vec2( uTexelSize.x, -uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2(-uTexelSize.x,  uTexelSize.y)).r
+               + 2.0 * texture(uTexture, vTexCoord + vec2(0.0,  uTexelSize.y)).r
+               + texture(uTexture, vTexCoord + vec2( uTexelSize.x,  uTexelSize.y)).r;
+    float edge = sqrt(gx * gx + gy * gy);
+    vec4 baseColor = texture(uTexture, vTexCoord);
+    if (edge > 0.35) {
+        fragColor = vec4(mix(baseColor.rgb, uPeakingColor, 0.85), 1.0);
+    } else {
+        fragColor = baseColor;
+    }
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 9. Eye Focus Inspection ==================== -->
+      <section id="eye-detection" class="docs-section">
+        <h2>9. 468-Point Face & 100% Eye Focus Inspection</h2>
+        <p>
+          Blinking or soft eye focus ruins commercial group portraits. PhotoSelect features a Narrative Select-inspired multi-face inspector that runs <strong>100% locally with zero cloud dependencies</strong>:
+        </p>
+        <ul>
+          <li><strong>MediaPipe Face Landmarker WebAssembly:</strong> Real-time inference executed directly on local CPU / GPU hardware.</li>
+          <li><strong>Automatic 1:1 Eye Crops:</strong> Locates every face in the frame and renders 100% scale thumbnails of both left and right eyes in a dedicated HUD tray.</li>
+          <li><strong>Quantitative Openness & Sharpness Metric:</strong> Instant blink alerts prevent accidental delivery of compromised expressions.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 10. Pro Video Workflow ==================== -->
+      <section id="video-workflow" class="docs-section">
+        <h2>10. Pro Camera Video Workflow & HUD</h2>
+        <p>
+          Modern hybrid cameras capture both stills and 4K/8K high-bitrate video clips (All-Intra, 10-bit 4:2:2).
+        </p>
+        <h3>HTTP 206 Partial Content Streaming</h3>
+        <p>
+          PhotoSelect's embedded Rust streaming server delivers instantaneous seeking with <code>Range: bytes</code> header support and 8MB predictive buffering. Heavy multi-gigabyte clips scrub with zero lag.
+        </p>
+        <h3>Darkroom Video HUD</h3>
+        <ul>
+          <li><strong>Speed Controls:</strong> Smooth playback at 0.5x, 1.0x, 1.5x, and 2.0x.</li>
+          <li><strong>Shortcut Navigation:</strong> Use <kbd>Space</kbd> to toggle playback, or press <kbd>J</kbd> / <kbd>L</kbd> to step ±5 seconds.</li>
+          <li><strong>Live Rating & Culling:</strong> Apply star ratings and pick flags directly while video plays. Selected videos export automatically into an organized <code>/VIDEO</code> folder.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 11. XMP Sidecar Sync ==================== -->
+      <section id="xmp-sync" class="docs-section">
+        <h2>11. XMP Sidecar Sync with Adobe Lightroom Classic</h2>
+        <p>
+          Ratings and tags adhere strictly to the universal <strong>Adobe XMP Sidecar specification</strong>:
+        </p>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">Sample Generated .xmp Metadata File</span>
+            <button class="code-copy-btn">Copy Code</button>
+          </div>
+          <pre class="code-content"><code>&lt;x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="PhotoSelect Desktop v1.1.0"&gt;
+ &lt;rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"&gt;
+  &lt;rdf:Description rdf:about=""
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+    xmlns:xmpLabel="http://ns.adobe.com/xap/1.0/label/"
+    xmp:Rating="5"
+    xmp:Label="Pick"
+    photoshop:Urgency="1"&gt;
+   &lt;xmp:CreateDate&gt;2026-11-11T16:20:00+08:00&lt;/xmp:CreateDate&gt;
+  &lt;/rdf:Description&gt;
+ &lt;/rdf:RDF&gt;
+&lt;/x:xmpmeta&gt;</code></pre>
+        </div>
+        <p>
+          Import your culled folder into Lightroom Classic or Capture One — all stars, labels, and pick flags appear automatically.
+        </p>
+      </section>
+
+      <!-- ==================== 12. Account & Commercial Ecosystem ==================== -->
+      <section id="account-cloud" class="docs-section">
+        <h2>12. URL Time Account & Commercial Pro Ecosystem</h2>
+        <p>
+          PhotoSelect Desktop integrates deeply with the <strong>URL Time Unified Account Center</strong>. By clicking "URL Time SSO" in the top navigation bar, photographers and studios can securely sign in, activate cloud preferences, and streamline cross-workstation collaboration.
+        </p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>Account Security & Architecture:</strong><br>
+            • <strong>Single Sign-On (SSO):</strong> Encrypted authorization handled via <code>login.urltime.cn</code> with zero redundant password management.<br>
+            • <strong>Complete Local Privacy:</strong> Photo parsing, focus peaking, and face/eye AI processing remain 100% on your local machine. The cloud account only syncs license entitlements and user preferences.<br>
+            • <strong>Multi-Device Roaming:</strong> Seamlessly use one unified Pro account across studio editing towers, laptops, and on-location DIT stations.
+          </div>
+        </div>
+
+        <h3 id="pro-commercial">Commercial Pro Edition & Future Value-Added Services</h3>
+        <p>
+          To sustain the continuous engineering of high-performance desktop darkroom algorithms and provide guaranteed delivery support for commercial photography businesses, PhotoSelect follows a <strong>"Free Community Tier + Commercial Pro Services"</strong> roadmap:
+        </p>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>Feature & Capability</th>
+                <th>Community Free Tier</th>
+                <th>PhotoSelect Pro (Commercial)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Zero-Import Instant Loading & RAW+JPG Link</strong></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+              </tr>
+              <tr>
+                <td><strong>WebGL 2.0 Native Focus Peaking</strong></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+              </tr>
+              <tr>
+                <td><strong>468-Point Offline Eye Inspection</strong></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+                <td><span style="color: #10b981;">✓ Ultra-Concurrency Acceleration</span></td>
+              </tr>
+              <tr>
+                <td><strong>Adobe Lightroom XMP Sidecar Sync</strong></td>
+                <td><span style="color: #10b981;">✓ Full Support</span></td>
+                <td><span style="color: #10b981;">✓ Multi-Directory Rule Batch Export</span></td>
+              </tr>
+              <tr>
+                <td><strong>Client Online Proofing Galleries</strong></td>
+                <td>❌ Not Included</td>
+                <td><span style="color: #38bdf8;">★ Coming Soon (Zero RAW upload client pick)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Multi-Camera Real-Time Team Collaboration</strong></td>
+                <td>❌ Not Included</td>
+                <td><span style="color: #38bdf8;">★ Studio & Team Plan Exclusive</span></td>
+              </tr>
+              <tr>
+                <td><strong>Dedicated Enterprise Support & Commercial SLA</strong></td>
+                <td>Community Support</td>
+                <td><span style="color: #38bdf8;">★ Official Priority Support & Commercial Rights</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 13. Shortcuts ==================== -->
+      <section id="shortcuts" class="docs-section">
+        <h2>13. Complete Keyboard Shortcuts Cheatsheet</h2>
+        <div class="docs-table-wrapper">
+          <table class="docs-table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Action</th>
+                <th>Darkroom Workflow Usage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><kbd>→</kbd> / <kbd>←</kbd></td>
+                <td>Next / Previous Photo</td>
+                <td>Hold down for rapid 60fps frame scrubbing.</td>
+              </tr>
+              <tr>
+                <td><kbd>0</kbd> – <kbd>5</kbd></td>
+                <td>Star Rating (0 to 5)</td>
+                <td>Synchronizes bidirectionally with Lightroom / Capture One.</td>
+              </tr>
+              <tr>
+                <td><kbd>P</kbd></td>
+                <td>Flag as Pick</td>
+                <td>Green highlight border; injects <code>xmpLabel:Pick</code>.</td>
+              </tr>
+              <tr>
+                <td><kbd>X</kbd></td>
+                <td>Flag as Reject</td>
+                <td>Red border & dimmed view; queued for physical quarantine.</td>
+              </tr>
+              <tr>
+                <td><kbd>U</kbd></td>
+                <td>Unflag / Clear Marking</td>
+                <td>Resets rating and pick flag status to neutral.</td>
+              </tr>
+              <tr>
+                <td><kbd>Space</kbd></td>
+                <td>100% Zoom / Reset</td>
+                <td>Instantly zooms to focus point or cursor location.</td>
+              </tr>
+              <tr>
+                <td><kbd>F</kbd></td>
+                <td>Toggle Focus Peaking</td>
+                <td>Toggles real-time GPU Sobel edge detection shader.</td>
+              </tr>
+              <tr>
+                <td><kbd>S</kbd></td>
+                <td>Lock Dual Benchmark</td>
+                <td>Locks current shot to left; scrubs candidates on right.</td>
+              </tr>
+              <tr>
+                <td><kbd>J</kbd> / <kbd>L</kbd></td>
+                <td>Step Video ±5s</td>
+                <td>Darkroom video playback navigation.</td>
+              </tr>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>=</kbd> / <kbd>-</kbd></td>
+                <td>High-DPI Scale (100%-200%)</td>
+                <td>Adapts cleanly to 4K / 5K professional color grading monitors.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 14. Cameras ==================== -->
+      <section id="camera-support" class="docs-section">
+        <h2>14. Camera & RAW Format Support</h2>
+        <ul>
+          <li><strong>Sony:</strong> <code>.ARW</code> (A1, A9 III Global Shutter, A7R V, A7 IV, A7C II, FX3, ZV-E1 lossless/uncompressed).</li>
+          <li><strong>Canon:</strong> <code>.CR3</code> / <code>.CR2</code> (EOS R5 II, R3, R6 II, R8, 1D X Mark III and legacy EF bodies).</li>
+          <li><strong>Nikon:</strong> <code>.NEF</code> (Z9, Z8, Z6 III, Zf, D850 High Efficiency & Lossless RAW).</li>
+          <li><strong>Fujifilm:</strong> <code>.RAF</code> (X-T5, X-H2S, X100VI, GFX100 II medium format X-Trans & Bayer).</li>
+          <li><strong>Other Brands:</strong> Leica <code>.DNG</code>, Panasonic <code>.RW2</code>, OM System / Olympus <code>.ORF</code>, DJI Drone / Hasselblad <code>.DNG</code> / <code>.3FR</code>.</li>
+        </ul>
+      </section>
+
+      <!-- ==================== 15. Architecture ==================== -->
+      <section id="architecture" class="docs-section">
+        <h2>15. Technical Architecture & Building from Source</h2>
+        <p>
+          PhotoSelect Desktop combines high-performance native systems programming with modern web engineering:
+        </p>
+        <ul>
+          <li><strong>Core Layer:</strong> Rust 1.78+ & Tauri 2.0 (Native OS windows, multi-threaded async file I/O, embedded HTTP 206 server).</li>
+          <li><strong>UI Framework:</strong> Vue 3.5 (Composition API) + TypeScript 5.6 + Tailwind CSS 3.4.</li>
+          <li><strong>Viewport Engine:</strong> WebGL 2.0 custom shaders for real-time focus peaking.</li>
+          <li><strong>Local AI Engine:</strong> Google MediaPipe Face Landmarker WebAssembly offline model.</li>
+        </ul>
+
+        <h3>Build Instructions</h3>
+        <div class="code-block-wrapper">
+          <div class="code-header">
+            <span class="code-lang-tag">Build Commands (Bash / PowerShell)</span>
+            <button class="code-copy-btn">Copy Code</button>
+          </div>
+          <pre class="code-content"><code># 1. Clone repository
+git clone https://github.com/chensiqi2007/photoselect.git
+cd photoselect
+
+# 2. Install dependencies
+npm install
+
+# 3. Run development hot-reload
+npm run tauri dev
+
+# 4. Build production installer (.exe / .deb)
+npm run tauri build</code></pre>
+        </div>
+      </section>
+
+      <!-- ==================== 16. FAQ ==================== -->
+      <section id="faq" class="docs-section">
+        <h2>16. Frequently Asked Questions (FAQ)</h2>
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>Q: Why does PhotoSelect load much faster than Lightroom Classic?</strong><br>
+            A: PhotoSelect streams embedded camera preview JPEGs directly from storage cards using zero-copy Rust I/O and dynamic LRU garbage collection, avoiding time-consuming catalog database writes.
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="callout-content">
+            <strong>Q: What benefits do I unlock after signing in with a URL Time account?</strong><br>
+            A: Signing in automatically links your customized darkroom shortcuts, rating thresholds, and UI layouts across devices. Authenticated users also receive priority access to private betas for collaborative team proofing galleries and cloud asset review.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right Sidebar: On This Page / Table of Contents -->
+    <aside class="docs-sidebar-right">
+      <div class="toc-title">On This Page</div>
+      <ul class="toc-items">
+        <li class="toc-item active"><a href="#overview">1. Overview & Philosophy</a></li>
+        <li class="toc-item"><a href="#installation">2. Installation & Setup</a></li>
+        <li class="toc-item"><a href="#quickstart">3. 3-Minute Quick Start</a></li>
+        <li class="toc-item"><a href="#zero-import">4. Zero-Import Architecture</a></li>
+        <li class="toc-item"><a href="#raw-jpg-pairing">5. Smart RAW+JPG Pairing</a></li>
+        <li class="toc-item"><a href="#burst-clustering">6. Burst Clustering & Best Shot</a></li>
+        <li class="toc-item"><a href="#dual-compare">7. Side-by-Side Dual Comparison</a></li>
+        <li class="toc-item"><a href="#webgl-peaking">8. WebGL Focus Peaking</a></li>
+        <li class="toc-item"><a href="#eye-detection">9. 468-Point Eye Focus Check</a></li>
+        <li class="toc-item"><a href="#video-workflow">10. Video Workflow & HUD</a></li>
+        <li class="toc-item"><a href="#xmp-sync">11. Lightroom XMP Sidecar Sync</a></li>
+        <li class="toc-item"><a href="#account-cloud">12. URL Time Account Center</a></li>
+        <li class="toc-item toc-sub-item"><a href="#pro-commercial">└ Commercial Pro Services</a></li>
+        <li class="toc-item"><a href="#shortcuts">13. Keyboard Shortcuts Cheatsheet</a></li>
+        <li class="toc-item"><a href="#camera-support">14. Camera & RAW Formats</a></li>
+        <li class="toc-item"><a href="#architecture">15. Architecture & Source Build</a></li>
+        <li class="toc-item"><a href="#faq">16. FAQ & Troubleshooting</a></li>
+      </ul>
+    </aside>
+
+  </div>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="site-footer" style="margin-top: 40px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <div class="container">
+      <div class="footer-bottom" style="padding: 24px 0;">
+        <div>
+          © 2026 URL Time LLC. All Rights Reserved.
+        </div>
+        <div class="social-links">
+          <a href="en.html" class="social-link">Homepage</a>
+          <a href="docs.html" class="social-link">中文文档</a>
+          <a href="https://github.com/chensiqi2007/photoselect" target="_blank" rel="noopener" class="social-link">GitHub</a>
+          <a href="privacy.html" class="social-link">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/sso.js"></script>
+  <script src="assets/js/docs.js"></script>
+</body>
+</html>
+

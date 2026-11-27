@@ -9,6 +9,8 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
+  Trash2,
   FileText,
   Layers,
   Settings,
@@ -62,6 +64,29 @@ const exportProgress = ref<ExportProgress | null>(null);
 const exportDoneMessage = ref<string>("");
 let unlistenProgress: UnlistenFn | null = null;
 
+// 删除/移动模式二次确认弹窗控制
+const showMoveConfirmModal = ref<boolean>(false);
+const showExecuteConfirmModal = ref<boolean>(false);
+
+const requestSelectOperation = (op: ExportOp) => {
+  if (op === "move") {
+    if (operation.value !== "move") {
+      showMoveConfirmModal.value = true;
+    }
+  } else {
+    operation.value = "copy";
+  }
+};
+
+const confirmEnableMoveMode = () => {
+  operation.value = "move";
+  showMoveConfirmModal.value = false;
+};
+
+const cancelEnableMoveMode = () => {
+  showMoveConfirmModal.value = false;
+};
+
 // 计算当前实际待导出的照片集合
 const targetItems = computed<PhotoGroup[]>(() => {
   if (exportScope.value === "picked") {
@@ -88,7 +113,7 @@ const handleBrowseTargetDir = async () => {
   }
 };
 
-const handleStartExport = async () => {
+const handleStartExport = () => {
   if (!targetDir.value) {
     alert("请先选择或输入导出目标硬盘目录！");
     return;
@@ -100,6 +125,22 @@ const handleStartExport = async () => {
     return;
   }
 
+  // 若处于移动/删除模式，触发二次确认弹窗
+  if (operation.value === "move") {
+    showExecuteConfirmModal.value = true;
+    return;
+  }
+
+  doExport();
+};
+
+const confirmAndExecuteMove = () => {
+  showExecuteConfirmModal.value = false;
+  doExport();
+};
+
+const doExport = async () => {
+  const items = targetItems.value;
   isExporting.value = true;
   exportDoneMessage.value = "";
   exportProgress.value = {
@@ -135,7 +176,22 @@ const handleStartExport = async () => {
   }
 };
 
+const handleEscapeCapture = (e: KeyboardEvent) => {
+  if (e.key === "Escape") {
+    if (showExecuteConfirmModal.value) {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      showExecuteConfirmModal.value = false;
+    } else if (showMoveConfirmModal.value) {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      showMoveConfirmModal.value = false;
+    }
+  }
+};
+
 onMounted(async () => {
+  window.addEventListener("keydown", handleEscapeCapture, true);
   try {
     // 监听 Tauri 后端实时流转进度事件
     unlistenProgress = await listen<ExportProgress>("export-progress", (event) => {
@@ -147,6 +203,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener("keydown", handleEscapeCapture, true);
   if (unlistenProgress) {
     unlistenProgress();
   }
@@ -260,13 +317,18 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 3. 文件操作方式: 复制 vs 移动 -->
+        <!-- 3. 文件操作方式: 复制 vs 移动 (删除模式) -->
         <div class="space-y-2">
-          <label class="text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider">
-            流转操作方式
+          <label class="text-[11px] font-bold text-[#A1A1AA] uppercase tracking-wider flex items-center justify-between">
+            <span>流转操作方式</span>
+            <span v-if="operation === 'move'" class="text-[10px] text-rose-400 font-semibold flex items-center gap-1">
+              <AlertTriangle class="w-3 h-3" />
+              <span>已开启删除源卡模式</span>
+            </span>
           </label>
           <div class="grid grid-cols-2 gap-2">
-            <label
+            <div
+              @click="requestSelectOperation('copy')"
               :class="[
                 'flex items-center space-x-2.5 p-2.5 rounded-xl border cursor-pointer transition-all',
                 operation === 'copy'
@@ -274,13 +336,20 @@ onUnmounted(() => {
                   : 'border-white/8 bg-white/5 text-[#8C8C8C] hover:bg-white/8',
               ]"
             >
-              <input type="radio" value="copy" v-model="operation" class="accent-emerald-500 cursor-pointer" />
+              <input
+                type="radio"
+                name="export_op"
+                value="copy"
+                :checked="operation === 'copy'"
+                class="accent-emerald-500 cursor-pointer pointer-events-none"
+              />
               <div>
-                <div class="font-bold">复制 (Copy)</div>
+                <div class="font-bold text-xs">复制 (Copy)</div>
                 <div class="text-[10px] opacity-75">保留相机原卡数据 (推荐)</div>
               </div>
-            </label>
-            <label
+            </div>
+            <div
+              @click="requestSelectOperation('move')"
               :class="[
                 'flex items-center space-x-2.5 p-2.5 rounded-xl border cursor-pointer transition-all',
                 operation === 'move'
@@ -288,12 +357,21 @@ onUnmounted(() => {
                   : 'border-white/8 bg-white/5 text-[#8C8C8C] hover:bg-white/8',
               ]"
             >
-              <input type="radio" value="move" v-model="operation" class="accent-rose-500 cursor-pointer" />
+              <input
+                type="radio"
+                name="export_op"
+                value="move"
+                :checked="operation === 'move'"
+                class="accent-rose-500 cursor-pointer pointer-events-none"
+              />
               <div>
-                <div class="font-bold">移动 (Move)</div>
+                <div class="font-bold text-xs flex items-center space-x-1">
+                  <span>移动 / 删除</span>
+                  <span class="px-1 py-0.2 rounded text-[9px] bg-rose-500/20 text-rose-300 font-normal">删原卡</span>
+                </div>
                 <div class="text-[10px] opacity-75">安全落盘后删除源文件</div>
               </div>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -344,7 +422,7 @@ onUnmounted(() => {
             </label>
             <label class="flex items-center space-x-2 cursor-pointer text-[#E5E5E5]">
               <input type="checkbox" v-model="splitFolders" class="rounded accent-blue-500 cursor-pointer" />
-              <span>分设独立子目录: 分别存放至 /RAW 与 /JPG 文件夹</span>
+              <span>分设独立子目录: 分别存放至 /RAW、/JPG 与 /VIDEO 文件夹</span>
             </label>
             <label class="flex items-center space-x-2 cursor-pointer text-[#E5E5E5]">
               <input type="checkbox" v-model="generateXmp" class="rounded accent-emerald-500 cursor-pointer" />
@@ -419,14 +497,124 @@ onUnmounted(() => {
             'w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-xl flex items-center justify-center space-x-2',
             isExporting || targetItems.length === 0
               ? 'bg-white/10 text-[#666666] cursor-not-allowed border border-white/5'
+              : operation === 'move'
+              ? 'bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white shadow-rose-600/30 active:scale-98 cursor-pointer'
               : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-emerald-600/30 active:scale-98 cursor-pointer',
           ]"
         >
-          <Download class="w-4 h-4" />
+          <component :is="operation === 'move' ? Trash2 : Download" class="w-4 h-4" />
           <span>
-            {{ isExporting ? '多线程流式导出中...' : `立即快捷导出 (共 ${targetItems.length} 张)` }}
+            {{ isExporting ? '多线程流式流转中...' : operation === 'move' ? `执行移动并删除原片 (共 ${targetItems.length} 张)` : `立即快捷导出 (共 ${targetItems.length} 张)` }}
           </span>
         </button>
+      </div>
+    </div>
+
+    <!-- 模态框 1: 切换移动/删除模式确认 -->
+    <div
+      v-if="showMoveConfirmModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 select-none"
+      @click.self="cancelEnableMoveMode"
+    >
+      <div
+        class="w-full max-w-sm rounded-2xl bg-[#1A1A20] border border-amber-500/40 p-5 shadow-2xl flex flex-col space-y-4 shadow-amber-500/10"
+      >
+        <div class="flex items-start space-x-3">
+          <div class="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 shrink-0 border border-amber-500/30">
+            <AlertTriangle class="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white tracking-wide">切换至「移动 / 删除模式」？</h3>
+            <p class="text-xs text-[#A1A1AA] mt-1 leading-relaxed">
+              此模式在将照片导出到目标目录并确认大小一致后，将<span class="text-rose-400 font-bold">永久删除源存储介质（如 SD 卡或源文件夹）中的原始照片</span>以释放空间。
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] text-[#A1A1AA] space-y-1">
+          <div class="text-amber-300/90 font-medium flex items-center gap-1">
+            <AlertCircle class="w-3.5 h-3.5 text-amber-400" />
+            <span>不可逆操作风险：</span>
+          </div>
+          <div>• 删除后的源卡文件无法从回收站恢复</div>
+          <div>• 建议仅在需要腾出卡内空间且已有完备备份时使用</div>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-1">
+          <button
+            @click="cancelEnableMoveMode"
+            class="flex-1 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#D4D4D8] border border-white/10 transition-colors cursor-pointer"
+          >
+            取消 (保持复制)
+          </button>
+          <button
+            @click="confirmEnableMoveMode"
+            class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-xs font-bold text-white shadow-lg shadow-rose-600/20 transition-all cursor-pointer"
+          >
+            确认开启该模式
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模态框 2: 最终执行导出并删除源文件二次确认 -->
+    <div
+      v-if="showExecuteConfirmModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 select-none"
+      @click.self="showExecuteConfirmModal = false"
+    >
+      <div
+        class="w-full max-w-md rounded-2xl bg-[#18181D] border border-rose-500/50 p-6 shadow-2xl flex flex-col space-y-4 shadow-rose-500/15"
+      >
+        <div class="flex items-start space-x-3.5">
+          <div class="p-3 rounded-xl bg-rose-500/15 text-rose-400 shrink-0 border border-rose-500/30">
+            <Trash2 class="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-wide">最终确认：执行移动并删除源文件？</h3>
+            <p class="text-xs text-[#A1A1AA] mt-1 leading-relaxed">
+              您当前处于<span class="text-rose-400 font-bold">【移动 / 删除模式】</span>，导出完成后源文件将被立即物理删除。
+            </p>
+          </div>
+        </div>
+
+        <!-- 详细参数确认卡片 -->
+        <div class="p-3.5 rounded-xl bg-black/50 border border-white/10 space-y-2 text-xs">
+          <div class="flex justify-between items-center text-[#D4D4D8]">
+            <span class="text-[#8E8E98]">待处理照片数量:</span>
+            <span class="font-mono font-bold text-white">{{ targetItems.length }} 张</span>
+          </div>
+          <div class="flex flex-col space-y-1 text-[#D4D4D8]">
+            <span class="text-[#8E8E98]">导出目标目录:</span>
+            <span class="font-mono text-[11px] text-amber-300 break-all bg-white/5 p-1.5 rounded border border-white/5">
+              {{ targetDir }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center text-rose-400 font-semibold pt-1 border-t border-white/5">
+            <span>源卡文件处理:</span>
+            <span>落盘校验后永久删除源文件</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-rose-300/80 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
+          ⚠️ 警告：该操作不可撤销！请确认目标目录所在磁盘有充足空间，且源存储卡中的原始数据允许被清理。
+        </p>
+
+        <div class="flex items-center space-x-3 pt-2">
+          <button
+            @click="showExecuteConfirmModal = false"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#E4E4E7] border border-white/10 transition-colors cursor-pointer"
+          >
+            放弃 (返回修改)
+          </button>
+          <button
+            @click="confirmAndExecuteMove"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-xs font-bold text-white shadow-lg shadow-rose-600/30 transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+          >
+            <Trash2 class="w-3.5 h-3.5" />
+            <span>确认执行并删除</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

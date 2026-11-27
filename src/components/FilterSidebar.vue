@@ -10,6 +10,7 @@ import {
   CircleHelp,
   RefreshCw,
   Folder,
+  Video,
 } from "lucide-vue-next";
 import { usePhotoStore } from "../stores/photoStore";
 import { useI18n } from "../i18n";
@@ -24,18 +25,13 @@ onMounted(async () => {
 });
 
 const selectSmartCollection = (
-  type: "all" | "picked" | "rejected" | "unflagged" | "five_star"
+  type: "all" | "picked" | "rejected" | "unflagged" | "five_star" | "videos"
 ) => {
-  store.filter.smart_collection = type;
+  store.setSmartCollection(type);
 };
 
 const toggleColorLabel = (color: ColorLabel) => {
-  const idx = store.filter.colors.indexOf(color);
-  if (idx >= 0) {
-    store.filter.colors.splice(idx, 1);
-  } else {
-    store.filter.colors.push(color);
-  }
+  store.toggleColorFilter(color);
 };
 </script>
 
@@ -101,6 +97,25 @@ const toggleColorLabel = (color: ColorLabel) => {
             </div>
             <span class="tabular-nums font-mono text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-[#8E8E98]">
               {{ store.smartCounts.all }}
+            </span>
+          </button>
+
+          <!-- 视频媒体 Videos -->
+          <button
+            @click="selectSmartCollection('videos')"
+            :class="[
+              'w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all cursor-pointer text-xs',
+              store.filter.smart_collection === 'videos'
+                ? 'bg-[#22222A] text-purple-400 font-semibold border border-purple-500/30 shadow-sm'
+                : 'text-[#8E8E98] hover:bg-[#1C1C22] hover:text-[#F4F4F5] border border-transparent',
+            ]"
+          >
+            <div class="flex items-center space-x-2">
+              <Video class="w-3.5 h-3.5 text-purple-400" />
+              <span>{{ t.sidebar.videos }}</span>
+            </div>
+            <span class="tabular-nums font-mono text-[10px] px-1.5 py-0.2 rounded bg-purple-500/15 border border-purple-500/20 text-purple-400 font-bold">
+              {{ store.smartCounts.videos }}
             </span>
           </button>
 

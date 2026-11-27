@@ -17,6 +17,11 @@ pub const RAW_EXTENSIONS: &[&str] = &[
     "iiq", // Phase One
 ];
 
+/// 主流相机与通用视频格式后缀集合 (小写)
+pub const VIDEO_EXTENSIONS: &[&str] = &[
+    "mp4", "mov", "m4v", "mkv", "avi", "webm", "mts", "m2ts",
+];
+
 /// 归一化物理路径字符串 (跨平台兼容 Windows 反斜杠与 Linux 正斜杠)
 pub fn normalize_path_str(path: &Path) -> String {
     path.to_string_lossy().replace('\\', "/")
@@ -55,6 +60,9 @@ pub struct PhotoGroup {
     pub std_image: Option<PathBuf>,
     /// 相机原始 RAW 格式路径 (CR2 / CR3 / ARW / NEF / RAF / DNG)
     pub raw_image: Option<PathBuf>,
+    /// 视频文件路径 (MP4 / MOV / M4V / WebM 等)
+    #[serde(default)]
+    pub video_file: Option<PathBuf>,
     /// 附属 XMP 元数据侧车文件路径
     pub xmp_sidecar: Option<PathBuf>,
     /// 星级打分: 0 - 5 星
@@ -87,6 +95,15 @@ pub struct PhotoGroup {
     /// 若为重复帧，指向的主参考照片 ID
     #[serde(default)]
     pub duplicate_of: Option<String>,
+    /// NPU/神经网络综合焦点与美学选优得分 (0 - 100)
+    #[serde(default)]
+    pub neural_score: Option<u8>,
+    /// 主体中心区域高频锐度得分 (0.0 - 100.0)
+    #[serde(default)]
+    pub sharpness_score: Option<f32>,
+    /// 神经网络自动识别的拍摄场景/主体类别标签
+    #[serde(default)]
+    pub scene_tag: Option<String>,
     /// 主文件字节数 (用于统计与安全校验)
     pub file_size_bytes: u64,
     /// 拍摄时间戳 ISO 8601
@@ -104,6 +121,7 @@ impl PhotoGroup {
             folder_path,
             std_image: None,
             raw_image: None,
+            video_file: None,
             xmp_sidecar: None,
             rating: 0,
             flag: 0,
@@ -116,6 +134,9 @@ impl PhotoGroup {
             is_subject_best: false,
             is_duplicate: false,
             duplicate_of: None,
+            neural_score: None,
+            sharpness_score: None,
+            scene_tag: None,
             file_size_bytes: 0,
             capture_time: None,
             exif: None,
@@ -127,6 +148,12 @@ impl PhotoGroup {
     pub fn signature(&self) -> String {
         let norm_folder = normalize_path_str(&self.folder_path);
         format!("{}:{}", norm_folder, self.base_name.to_uppercase())
+    }
+
+    /// 是否为视频文件
+    #[inline]
+    pub fn is_video(&self) -> bool {
+        self.video_file.is_some()
     }
 
     /// 是否同时拥有 JPG 和 RAW 文件 (双格式同名联动)
@@ -149,7 +176,9 @@ impl PhotoGroup {
 
     /// 获取界面显示的类型标签
     pub fn display_badge_label(&self) -> &'static str {
-        if self.is_raw_plus_jpg() {
+        if self.is_video() {
+            "VIDEO"
+        } else if self.is_raw_plus_jpg() {
             "RAW+JPG"
         } else if self.is_raw_only() {
             "RAW"
@@ -171,6 +200,11 @@ impl PhotoGroup {
     /// 检查指定路径后缀是否为 RAW 格式
     pub fn is_raw_ext(ext: &str) -> bool {
         RAW_EXTENSIONS.iter().any(|&e| e.eq_ignore_ascii_case(ext))
+    }
+
+    /// 检查指定路径后缀是否为视频格式
+    pub fn is_video_ext(ext: &str) -> bool {
+        VIDEO_EXTENSIONS.iter().any(|&e| e.eq_ignore_ascii_case(ext))
     }
 
     /// 检查指定路径后缀是否为 XMP 侧车文件
@@ -198,11 +232,20 @@ impl PhotoGroup {
             return false;
         }
 
+        if query.video_only && !self.is_video() {
+            return false;
+        }
+
+        if query.photo_only && self.is_video() {
+            return false;
+        }
+
         match query.smart_collection.as_deref() {
             Some("picked") => self.flag == 1,
             Some("rejected") => self.flag == -1,
             Some("unflagged") => self.flag == 0,
             Some("five_star") => self.rating == 5,
+            Some("videos") => self.is_video(),
             _ => true,
         }
     }
@@ -216,6 +259,8 @@ pub struct ScanSummary {
     pub raw_plus_jpg_count: usize,
     pub raw_only_count: usize,
     pub std_only_count: usize,
+    #[serde(default)]
+    pub video_count: usize,
     pub scan_elapsed_ms: u64,
     pub groups: Vec<PhotoGroup>,
 }
@@ -227,6 +272,10 @@ pub struct FilterQuery {
     pub allowed_flags: Vec<i8>,
     pub allowed_colors: Vec<String>,
     pub raw_plus_jpg_only: bool,
+    #[serde(default)]
+    pub video_only: bool,
+    #[serde(default)]
+    pub photo_only: bool,
     pub smart_collection: Option<String>,
 }
 
@@ -310,6 +359,9 @@ pub struct BurstConfig {
     /// 是否自动将每组的 Best Shot 推荐标记为 Pick (flag = 1)
     #[serde(default)]
     pub auto_flag_best: bool,
+    /// 算力驱动方式: "auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic"
+    #[serde(default)]
+    pub compute_backend: Option<String>,
 }
 
 impl Default for BurstConfig {
@@ -318,6 +370,7 @@ impl Default for BurstConfig {
             threshold_ms: 500,
             min_burst_count: 2,
             auto_flag_best: false,
+            compute_backend: None,
         }
     }
 }
@@ -363,6 +416,12 @@ pub struct SimilarityConfig {
     /// 自动将同主体最佳推荐帧标记为留用 (Pick, flag = 1)
     #[serde(default)]
     pub auto_flag_best: bool,
+    /// 算力驱动方式: "auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic"
+    #[serde(default)]
+    pub compute_backend: Option<String>,
+    /// 是否将神经网络识别的场景/主体类别自动写入照片标签
+    #[serde(default)]
+    pub auto_tag_scene: bool,
 }
 
 impl Default for SimilarityConfig {
@@ -374,6 +433,8 @@ impl Default for SimilarityConfig {
             min_group_count: 2,
             auto_reject_duplicates: false,
             auto_flag_best: false,
+            compute_backend: None,
+            auto_tag_scene: false,
         }
     }
 }
@@ -406,4 +467,59 @@ pub struct SubjectCluster {
     pub start_time: Option<String>,
     pub end_time: Option<String>,
     pub time_span_secs: u64,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_video_extension_recognition() {
+        assert!(PhotoGroup::is_video_ext("mp4"));
+        assert!(PhotoGroup::is_video_ext("MP4"));
+        assert!(PhotoGroup::is_video_ext("mov"));
+        assert!(PhotoGroup::is_video_ext("MOV"));
+        assert!(PhotoGroup::is_video_ext("m4v"));
+        assert!(PhotoGroup::is_video_ext("mkv"));
+        assert!(PhotoGroup::is_video_ext("mts"));
+        assert!(PhotoGroup::is_video_ext("m2ts"));
+        assert!(!PhotoGroup::is_video_ext("jpg"));
+        assert!(!PhotoGroup::is_video_ext("arw"));
+        assert!(!PhotoGroup::is_video_ext("cr3"));
+    }
+
+    #[test]
+    fn test_video_group_and_filtering() {
+        let mut group = PhotoGroup::new(
+            "C0001".to_string(),
+            "C0001".to_string(),
+            PathBuf::from("D:/DCIM/100MSDCF"),
+        );
+        group.video_file = Some(PathBuf::from("D:/DCIM/100MSDCF/C0001.MP4"));
+        assert!(group.is_video());
+        assert_eq!(group.display_badge_label(), "VIDEO");
+
+        let mut filter = FilterQuery {
+            min_rating: 0,
+            allowed_flags: vec![],
+            allowed_colors: vec![],
+            raw_plus_jpg_only: false,
+            video_only: true,
+            photo_only: false,
+            smart_collection: None,
+        };
+        assert!(group.matches_filter(&filter));
+
+        filter.video_only = false;
+        filter.photo_only = true;
+        assert!(!group.matches_filter(&filter));
+
+        filter.photo_only = false;
+        filter.smart_collection = Some("videos".to_string());
+        assert!(group.matches_filter(&filter));
+
+        filter.smart_collection = Some("picked".to_string());
+        assert!(!group.matches_filter(&filter));
+    }
 }

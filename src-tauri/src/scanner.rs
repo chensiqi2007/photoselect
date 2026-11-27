@@ -1,10 +1,12 @@
 use anyhow::Result;
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use walkdir::WalkDir;
 
-use crate::models::{PhotoGroup, ScanSummary, RAW_EXTENSIONS, STD_EXTENSIONS};
+use crate::decoder::ImageDecoder;
+use crate::models::{PhotoGroup, ScanSummary, RAW_EXTENSIONS, STD_EXTENSIONS, VIDEO_EXTENSIONS};
 
 /// 极速目录扫描器与同名文件配对引擎
 pub struct DirectoryScanner;
@@ -60,9 +62,10 @@ impl DirectoryScanner {
 
             let is_std = STD_EXTENSIONS.iter().any(|candidate| ext.eq_ignore_ascii_case(candidate));
             let is_raw = RAW_EXTENSIONS.iter().any(|candidate| ext.eq_ignore_ascii_case(candidate));
+            let is_video = VIDEO_EXTENSIONS.iter().any(|candidate| ext.eq_ignore_ascii_case(candidate));
             let is_xmp = ext.eq_ignore_ascii_case("xmp");
 
-            if !is_std && !is_raw && !is_xmp {
+            if !is_std && !is_raw && !is_video && !is_xmp {
                 continue;
             }
 
@@ -86,6 +89,13 @@ impl DirectoryScanner {
                     group.raw_image = Some(path.to_path_buf());
                     group.file_size_bytes = file_len;
                 }
+            } else if is_video {
+                if group.video_file.is_none() {
+                    group.video_file = Some(path.to_path_buf());
+                    if group.file_size_bytes == 0 {
+                        group.file_size_bytes = file_len;
+                    }
+                }
             } else if is_xmp {
                 group.xmp_sidecar = Some(path.to_path_buf());
             }
@@ -94,18 +104,41 @@ impl DirectoryScanner {
         // 过滤掉只有孤立 xmp 侧车文件的空条目
         let mut groups: Vec<PhotoGroup> = groups_map
             .into_values()
-            .filter(|g| g.std_image.is_some() || g.raw_image.is_some())
+            .filter(|g| g.std_image.is_some() || g.raw_image.is_some() || g.video_file.is_some())
             .collect();
 
         // 按照文件名自然排序 (Natural Sort)，确保 500+ 张照片毫秒级呈现
         groups.sort_by(|a, b| natord::compare(&a.base_name, &b.base_name));
 
+        // 采用 Rayon 跑满 CPU 核心并行提取 EXIF 拍摄参数或视频修改时间
+        groups.par_iter_mut().for_each(|g| {
+            let target_path = g.std_image.as_ref().or(g.raw_image.as_ref());
+            if let Some(path) = target_path {
+                if let Some(exif) = ImageDecoder::extract_exif_summary(path) {
+                    g.capture_time = exif.capture_time.clone();
+                    g.exif = Some(exif);
+                }
+            } else if let Some(ref vid_path) = g.video_file {
+                if g.capture_time.is_none() {
+                    if let Ok(meta) = std::fs::metadata(vid_path) {
+                        if let Ok(mtime) = meta.modified() {
+                            let dt: chrono::DateTime<chrono::Local> = mtime.into();
+                            g.capture_time = Some(dt.format("%Y-%m-%d %H:%M:%S").to_string());
+                        }
+                    }
+                }
+            }
+        });
+
         let mut raw_plus_jpg_count = 0usize;
         let mut raw_only_count = 0usize;
         let mut std_only_count = 0usize;
+        let mut video_count = 0usize;
 
         for g in &groups {
-            if g.is_raw_plus_jpg() {
+            if g.is_video() {
+                video_count += 1;
+            } else if g.is_raw_plus_jpg() {
                 raw_plus_jpg_count += 1;
             } else if g.is_raw_only() {
                 raw_only_count += 1;
@@ -122,6 +155,7 @@ impl DirectoryScanner {
             raw_plus_jpg_count,
             raw_only_count,
             std_only_count,
+            video_count,
             scan_elapsed_ms: elapsed,
             groups,
         })

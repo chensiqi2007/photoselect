@@ -102,6 +102,7 @@ const pickBAndRejectA = async () => {
 
 const getBadgeLabel = (photo: PhotoGroup | null): string => {
   if (!photo) return "";
+  if (photo.video_file) return "VIDEO";
   if (photo.std_image && photo.raw_image) return "RAW+JPG";
   if (photo.raw_image) return "RAW";
   return "JPG";
@@ -229,7 +230,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
               transform: `translate(${panA.x}px, ${panA.y}px) scale(${scaleA})`,
             }"
           >
+            <video
+              v-if="photoA.video_file"
+              :src="store.getPreviewUrl(photoA)"
+              autoplay
+              loop
+              muted
+              playsinline
+              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            ></video>
             <img
+              v-else
               :src="store.getPreviewUrl(photoA)"
               alt=""
               class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
@@ -351,7 +362,17 @@ const getBadgeLabel = (photo: PhotoGroup | null): string => {
               transform: `translate(${panB.x}px, ${panB.y}px) scale(${scaleB})`,
             }"
           >
+            <video
+              v-if="photoB.video_file"
+              :src="store.getPreviewUrl(photoB)"
+              autoplay
+              loop
+              muted
+              playsinline
+              class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            ></video>
             <img
+              v-else
               :src="store.getPreviewUrl(photoB)"
               alt=""
               class="max-w-[85vw] max-h-[80vh] object-contain select-none pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"

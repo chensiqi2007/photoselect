@@ -55,6 +55,17 @@ fn is_raw_path(path: &Path) -> bool {
     )
 }
 
+fn is_video_path(path: &Path) -> bool {
+    matches!(
+        path.extension()
+            .and_then(|value| value.to_str())
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+            .as_str(),
+        "mp4" | "mov" | "m4v" | "mkv" | "avi" | "webm" | "mts" | "m2ts"
+    )
+}
+
 /// 处理 photoselect:// (或 Windows 下 http://photoselect.localhost/) 协议的二进制图片请求
 /// 典型 URL 形态：
 /// - http://photoselect.localhost/F%3A%5CPhotos%2FDSC0001.JPG (Windows 全尺寸预览)
@@ -149,6 +160,102 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
     }
 
     // =========================================================================
+    // 视频流式传输与伴生缩略图处理 (支持 HTTP 206 Partial Content / Range 毫秒级拖拽快进)
+    // =========================================================================
+    if is_video_path(&path) {
+        if is_thumb {
+            // 尝试查找相机生成的同名伴生缩略图 (.THM / .thm / .JPG / .jpg)
+            for thumb_ext in &["THM", "thm", "JPG", "jpg", "png"] {
+                let candidate = path.with_extension(thumb_ext);
+                if candidate.exists() && candidate.is_file() {
+                    if let Ok(bytes) = std::fs::read(&candidate) {
+                        return Response::builder()
+                            .status(StatusCode::OK)
+                            .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                            .header(header::CONTENT_TYPE, "image/jpeg")
+                            .header(header::CONTENT_LENGTH, bytes.len().to_string())
+                            .body(Cow::Owned(bytes))
+                            .unwrap();
+                    }
+                }
+            }
+        }
+
+        // 全尺寸预览/播放模式：提供 Range 范围切片支持
+        let file_len = path.metadata().map(|m| m.len()).unwrap_or(0);
+        let mime_type = detect_mime_type(&path);
+
+        let range_header = request
+            .headers()
+            .get(header::RANGE)
+            .and_then(|v| v.to_str().ok());
+
+        if let Some(range_val) = range_header {
+            if let Some(range_spec) = range_val.strip_prefix("bytes=") {
+                let mut parts = range_spec.split('-');
+                let start_str = parts.next().unwrap_or("").trim();
+                let end_str = parts.next().unwrap_or("").trim();
+
+                let start: u64 = start_str.parse().unwrap_or(0);
+                let end: u64 = if let Ok(e) = end_str.parse::<u64>() {
+                    e.min(file_len.saturating_sub(1))
+                } else {
+                    // 未指定 end 时，每次切片 8MB，大幅降低大视频内存开销并实现秒开
+                    (start + 8 * 1024 * 1024).min(file_len.saturating_sub(1))
+                };
+
+                if start <= end && start < file_len {
+                    let chunk_len = end - start + 1;
+                    use std::io::{Read, Seek, SeekFrom};
+                    if let Ok(mut f) = std::fs::File::open(&path) {
+                        if f.seek(SeekFrom::Start(start)).is_ok() {
+                            let mut buf = vec![0u8; chunk_len as usize];
+                            if f.read_exact(&mut buf).is_ok() {
+                                return Response::builder()
+                                    .status(StatusCode::PARTIAL_CONTENT)
+                                    .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                                    .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, HEAD, OPTIONS")
+                                    .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                                    .header(header::ACCEPT_RANGES, "bytes")
+                                    .header(header::CONTENT_RANGE, format!("bytes {}-{}/{}", start, end, file_len))
+                                    .header(header::CONTENT_LENGTH, chunk_len.to_string())
+                                    .header(header::CONTENT_TYPE, mime_type)
+                                    .body(Cow::Owned(buf))
+                                    .unwrap();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 无 Range 头时，若文件小于 32MB 直接返回；若很大则返回前 8MB 片段
+        let initial_chunk_size = (32 * 1024 * 1024).min(file_len);
+        use std::io::Read;
+        if let Ok(mut f) = std::fs::File::open(&path) {
+            let mut buf = vec![0u8; initial_chunk_size as usize];
+            if f.read_exact(&mut buf).is_ok() {
+                let status = if initial_chunk_size < file_len {
+                    StatusCode::PARTIAL_CONTENT
+                } else {
+                    StatusCode::OK
+                };
+                return Response::builder()
+                    .status(status)
+                    .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+                    .header(header::ACCESS_CONTROL_ALLOW_METHODS, "GET, HEAD, OPTIONS")
+                    .header(header::ACCESS_CONTROL_ALLOW_HEADERS, "*")
+                    .header(header::ACCEPT_RANGES, "bytes")
+                    .header(header::CONTENT_RANGE, format!("bytes 0-{}/{}", initial_chunk_size.saturating_sub(1), file_len))
+                    .header(header::CONTENT_LENGTH, initial_chunk_size.to_string())
+                    .header(header::CONTENT_TYPE, mime_type)
+                    .body(Cow::Owned(buf))
+                    .unwrap();
+            }
+        }
+    }
+
+    // =========================================================================
     // 缩略图模式 (胶片条与网格专用，优先从 SSD 缓存与内嵌高速小图命中)
     // =========================================================================
     if is_thumb {
@@ -186,10 +293,19 @@ pub fn handle_protocol_request(request: &Request<Vec<u8>>) -> Response<Cow<'stat
                 }
             }
 
-            // 2. 缓存未命中：提取嵌入式轻量级缩略图并写入缓存
+            // 2. 缓存未命中：提取嵌入式轻量级缩略图并写入缓存 (通过原子临时文件避免并发读取损坏)
             if let Ok(thumb_bytes) = ImageDecoder::extract_thumbnail_bytes(&path) {
                 let _ = std::fs::create_dir_all(&cache_dir);
-                let _ = std::fs::write(&cache_file, &thumb_bytes);
+                if !cache_file.exists() {
+                    let rand_suffix = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_nanos())
+                        .unwrap_or(0);
+                    let pending_file = cache_file.with_extension(format!("{:x}.pending", rand_suffix));
+                    if std::fs::write(&pending_file, &thumb_bytes).is_ok() {
+                        let _ = std::fs::rename(&pending_file, &cache_file);
+                    }
+                }
 
                 return Response::builder()
                     .status(StatusCode::OK)
@@ -334,6 +450,11 @@ fn detect_mime_type(path: &Path) -> &'static str {
     match ext.as_str() {
         "png" => "image/png",
         "webp" => "image/webp",
+        "mp4" | "m4v" => "video/mp4",
+        "mov" => "video/quicktime",
+        "webm" => "video/webm",
+        "mkv" => "video/x-matroska",
+        "avi" => "video/x-msvideo",
         // 所有主流相机 RAW 提取出的内嵌预览图均为标准 JPEG 格式
         _ => "image/jpeg",
     }

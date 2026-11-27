@@ -262,7 +262,17 @@ fn parse_results(body: &Value, photos: &[PhotoGroup]) -> Result<Vec<AiPhotoResul
         .pointer("/choices/0/message/content")
         .and_then(Value::as_str)
         .ok_or_else(|| anyhow!("Provider response does not contain a text result"))?;
-    let content: Value = serde_json::from_str(text).context("AI result was not valid JSON")?;
+    let mut clean_text = text.trim();
+    if clean_text.starts_with("```") {
+        if let Some(pos) = clean_text.find('\n') {
+            clean_text = &clean_text[pos + 1..];
+        }
+    }
+    if let Some(pos) = clean_text.rfind("```") {
+        clean_text = &clean_text[..pos];
+    }
+    let clean_text = clean_text.trim();
+    let content: Value = serde_json::from_str(clean_text).context("AI result was not valid JSON")?;
     let rows = content
         .get("results")
         .and_then(Value::as_array)

@@ -5,6 +5,38 @@
 export type FlagStatus = 1 | 0 | -1; // 1: Pick (留用), 0: Unflagged, -1: Reject (淘汰)
 export type ColorLabel = "none" | "red" | "yellow" | "green" | "blue" | "purple";
 export type ViewMode = "loupe" | "grid" | "compare";
+export type ComputeBackendMode = "auto" | "npu" | "gpu" | "cpu_ai" | "cpu_classic";
+
+export interface ComputeDeviceInfo {
+  backend: string;
+  deviceName: string;
+  vendor: string;
+  driverApi: string;
+  available: boolean;
+  specs: string;
+  recommended: boolean;
+}
+
+export interface ComputeCapabilities {
+  selectedBackend: ComputeBackendMode;
+  activeBackend: string;
+  activeDeviceName: string;
+  npuAvailable: boolean;
+  gpuAvailable: boolean;
+  levelZeroLoaded: boolean;
+  directmlLoaded: boolean;
+  devices: ComputeDeviceInfo[];
+}
+
+export interface InferenceTelemetry {
+  requestedBackend: string;
+  executedBackend: string;
+  deviceName: string;
+  precisionMode: string;
+  photoCount: number;
+  totalElapsedMs: number;
+  avgMsPerPhoto: number;
+}
 
 export interface ExifSummary {
   camera_make?: string;
@@ -29,6 +61,7 @@ export interface PhotoGroup {
   folder_path: string;             // 所属父目录绝对路径
   std_image: string | null;        // JPG / PNG / HEIC / WEBP 绝对路径
   raw_image: string | null;        // CR2 / CR3 / ARW / NEF / RAF / DNG 等绝对路径
+  video_file?: string | null;      // MP4 / MOV / M4V / WebM 等视频绝对路径
   xmp_sidecar: string | null;      // 对应同名 .xmp 文件绝对路径
   rating: number;                  // 0 - 5 星
   flag: FlagStatus;                // 1(留用), 0(未标记), -1(淘汰)
@@ -41,6 +74,9 @@ export interface PhotoGroup {
   is_subject_best?: boolean;       // 是否为同主体推荐最佳帧
   is_duplicate?: boolean;          // 是否为严格重复帧
   duplicate_of?: string | null;    // 重复所指向的主参考照片 ID
+  neural_score?: number | null;    // NPU/神经网络综合焦点与美学选优分 (0-100)
+  sharpness_score?: number | null; // 主体中心焦点高频锐度分 (0-100)
+  scene_tag?: string | null;       // 神经网络识别场景/主体类别标签
   file_size_bytes: number;         // 照片主文件大小
   capture_time: string | null;     // 拍摄时间戳 ISO 8601
   exif: ExifSummary | null;        // EXIF 核心元数据
@@ -52,6 +88,7 @@ export interface ScanResult {
   raw_plus_jpg_count: number;
   raw_only_count: number;
   std_only_count: number;
+  video_count?: number;
   scan_elapsed_ms: number;
   groups: PhotoGroup[];
 }
@@ -61,7 +98,9 @@ export interface FilterState {
   flags: FlagStatus[];             // 允许展示的旗标
   colors: ColorLabel[];            // 允许展示的色标
   raw_plus_jpg_only: boolean;      // 仅展示 JPG+RAW 联动文件
-  smart_collection: "all" | "picked" | "rejected" | "unflagged" | "five_star";
+  video_only?: boolean;            // 仅展示视频文件
+  photo_only?: boolean;            // 仅展示静态图像文件
+  smart_collection: "all" | "picked" | "rejected" | "unflagged" | "five_star" | "videos";
 }
 
 export type ExportOp = "copy" | "move";
@@ -110,6 +149,7 @@ export interface BurstConfig {
   threshold_ms?: number;
   min_burst_count?: number;
   auto_flag_best?: boolean;
+  compute_backend?: ComputeBackendMode;
 }
 
 export interface BurstCluster {
@@ -129,6 +169,8 @@ export interface SimilarityConfig {
   min_group_count?: number;
   auto_reject_duplicates?: boolean;
   auto_flag_best?: boolean;
+  compute_backend?: ComputeBackendMode;
+  auto_tag_scene?: boolean;
 }
 
 export interface SubjectCluster {

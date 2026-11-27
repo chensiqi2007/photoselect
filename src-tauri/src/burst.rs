@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use crate::models::{BurstCluster, BurstConfig, PhotoGroup};
+use crate::npu_engine::{ComputeBackend, InferenceTelemetry, NpuEngine};
 
 /// 单张照片在连拍分析中的瞬时元数据条目
 struct ItemMeta {
@@ -98,14 +99,40 @@ impl BurstDetector {
         photos: &mut [PhotoGroup],
         config: &BurstConfig,
     ) -> Vec<BurstCluster> {
-        if photos.len() < config.min_burst_count {
-            return Vec::new();
-        }
+        let (clusters, _) = Self::cluster_with_telemetry(photos, config);
+        clusters
+    }
 
+    /// 执行连拍时序聚合，并调用 NPU / GPU / CPU 神经网络算子评估组内每张照片的主体焦点锐度以推选 Best Shot
+    pub fn cluster_with_telemetry(
+        photos: &mut [PhotoGroup],
+        config: &BurstConfig,
+    ) -> (Vec<BurstCluster>, InferenceTelemetry) {
         // 清理旧的连拍标记
         for p in photos.iter_mut() {
             p.burst_group_id = None;
             p.is_burst_best = false;
+        }
+
+        let requested_backend = ComputeBackend::from_str_opt(config.compute_backend.as_deref());
+
+        if photos.len() < config.min_burst_count {
+            let (_, telemetry) = NpuEngine::extract_batch_features(&[], requested_backend);
+            return (Vec::new(), telemetry);
+        }
+
+        // 调用所选硬件后端 (NPU / GPU / CPU) 并行评估照片焦点锐度与质量评分
+        let (neural_feats, telemetry) =
+            NpuEngine::extract_batch_features(photos, requested_backend);
+        for (idx, feat_opt) in neural_feats.into_iter().enumerate() {
+            if let Some(feat) = feat_opt {
+                photos[idx].neural_score = Some(feat.quality_score);
+                photos[idx].sharpness_score = Some((feat.sharpness_score * 10.0).round() / 10.0);
+                photos[idx].scene_tag = Some(feat.scene_tag.to_string());
+                if photos[idx].phash.is_none() {
+                    photos[idx].phash = Some(format!("{:016x}", feat.dhash));
+                }
+            }
         }
 
         // 按目录将下标分类隔离
@@ -223,7 +250,7 @@ impl BurstDetector {
             }
         }
 
-        clusters
+        (clusters, telemetry)
     }
 
     fn finalize_cluster(
@@ -253,24 +280,28 @@ impl BurstDetector {
         // 评选 Best Shot:
         // 1. 最高 rating (若用户已打标)
         // 2. flag == 1 (Pick)
-        // 3. 最大文件体积 (高频细节多)
-        // 4. 位于连拍正中间帧 (通常是主体姿态最舒展阶段)
+        // 3. NPU/神经网络主体焦点锐度与美学得分 (neural_score + sharpness_score)
+        // 4. 最大文件体积 (高频细节多)
+        // 5. 位于连拍正中间帧 (通常是主体姿态最舒展阶段)
         let mut best_idx_in_photos = cluster_items[count / 2].idx;
-        let mut best_score = -1i64;
+        let mut best_score = i64::MIN / 2;
 
         for (order_in_group, item) in cluster_items.iter().enumerate() {
             let p = &photos[item.idx];
-            let mut score = 0i64;
-            score += (p.rating as i64) * 1_000_000_000;
-            if p.flag == 1 {
-                score += 500_000_000;
-            } else if p.flag == -1 {
-                score -= 500_000_000;
-            }
-            score += p.file_size_bytes as i64;
-            // 距离中心越近给予轻微加权 (若文件体积近乎一致，优先取中心帧)
-            let dist_from_center = (order_in_group as i64 - (count as i64 / 2)).abs();
-            score -= dist_from_center * 200;
+            #[cfg(has_proprietary_ai)]
+            let score =
+                crate::npu_engine::kernel::compute_proprietary_best_shot_score(p, order_in_group, count);
+            #[cfg(not(has_proprietary_ai))]
+            let score = {
+                let mut s = (p.rating as i64) * 1_000_000_000 + (p.file_size_bytes as i64);
+                if p.flag == 1 {
+                    s += 500_000_000;
+                } else if p.flag == -1 {
+                    s -= 500_000_000;
+                }
+                let dist_from_center = (order_in_group as i64 - (count as i64 / 2)).abs();
+                s - dist_from_center * 200
+            };
 
             if score > best_score {
                 best_score = score;
@@ -335,6 +366,7 @@ mod tests {
             threshold_ms: 300,
             min_burst_count: 2,
             auto_flag_best: true,
+            compute_backend: None,
         };
 
         let clusters = BurstDetector::cluster_photos(&mut photos, &config);

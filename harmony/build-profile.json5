@@ -1,18 +1,55 @@
 {
   "app": {
-    "products": [{
-      "name": "default",
-      "targetSdkVersion": "6.0.1(21)",
-      "compatibleSdkVersion": "6.0.0(20)",
-      "runtimeOS": "HarmonyOS",
-      "buildOption": {
-        "strictMode": {
-          "caseSensitiveCheck": true,
-          "useNormalizedOHMUrl": true
+    "products": [
+      {
+        "name": "default",
+        "targetSdkVersion": "6.0.1(21)",
+        "compatibleSdkVersion": "6.0.0(20)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
         }
       }
-    }],
-    "buildModeSet": [{ "name": "debug" }, { "name": "release" }]
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "release"
+      }
+    ],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "C:/Users/chensiqi/huawei/urltime.p12",
+          "storePassword": "00000020E6D64E5980776646D2F11E6BF9A93E7E2EBD9B0EF3F1FA043A21949A51B42F89E82973C35EDF9F804DE3C363",
+          "keyAlias": "urltime",
+          "keyPassword": "00000020106E9C62509660CC5CBA891BCE600248DDF84287C79CA5C10EDC33B951E007CEB6B7ECDC0198CCF478190BB7",
+          "signAlg": "SHA256withECDSA",
+          "profile": "C:/Users/chensiqi/huawei/photo.select.globleRelease.p7b",
+          "certpath": "C:/Users/chensiqi/huawei/urltime_release.cer"
+        }
+      }
+    ]
   },
-  "modules": [{ "name": "entry", "srcPath": "./entry", "targets": [{ "name": "default", "applyToProducts": ["default"] }] }]
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
 }

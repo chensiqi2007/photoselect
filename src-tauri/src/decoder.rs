@@ -1244,6 +1244,9 @@ impl ImageDecoder {
     }
 
     pub fn format_aperture(num: u32, den: u32) -> String {
+        if den == 0 {
+            return "--".to_string();
+        }
         let f = num as f64 / den as f64;
         if (f.fract() * 10.0).round() == 0.0 {
             format!("f/{:.0}", f)
@@ -1270,6 +1273,9 @@ impl ImageDecoder {
     }
 
     pub fn format_focal_length(num: u32, den: u32) -> String {
+        if den == 0 {
+            return "-- mm".to_string();
+        }
         let fl = num as f64 / den as f64;
         if (fl.fract() * 10.0).round() == 0.0 {
             format!("{:.0} mm", fl)
@@ -1279,6 +1285,9 @@ impl ImageDecoder {
     }
 
     pub fn format_ev(num: i32, den: i32) -> String {
+        if den == 0 {
+            return "0 EV".to_string();
+        }
         let ev = num as f64 / den as f64;
         if ev.abs() < 0.05 {
             "0 EV".to_string()

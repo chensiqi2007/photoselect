@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.photoselect.harmony",
+    "bundleName": "photo.select.globle",
     "vendor": "PhotoSelect",
     "versionCode": 10000,
     "versionName": "0.1.0",

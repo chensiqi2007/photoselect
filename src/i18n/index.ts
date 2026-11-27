@@ -25,6 +25,7 @@ export interface Translations {
     storageDrives: string;
     smartCollections: string;
     allPhotos: string;
+    videos: string;
     picked: string;
     fiveStar: string;
     rejected: string;
@@ -229,6 +230,7 @@ const zhCN: Translations = {
     storageDrives: "存储介质 / 读卡器",
     smartCollections: "智能分类视图",
     allPhotos: "全部照片",
+    videos: "视频媒体",
     picked: "已留用 (Picked)",
     fiveStar: "五星精选",
     rejected: "已淘汰 (Rejected)",
@@ -412,6 +414,7 @@ const zhTW: Translations = {
     storageDrives: "存儲介質 / 讀卡器",
     smartCollections: "智慧分類檢視",
     allPhotos: "全部照片",
+    videos: "影片媒體",
     picked: "已留用 (Picked)",
     fiveStar: "五星精選",
     rejected: "已淘汰 (Rejected)",
@@ -595,6 +598,7 @@ const enUS: Translations = {
     storageDrives: "Storage / Card Readers",
     smartCollections: "Smart Collections",
     allPhotos: "All Photos",
+    videos: "Videos",
     picked: "Picked",
     fiveStar: "5-Star Favorites",
     rejected: "Rejected",
